@@ -53,11 +53,11 @@ dns:
     - 1.2.4.8
 
   nameserver:
-    - https://cloudflare-dns.com/dns-query
-    - https://77.88.8.8/dns-query
-    - https://8.8.4.4/dns-query#ecs=1.1.1.1/24&ecs-override=true
-    - https://208.67.222.222/dns-query#ecs=1.1.1.1/24&ecs-override=true
-    - https://9.9.9.9/dns-query
+    - https://cloudflare-dns.com/dns-query#DNS-Proxy
+    - https://77.88.8.8/dns-query#DNS-Proxy
+    - https://8.8.4.4/dns-query#DNS-Proxy&ecs=1.1.1.1/24&ecs-override=true
+    - https://208.67.222.222/dns-query#DNS-Proxy&ecs=1.1.1.1/24&ecs-override=true
+    - https://9.9.9.9/dns-query#DNS-Proxy
 
   proxy-server-nameserver:
     - https://223.5.5.5/dns-query
