@@ -166,18 +166,17 @@ rule-providers:
     url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt"
     path: ./ruleset/applications.yaml
     interval: 86400
+    
+  extra-direct:
+    type: http
+    behavior: classical
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt"
+    path: ./ruleset/applications.yaml
+    interval: 86400
 
 rules:
   - RULE-SET,reject,🛑 广告拦截
   - RULE-SET,direct,🎯 全球直连
-  - RULE-SET,proxy,🚀 节点选择
   - RULE-SET,applications,🎯 全球直连
-  - RULE-SET,apple,🍎 苹果服务
-  - RULE-SET,icloud,🍎 苹果服务
-  - RULE-SET,google,🚀 节点选择
-  - RULE-SET,tld-not-cn,🚀 节点选择
-  - RULE-SET,telegramcidr,📲 电报消息
-  - RULE-SET,private,DIRECT
-  - RULE-SET,lancidr,DIRECT
-  - RULE-SET,cncidr,🎯 全球直连
-  - GEOIP,LAN,DIRECT
+
+
