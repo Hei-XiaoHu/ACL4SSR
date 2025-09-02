@@ -82,20 +82,6 @@ rule-providers:
     url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt"
     path: ./ruleset/reject.yaml
     interval: 86400
-
-  direct:
-    type: http
-    behavior: domain
-    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt"
-    path: ./ruleset/direct.yaml
-    interval: 86400
-
-  applications:
-    type: http
-    behavior: classical
-    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/applications.txt"
-    path: ./ruleset/applications.yaml
-    interval: 86400
     
   extra-direct:
     type: http
@@ -106,8 +92,6 @@ rule-providers:
 
 rules:
   - RULE-SET,reject,🛑 广告拦截
-  - RULE-SET,direct,🎯 全球直连
-  - RULE-SET,applications,🎯 全球直连
   - RULE-SET,extra-direct,🎯 全球直连
 
 
