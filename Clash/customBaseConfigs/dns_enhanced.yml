@@ -28,6 +28,11 @@ external-controller: 127.0.0.1:9090
 # RESTful API 的口令 (可选)
 # secret: ""
 
+# 持久化策略组选择和 Fake-IP 映射
+profile:
+  store-selected: true
+  store-fake-ip: true
+
 # DNS 设置
 dns:
   enable: true
@@ -35,13 +40,18 @@ dns:
   ipv6: false
   prefer-h3: false
   respect-rules: true
-  use-hosts: false
+  use-hosts: true
+  use-system-hosts: true
   cache-algorithm: arc
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
+  fake-ip-filter-mode: blacklist
   fake-ip-filter:
     - "+.lan"
     - "+.local"
+    - "+.localhost"
+    - "+.home.arpa"
+    - "+.internal"
     - "+.msftconnecttest.com"
     - "+.msftncsi.com"
     - "localhost.ptlogin2.qq.com"
@@ -54,11 +64,8 @@ dns:
     - 119.29.29.29
 
   nameserver:
-    - https://cloudflare-dns.com/dns-query#DNS-Proxy
-    - https://77.88.8.8/dns-query#DNS-Proxy
-    - https://8.8.4.4/dns-query#DNS-Proxy&ecs=1.1.1.1/24&ecs-override=true
-    - https://208.67.222.222/dns-query#DNS-Proxy&ecs=1.1.1.1/24&ecs-override=true
-    - https://9.9.9.9/dns-query#DNS-Proxy
+    - "https://1.1.1.1/dns-query#DNS-Proxy"
+    - "https://8.8.8.8/dns-query#DNS-Proxy"
 
   proxy-server-nameserver:
     - https://223.5.5.5/dns-query
@@ -71,27 +78,18 @@ dns:
   direct-nameserver-follow-policy: false
 
   nameserver-policy:
-    geosite:cn:
+    "geosite:cn":
       - https://223.5.5.5/dns-query
       - https://doh.pub/dns-query
 
 rule-providers:
-  reject:
-    type: http
-    behavior: domain
-    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt"
-    path: ./ruleset/reject.yaml
-    interval: 86400
-    
   extra-direct:
     type: http
     behavior: classical
+    format: yaml
     url: "https://raw.githubusercontent.com/Hei-XiaoHu/ACL4SSR/master/Clash/rule/extra-direct.txt"
     path: ./ruleset/extra-direct.yaml
     interval: 86400
 
 rules:
-  - RULE-SET,reject,🛑 广告拦截
   - RULE-SET,extra-direct,🎯 全球直连
-
-
