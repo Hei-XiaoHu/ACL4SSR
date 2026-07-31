@@ -14,6 +14,12 @@ allow-lan: true
 # 规则模式：Rule（规则） / Global（全局代理）/ Direct（全局直连）
 mode: rule
 
+# TCP 并发：对域名的多个 IP 并发握手，取最快建立的连接
+tcp-concurrent: true
+
+# 统一延迟：扣除握手等额外耗时，使各协议节点延迟可横向对比
+unified-delay: true
+
 # 设置日志输出级别 (默认级别：silent，即不输出任何内容，以避免因日志内容过大而导致程序内存溢出）。
 # 5 个级别：silent / info / warning / error / debug。级别越高日志输出量越大，越倾向于调试，若需要请自行开启。
 log-level: info
@@ -28,10 +34,10 @@ external-controller: 127.0.0.1:9090
 # RESTful API 的口令 (可选)
 # secret: ""
 
-# 持久化策略组选择和 Fake-IP 映射
+# 持久化策略组选择；Fake-IP 映射不持久化（移动端写盘开销大，且旧映射易与 fake-ip-filter 冲突）
 profile:
   store-selected: true
-  store-fake-ip: true
+  store-fake-ip: false
 
 # DNS 设置
 dns:
@@ -63,9 +69,13 @@ dns:
     - 1.2.4.8
     - 119.29.29.29
 
+  # 多路 DoH 并发竞速，取最先返回者；全部使用 IP 形式，免去先解析 DoH 域名的额外一跳
   nameserver:
     - "https://1.1.1.1/dns-query#DNS-Proxy"
     - "https://8.8.8.8/dns-query#DNS-Proxy"
+    - "https://9.9.9.9/dns-query#DNS-Proxy"
+    - "https://208.67.222.222/dns-query#DNS-Proxy"
+    - "https://77.88.8.8/dns-query#DNS-Proxy"
 
   proxy-server-nameserver:
     - https://223.5.5.5/dns-query
