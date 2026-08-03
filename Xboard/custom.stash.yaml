@@ -1,0 +1,689 @@
+# Xboard 订阅模板 - Stash / iOS（custom.stash.yaml）
+# 与 Hei-XiaoHu/ACL4SSR 的 Full_AdblockPlus_Stash + dns_enhanced_stash.yml 同一套规则方案
+# Stash 无 mihomo 的 nameserver#组 语法，DNS 走节点由 dns.follow-rule + DoH IP 规则实现
+# iOS 网络扩展内存上限约 50MB，规则全部走 rule-provider 以降低解析峰值
+mode: rule
+log-level: info
+ipv6: false
+profile:
+  store-selected: true
+  store-fake-ip: false
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+  - +.lan
+  - +.local
+  - +.localhost
+  - +.home.arpa
+  - +.internal
+  - +.msftconnecttest.com
+  - +.msftncsi.com
+  - localhost.ptlogin2.qq.com
+  - localhost.sec.qq.com
+  - localhost.work.weixin.qq.com
+  follow-rule: true
+  default-nameserver:
+  - 223.5.5.5
+  - 119.29.29.29
+  nameserver:
+  - https://1.1.1.1/dns-query
+  - https://8.8.8.8/dns-query
+  - https://9.9.9.9/dns-query
+  - https://208.67.222.222/dns-query
+  - https://77.88.8.8/dns-query
+  nameserver-policy:
+    geosite:cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+proxies: []
+proxy-groups:
+- name: 🎓 上网走 🚀 节点选择 · AI走 💬 Ai平台
+  type: select
+  proxies:
+  - DIRECT
+  - REJECT
+- name: 🚀 节点选择
+  type: select
+  proxies:
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - 🔯 自选
+  - DIRECT
+  - REJECT
+- name: 🛰️ DNS-Proxy
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - DIRECT
+  - REJECT
+- name: 🔯 自选
+  type: select
+  proxies:
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - DIRECT
+  - REJECT
+- name: ♻️ 自动选择
+  type: url-test
+  url: https://cp.cloudflare.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies: []
+- name: 📲 电报消息
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - DIRECT
+  - REJECT
+- name: 💬 Ai平台
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - DIRECT
+  - REJECT
+- name: 📹 油管视频
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - DIRECT
+  - REJECT
+- name: 🎥 奈飞视频
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - DIRECT
+  - REJECT
+- name: 📺 巴哈姆特
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - DIRECT
+  - REJECT
+- name: 🌍 国外媒体
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - DIRECT
+  - REJECT
+- name: 📢 谷歌FCM
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - DIRECT
+  - REJECT
+- name: 🎮 游戏平台
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - DIRECT
+  - REJECT
+- name: 🐟 漏网之鱼
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - DIRECT
+  - REJECT
+- name: 📺 哔哩哔哩
+  type: select
+  proxies:
+  - DIRECT
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - REJECT
+- name: 🌏 国内媒体
+  type: select
+  proxies:
+  - DIRECT
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - REJECT
+- name: Ⓜ️ 微软Bing
+  type: select
+  proxies:
+  - DIRECT
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - REJECT
+- name: Ⓜ️ 微软云盘
+  type: select
+  proxies:
+  - DIRECT
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - REJECT
+- name: Ⓜ️ 微软服务
+  type: select
+  proxies:
+  - DIRECT
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - REJECT
+- name: 🍎 苹果服务
+  type: select
+  proxies:
+  - DIRECT
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - REJECT
+- name: 🎶 网易音乐
+  type: select
+  proxies:
+  - DIRECT
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - REJECT
+- name: 🎯 全球直连
+  type: select
+  proxies:
+  - DIRECT
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - REJECT
+- name: 🛑 广告拦截
+  type: select
+  proxies:
+  - REJECT
+  - DIRECT
+- name: 🍃 应用净化
+  type: select
+  proxies:
+  - REJECT
+  - DIRECT
+- name: 🆎 AdBlock
+  type: select
+  proxies:
+  - REJECT
+  - DIRECT
+- name: 🛡️ 隐私防护
+  type: select
+  proxies:
+  - REJECT
+  - DIRECT
+- name: 🇭🇰 香港节点
+  type: url-test
+  url: https://cp.cloudflare.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+  - /(港|HK|Hong Kong|HongKong)/i
+  - REJECT
+- name: 🇹🇼 台湾节点
+  type: url-test
+  url: https://cp.cloudflare.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+  - /(台|新北|彰化|TW|Taiwan)/i
+  - REJECT
+- name: 🇸🇬 狮城节点
+  type: url-test
+  url: https://cp.cloudflare.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+  - /(新加坡|坡|狮城|SG|Singapore)/i
+  - REJECT
+- name: 🇯🇵 日本节点
+  type: url-test
+  url: https://cp.cloudflare.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+  - /(日本|川日|东京|大阪|泉日|埼玉|沪日|深日|JP|Japan)/i
+  - REJECT
+- name: 🇺🇸 美国节点
+  type: url-test
+  url: https://cp.cloudflare.com/generate_204
+  interval: 300
+  tolerance: 150
+  proxies:
+  - /(美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|US|United States)/i
+  - REJECT
+- name: 🇰🇷 韩国节点
+  type: url-test
+  url: https://cp.cloudflare.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+  - /(KR|Korea|KOR|首尔|韩|韓)/i
+  - REJECT
+- name: 🇩🇪 德国节点
+  type: url-test
+  url: https://cp.cloudflare.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+  - /(德|法兰克福|柏林|DE|Germany)/i
+  - REJECT
+rule-providers:
+  extra-direct:
+    type: http
+    behavior: classical
+    format: yaml
+    interval: 86400
+    path: ./ruleset/extra-direct.yaml
+    url: https://raw.githubusercontent.com/Hei-XiaoHu/ACL4SSR/master/Clash/rule/extra-direct.txt
+  lan:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/lan.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/LocalAreaNetwork.list
+  unban:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/unban.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/UnBan.list
+  banad:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/banad.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list
+  banprogramad:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/banprogramad.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list
+  adrules:
+    type: http
+    behavior: domain
+    format: text
+    interval: 86400
+    path: ./ruleset/adrules.list
+    url: https://adrules.top/adrules_domainset.txt
+  anti-ad:
+    type: http
+    behavior: domain
+    format: yaml
+    interval: 86400
+    path: ./ruleset/anti-ad.yaml
+    url: https://anti-ad.net/clash.yaml
+  googlefcm:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/googlefcm.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/GoogleFCM.list
+  googlecn:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/googlecn.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/GoogleCN.list
+  steamcn:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/steamcn.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/SteamCN.list
+  bing:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/bing.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Bing.list
+  onedrive:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/onedrive.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/OneDrive.list
+  microsoft:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/microsoft.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Microsoft.list
+  apple:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/apple.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Apple.list
+  telegram:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/telegram.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Telegram.list
+  ai:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/ai.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/AI.list
+  openai:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/openai.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/OpenAi.list
+  neteasemusic:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/neteasemusic.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/NetEaseMusic.list
+  epic:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/epic.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Epic.list
+  origin:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/origin.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Origin.list
+  sony:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/sony.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Sony.list
+  steam:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/steam.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Steam.list
+  nintendo:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/nintendo.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Nintendo.list
+  youtube:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/youtube.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/YouTube.list
+  netflix:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/netflix.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Netflix.list
+  bahamut:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/bahamut.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Bahamut.list
+  bilibilihmt:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/bilibilihmt.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/BilibiliHMT.list
+  bilibili:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/bilibili.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Bilibili.list
+  chinamedia:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/chinamedia.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaMedia.list
+  proxymedia:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/proxymedia.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyMedia.list
+  gfwlist:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/gfwlist.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyGFWlist.list
+  chinadomain:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/chinadomain.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaDomain.list
+  chinacompanyip:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/chinacompanyip.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaCompanyIp.list
+  download:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    path: ./ruleset/download.list
+    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Download.list
+rules:
+- IP-CIDR,1.1.1.1/32,🛰️ DNS-Proxy,no-resolve
+- IP-CIDR,8.8.8.8/32,🛰️ DNS-Proxy,no-resolve
+- IP-CIDR,9.9.9.9/32,🛰️ DNS-Proxy,no-resolve
+- IP-CIDR,208.67.222.222/32,🛰️ DNS-Proxy,no-resolve
+- IP-CIDR,77.88.8.8/32,🛰️ DNS-Proxy,no-resolve
+- RULE-SET,extra-direct,🎯 全球直连
+- RULE-SET,lan,🎯 全球直连
+- RULE-SET,unban,🎯 全球直连
+- RULE-SET,banad,🛑 广告拦截
+- RULE-SET,banprogramad,🍃 应用净化
+- RULE-SET,adrules,🆎 AdBlock
+- RULE-SET,anti-ad,🛡️ 隐私防护
+- RULE-SET,googlefcm,📢 谷歌FCM
+- RULE-SET,googlecn,🎯 全球直连
+- RULE-SET,steamcn,🎯 全球直连
+- RULE-SET,bing,Ⓜ️ 微软Bing
+- RULE-SET,onedrive,Ⓜ️ 微软云盘
+- RULE-SET,microsoft,Ⓜ️ 微软服务
+- RULE-SET,apple,🍎 苹果服务
+- RULE-SET,telegram,📲 电报消息
+- RULE-SET,ai,💬 Ai平台
+- RULE-SET,openai,💬 Ai平台
+- RULE-SET,neteasemusic,🎶 网易音乐
+- RULE-SET,epic,🎮 游戏平台
+- RULE-SET,origin,🎮 游戏平台
+- RULE-SET,sony,🎮 游戏平台
+- RULE-SET,steam,🎮 游戏平台
+- RULE-SET,nintendo,🎮 游戏平台
+- RULE-SET,youtube,📹 油管视频
+- RULE-SET,netflix,🎥 奈飞视频
+- RULE-SET,bahamut,📺 巴哈姆特
+- RULE-SET,bilibilihmt,📺 哔哩哔哩
+- RULE-SET,bilibili,📺 哔哩哔哩
+- RULE-SET,chinamedia,🌏 国内媒体
+- RULE-SET,proxymedia,🌍 国外媒体
+- RULE-SET,gfwlist,🚀 节点选择
+- RULE-SET,chinadomain,🎯 全球直连
+- RULE-SET,chinacompanyip,🎯 全球直连
+- RULE-SET,download,🎯 全球直连
+- GEOIP,CN,🎯 全球直连
+- MATCH,🐟 漏网之鱼
