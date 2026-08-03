@@ -1,3 +1,8 @@
+# mihomo 底包（DNS 增强 + 去广告）：
+# EasyList / EasyListChina / EasyPrivacy 三个 classical 大列表（8.6 万条内联规则，内存大户）
+# 改由 domain 格式 rule-provider 提供（AdRules + anti-AD，压缩前缀树存储，内存降低一个数量级）
+# 需配合 ACL4SSR_Online_Full_AdblockPlus.ini 使用（依赖其中的策略组）
+
 # HTTP 代理端口
 port: 7890
 
@@ -101,5 +106,25 @@ rule-providers:
     path: ./ruleset/extra-direct.yaml
     interval: 86400
 
+  # AdRules：上游合并 EasyList / EasyListChina / EasyPrivacy 等（与 Full_AdblockPlus 同源），18 万+ 域名
+  adrules:
+    type: http
+    behavior: domain
+    format: text
+    url: "https://adrules.top/adrules_domainset.txt"
+    path: ./ruleset/adrules.txt
+    interval: 86400
+
+  # anti-AD：偏国内 App 广告与隐私上报，10 万+ 域名
+  anti-ad:
+    type: http
+    behavior: domain
+    format: yaml
+    url: "https://anti-ad.net/clash.yaml"
+    path: ./ruleset/anti-ad.yaml
+    interval: 86400
+
 rules:
   - RULE-SET,extra-direct,🎯 全球直连
+  - RULE-SET,adrules,🆎 AdBlock
+  - RULE-SET,anti-ad,🛡️ 隐私防护

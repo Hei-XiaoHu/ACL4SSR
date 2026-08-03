@@ -1,0 +1,104 @@
+# dns_enhanced_stash.yml —— dns_enhanced.yml 的 Stash / iOS 等价底包
+# 需配合 ACL4SSR_Online_Full_AdblockPlus_Stash.ini 使用（依赖其中的策略组）
+# iOS 网络扩展进程内存上限约 50MB（与设备总内存无关）
+#
+# 以下 mihomo 专属字段 Stash 内核不支持，已省略或改用等价实现：
+#   port/socks-port/bind-address/allow-lan/external-controller —— iOS 由 App 自行管理
+#   tcp-concurrent / unified-delay / cache-algorithm / prefer-h3 / fake-ip-filter-mode —— 无对应功能
+#   respect-rules —— 等价于 Stash 的 dns.follow-rule（已启用）
+#   nameserver 的 "#DNS-Proxy" 语法 —— 等价于 follow-rule + 下方 rules 把 DoH IP 指向 🛰️ DNS-Proxy 组
+#   proxy-server-nameserver / direct-nameserver —— 节点域名由 Stash 内部直连解析；国内分流由 nameserver-policy 覆盖
+
+# 规则模式：Rule（规则） / Global（全局代理）/ Direct（全局直连）
+mode: rule
+
+# 与 mihomo 底包一致；如需省电可改为 warning
+log-level: info
+
+ipv6: false
+
+# 持久化策略组选择；Fake-IP 映射不持久化（与 mihomo 底包一致）
+profile:
+  store-selected: true
+  store-fake-ip: false
+
+# DNS 设置（Stash 兼容字段）
+# Stash 的 nameserver 列表本身即并发查询、取最快响应（与 mihomo 行为一致）
+# mihomo 的 "#DNS-Proxy" 语法 Stash 不支持，等价实现：follow-rule + 下方 rules 把 DoH IP 指向 🛰️ DNS-Proxy 组
+# 注：多路 DoH 竞速比单 DNS 更耗电，Stash 官方建议移动端 1~2 个，介意续航可自行删减
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "+.lan"
+    - "+.local"
+    - "+.localhost"
+    - "+.home.arpa"
+    - "+.internal"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "localhost.ptlogin2.qq.com"
+    - "localhost.sec.qq.com"
+    - "localhost.work.weixin.qq.com"
+
+  # DNS 出站跟随分流规则（国外 DoH 走 🛰️ DNS-Proxy 组，国内 DoH 命中直连规则）
+  follow-rule: true
+
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+
+  # 多路 DoH 并发竞速，全部 IP 形式，免去解析 DoH 域名的额外一跳，也避免 follow-rule 递归
+  nameserver:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    - https://9.9.9.9/dns-query
+    - https://208.67.222.222/dns-query
+    - https://77.88.8.8/dns-query
+
+  # 国内域名直接用国内 DoH，不走国外竞速
+  nameserver-policy:
+    "geosite:cn":
+      - https://223.5.5.5/dns-query
+      - https://doh.pub/dns-query
+
+rule-providers:
+  extra-direct:
+    type: http
+    behavior: classical
+    format: yaml
+    url: "https://raw.githubusercontent.com/Hei-XiaoHu/ACL4SSR/master/Clash/rule/extra-direct.txt"
+    path: ./ruleset/extra-direct.yaml
+    interval: 86400
+
+  # AdRules：上游合并 EasyList / EasyListChina / EasyPrivacy 等（与 Full_AdblockPlus 同源），18 万+ 域名
+  # domain 格式加载为压缩前缀树，仅占几 MB 内存，iOS 50MB 限制内安全
+  adrules:
+    type: http
+    behavior: domain
+    format: text
+    url: "https://adrules.top/adrules_domainset.txt"
+    path: ./ruleset/adrules.txt
+    interval: 86400
+
+  # anti-AD：偏国内 App 广告与隐私上报，10 万+ 域名
+  anti-ad:
+    type: http
+    behavior: domain
+    format: yaml
+    url: "https://anti-ad.net/clash.yaml"
+    path: ./ruleset/anti-ad.yaml
+    interval: 86400
+
+rules:
+  # 国外 DoH 的 IP 走 🛰️ DNS-Proxy 组（配合 dns.follow-rule）
+  - IP-CIDR,1.1.1.1/32,🛰️ DNS-Proxy,no-resolve
+  - IP-CIDR,8.8.8.8/32,🛰️ DNS-Proxy,no-resolve
+  - IP-CIDR,9.9.9.9/32,🛰️ DNS-Proxy,no-resolve
+  - IP-CIDR,208.67.222.222/32,🛰️ DNS-Proxy,no-resolve
+  - IP-CIDR,77.88.8.8/32,🛰️ DNS-Proxy,no-resolve
+  - RULE-SET,extra-direct,🎯 全球直连
+  - RULE-SET,adrules,🆎 AdBlock
+  - RULE-SET,anti-ad,🛡️ 隐私防护
