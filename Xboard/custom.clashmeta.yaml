@@ -1,4 +1,5 @@
 # Xboard 订阅模板 - Clash Meta / mihomo（custom.clashmeta.yaml）
+# GitHub 规则集经 ghfast.top 加速；若失效，全局替换前缀为 https://ghproxy.net/ 或 https://gh-proxy.com/
 # 与 Hei-XiaoHu/ACL4SSR 的 Full_AdblockPlus + dns_enhanced.yml 同一套规则方案
 # 节点由 Xboard 注入 proxies；策略组内 /正则/i 为节点筛选，无正则的组自动追加全部节点
 # 去广告：AdRules(EasyList 系 18万+域名) + anti-AD(国内 10万+域名)，domain 前缀树，内存友好
@@ -433,35 +434,35 @@ rule-providers:
     format: yaml
     interval: 86400
     path: ./ruleset/extra-direct.yaml
-    url: https://raw.githubusercontent.com/Hei-XiaoHu/ACL4SSR/master/Clash/rule/extra-direct.txt
+    url: https://ghfast.top/https://raw.githubusercontent.com/Hei-XiaoHu/ACL4SSR/master/Clash/rule/extra-direct.txt
   lan:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/lan.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/LocalAreaNetwork.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/LocalAreaNetwork.list
   unban:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/unban.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/UnBan.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/UnBan.list
   banad:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/banad.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list
   banprogramad:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/banprogramad.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list
   adrules:
     type: http
     behavior: domain
@@ -482,189 +483,189 @@ rule-providers:
     format: text
     interval: 86400
     path: ./ruleset/googlefcm.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/GoogleFCM.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/GoogleFCM.list
   googlecn:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/googlecn.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/GoogleCN.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/GoogleCN.list
   steamcn:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/steamcn.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/SteamCN.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/SteamCN.list
   bing:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/bing.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Bing.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Bing.list
   onedrive:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/onedrive.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/OneDrive.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/OneDrive.list
   microsoft:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/microsoft.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Microsoft.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Microsoft.list
   apple:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/apple.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Apple.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Apple.list
   telegram:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/telegram.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Telegram.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Telegram.list
   ai:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/ai.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/AI.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/AI.list
   openai:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/openai.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/OpenAi.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/OpenAi.list
   neteasemusic:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/neteasemusic.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/NetEaseMusic.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/NetEaseMusic.list
   epic:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/epic.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Epic.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Epic.list
   origin:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/origin.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Origin.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Origin.list
   sony:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/sony.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Sony.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Sony.list
   steam:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/steam.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Steam.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Steam.list
   nintendo:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/nintendo.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Nintendo.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Nintendo.list
   youtube:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/youtube.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/YouTube.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/YouTube.list
   netflix:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/netflix.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Netflix.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Netflix.list
   bahamut:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/bahamut.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Bahamut.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Bahamut.list
   bilibilihmt:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/bilibilihmt.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/BilibiliHMT.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/BilibiliHMT.list
   bilibili:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/bilibili.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Bilibili.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Bilibili.list
   chinamedia:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/chinamedia.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaMedia.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaMedia.list
   proxymedia:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/proxymedia.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyMedia.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyMedia.list
   gfwlist:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/gfwlist.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyGFWlist.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyGFWlist.list
   chinadomain:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/chinadomain.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaDomain.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaDomain.list
   chinacompanyip:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/chinacompanyip.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaCompanyIp.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaCompanyIp.list
   download:
     type: http
     behavior: classical
     format: text
     interval: 86400
     path: ./ruleset/download.list
-    url: https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Download.list
+    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Download.list
 rules:
 - RULE-SET,extra-direct,🎯 全球直连
 - RULE-SET,lan,🎯 全球直连
