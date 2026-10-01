@@ -1,54 +1,51 @@
-# mihomo 底包（DNS 增强 + 去广告）：
-# GitHub 规则集经 ghfast.top 加速；若失效，全局替换前缀为 https://ghproxy.net/ 或 https://gh-proxy.com/
-# EasyList / EasyListChina / EasyPrivacy 三个 classical 大列表（8.6 万条内联规则，内存大户）
-# 改由 domain 格式 rule-provider 提供（AdRules + anti-AD，压缩前缀树存储，内存降低一个数量级）
-# 需配合 ACL4SSR_Online_Full_AdblockPlus.ini 使用（依赖其中的策略组）
+# subconverter 底包（mihomo），需配合 ACL4SSR_Online_Full_AdblockPlus.ini 使用（依赖其中的策略组）
+# 本文件由 tools/build.py 从 src/spec.yaml 生成，请勿手改；改规则请改 src/spec.yaml
+# MATCH 兜底由 ini 生成，排在本文件 rules 之后
+# 规则：MetaCubeX/meta-rules-dat（v2fly 社区，每日同步）mrs 二进制规则集，匹配快、内存小
+# 去广告：AdRules + anti-AD（mrs）；QUIC 走代理时拒绝，自动回落 TCP
+# DNS：国外域名经 🛰️ DNS-Proxy 组走 1.1.1.1 / 8.8.8.8 DoH；国内域名与节点域名用国内 DoH
+# 安全：allow-lan 关闭，DNS 仅监听 127.0.0.1；find-process-mode off（无进程规则，省 CPU）
+# 规则 CDN 为 https://testingcf.jsdelivr.net/gh，失效时全局替换为 https://fastly.jsdelivr.net/gh
 
-# HTTP 代理端口
 port: 7890
-
-# SOCKS5 代理端口
 socks-port: 7891
-
-# Linux 和 macOS 的 redir 代理端口 (如需使用此功能，请取消注释)
-# redir-port: 7892
-bind-address: "*"
-
-# 允许局域网的连接（可用来共享代理）
-allow-lan: true
-
-# 规则模式：Rule（规则） / Global（全局代理）/ Direct（全局直连）
+allow-lan: false
 mode: rule
-
-# TCP 并发：对域名的多个 IP 并发握手，取最快建立的连接
+log-level: warning
+find-process-mode: 'off'
 tcp-concurrent: true
-
-# 统一延迟：扣除握手等额外耗时，使各协议节点延迟可横向对比
 unified-delay: true
-
-# 设置日志输出级别 (默认级别：silent，即不输出任何内容，以避免因日志内容过大而导致程序内存溢出）。
-# 5 个级别：silent / info / warning / error / debug。级别越高日志输出量越大，越倾向于调试，若需要请自行开启。
-log-level: info
-
-# clash 的 RESTful API
 external-controller: 127.0.0.1:9090
-
-# 您可以将静态网页资源（如 clash-dashboard）放置在一个目录中，clash 将会服务于 `${API}/ui`
-# 参数应填写配置目录的相对路径或绝对路径。
-# external-ui: folder
-
-# RESTful API 的口令 (可选)
-# secret: ""
-
-# 持久化策略组选择；Fake-IP 映射不持久化（移动端写盘开销大，且旧映射易与 fake-ip-filter 冲突）
 profile:
   store-selected: true
   store-fake-ip: false
 
-# DNS 设置
+# 嗅探：浏览器自带 DoH 或直接按 IP 连接时，从 TLS/QUIC/HTTP 握手中取回域名再分流
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  parse-pure-ip: true
+  override-destination: false
+  sniff:
+    HTTP:
+      ports:
+      - 80
+      - 8080-8880
+    TLS:
+      ports:
+      - 443
+      - 8443
+    QUIC:
+      ports:
+      - 443
+      - 8443
+  skip-domain:
+  - +.push.apple.com
+  - Mijia Cloud
+
 dns:
   enable: true
-  listen: 0.0.0.0:1053
+  listen: 127.0.0.1:1053
   ipv6: false
   prefer-h3: false
   respect-rules: true
@@ -59,118 +56,108 @@ dns:
   fake-ip-range: 198.18.0.1/16
   fake-ip-filter-mode: blacklist
   fake-ip-filter:
-    - "+.lan"
-    - "+.local"
-    - "+.localhost"
-    - "+.home.arpa"
-    - "+.internal"
-    - "+.msftconnecttest.com"
-    - "+.msftncsi.com"
-    - "localhost.ptlogin2.qq.com"
-    - "localhost.sec.qq.com"
-    - "localhost.work.weixin.qq.com"
-
+  - +.lan
+  - +.local
+  - +.localhost
+  - +.home.arpa
+  - +.internal
+  - +.msftconnecttest.com
+  - +.msftncsi.com
+  - time.*.com
+  - ntp.*.com
+  - +.ntp.org
+  - +.stun.*.*
+  - +.stun.*.*.*
+  - localhost.ptlogin2.qq.com
+  - localhost.sec.qq.com
+  - localhost.work.weixin.qq.com
   default-nameserver:
-    - 223.5.5.5
-    - 1.2.4.8
-    - 119.29.29.29
-
-  # 多路 DoH 并发竞速，取最先返回者；全部使用 IP 形式，免去先解析 DoH 域名的额外一跳
+  - 223.5.5.5
+  - 119.29.29.29
   nameserver:
-    - "https://1.1.1.1/dns-query#DNS-Proxy"
-    - "https://8.8.8.8/dns-query#DNS-Proxy"
-    - "https://9.9.9.9/dns-query#DNS-Proxy"
-    - "https://208.67.222.222/dns-query#DNS-Proxy"
-    - "https://77.88.8.8/dns-query#DNS-Proxy"
-
-  proxy-server-nameserver:
-    - https://223.5.5.5/dns-query
-    - https://doh.pub/dns-query
-
-  direct-nameserver:
-    - https://223.5.5.5/dns-query
-    - https://doh.pub/dns-query
-
+  - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
+  - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
+  proxy-server-nameserver: &id001
+  - https://223.5.5.5/dns-query
+  - https://doh.pub/dns-query
+  direct-nameserver: *id001
   direct-nameserver-follow-policy: false
-
   nameserver-policy:
-    "geosite:cn":
-      - https://223.5.5.5/dns-query
-      - https://doh.pub/dns-query
+    rule-set:private:
+    - system
+    rule-set:cn: *id001
 
-# 全部分流规则改由 rule-provider 提供：
-#   主配置从几千行缩到几百行，启动解析峰值大降；规则每日自动更新，独立于订阅
-#   顺序与 ACL4SSR 原版一致（UnBan 先于广告拦截）；GEOIP,CN / FINAL 由 ini 生成，排在本列表之后
 rule-providers:
-  extra-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-direct.yaml, url: "https://ghfast.top/https://raw.githubusercontent.com/Hei-XiaoHu/ACL4SSR/master/Clash/rule/extra-direct.txt"}
-  lan: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/lan.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/LocalAreaNetwork.list"}
-  unban: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/unban.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/UnBan.list"}
-  banad: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/banad.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list"}
-  banprogramad: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/banprogramad.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list"}
-  # AdRules：上游合并 EasyList / EasyListChina / EasyPrivacy 等，18 万+ 域名，domain 前缀树仅占几 MB
-  adrules: {type: http, behavior: domain, format: text, interval: 86400, path: ./ruleset/adrules.txt, url: "https://adrules.top/adrules_domainset.txt"}
-  # anti-AD：偏国内 App 广告与隐私上报，10 万+ 域名
-  anti-ad: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/anti-ad.yaml, url: "https://anti-ad.net/clash.yaml"}
-  googlefcm: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/googlefcm.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/GoogleFCM.list"}
-  googlecn: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/googlecn.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/GoogleCN.list"}
-  steamcn: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/steamcn.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/SteamCN.list"}
-  bing: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/bing.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Bing.list"}
-  onedrive: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/onedrive.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/OneDrive.list"}
-  microsoft: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/microsoft.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Microsoft.list"}
-  apple: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/apple.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Apple.list"}
-  telegram: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/telegram.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Telegram.list"}
-  ai: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/ai.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/AI.list"}
-  openai: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/openai.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/OpenAi.list"}
-  neteasemusic: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/neteasemusic.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/NetEaseMusic.list"}
-  epic: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/epic.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Epic.list"}
-  origin: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/origin.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Origin.list"}
-  sony: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/sony.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Sony.list"}
-  steam: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/steam.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Steam.list"}
-  nintendo: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/nintendo.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Nintendo.list"}
-  youtube: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/youtube.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/YouTube.list"}
-  netflix: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/netflix.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Netflix.list"}
-  bahamut: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/bahamut.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Bahamut.list"}
-  bilibilihmt: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/bilibilihmt.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/BilibiliHMT.list"}
-  bilibili: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/bilibili.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Bilibili.list"}
-  chinamedia: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/chinamedia.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaMedia.list"}
-  proxymedia: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/proxymedia.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyMedia.list"}
-  gfwlist: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/gfwlist.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyGFWlist.list"}
-  chinadomain: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/chinadomain.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaDomain.list"}
-  chinacompanyip: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/chinacompanyip.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaCompanyIp.list"}
-  download: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/download.list, url: "https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Download.list"}
+  extra-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-direct.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-direct.txt'}
+  extra-ai: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-ai.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-ai.txt'}
+  private: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/private.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs'}
+  private-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/private-ip.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/private.mrs'}
+  unban: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/unban.list, url: 'https://testingcf.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/UnBan.list'}
+  adrules: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/adrules.mrs, url: 'https://testingcf.jsdelivr.net/gh/Cats-Team/AdRules@main/adrules-mihomo.mrs'}
+  anti-ad: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/anti-ad.mrs, url: 'https://anti-ad.net/mihomo.mrs'}
+  ai: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/ai.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-ai-!cn.mrs'}
+  googlefcm: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/googlefcm.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.mrs'}
+  google-cn: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/google-cn.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/google-cn.mrs'}
+  steam-cn: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/steam-cn.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/steam@cn.mrs'}
+  github: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/github.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/github.mrs'}
+  bing: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/bing.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bing.mrs'}
+  onedrive: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/onedrive.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/onedrive.mrs'}
+  microsoft: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/microsoft.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/microsoft.mrs'}
+  apple: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/apple.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/apple.mrs'}
+  telegram: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/telegram.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/telegram.mrs'}
+  telegram-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/telegram-ip.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/telegram.mrs'}
+  netease: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/netease.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/netease.mrs'}
+  epicgames: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/epicgames.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/epicgames.mrs'}
+  ea: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/ea.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/ea.mrs'}
+  sony: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/sony.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/sony.mrs'}
+  playstation: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/playstation.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/playstation.mrs'}
+  steam: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/steam.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/steam.mrs'}
+  nintendo: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/nintendo.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/nintendo.mrs'}
+  youtube: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/youtube.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/youtube.mrs'}
+  netflix: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/netflix.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/netflix.mrs'}
+  netflix-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/netflix-ip.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/netflix.mrs'}
+  bahamut: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/bahamut.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bahamut.mrs'}
+  bilibili: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/bilibili.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bilibili.mrs'}
+  proxymedia: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/proxymedia.list, url: 'https://testingcf.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/ProxyMedia.list'}
+  gfw: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/gfw.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/gfw.mrs'}
+  cn: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/cn.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs'}
+  geolocation-!cn: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/geolocation-!cn.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/geolocation-!cn.mrs'}
+  cn-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/cn-ip.mrs, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs'}
 
 rules:
-  - RULE-SET,extra-direct,🎯 全球直连
-  - RULE-SET,lan,🎯 全球直连
-  - RULE-SET,unban,🎯 全球直连
-  - RULE-SET,banad,🛑 广告拦截
-  - RULE-SET,banprogramad,🍃 应用净化
-  - RULE-SET,adrules,🆎 AdBlock
-  - RULE-SET,anti-ad,🛡️ 隐私防护
-  - RULE-SET,googlefcm,📢 谷歌FCM
-  - RULE-SET,googlecn,🎯 全球直连
-  - RULE-SET,steamcn,🎯 全球直连
-  - RULE-SET,bing,Ⓜ️ 微软Bing
-  - RULE-SET,onedrive,Ⓜ️ 微软云盘
-  - RULE-SET,microsoft,Ⓜ️ 微软服务
-  - RULE-SET,apple,🍎 苹果服务
-  - RULE-SET,telegram,📲 电报消息
-  - RULE-SET,ai,💬 Ai平台
-  - RULE-SET,openai,💬 Ai平台
-  - RULE-SET,neteasemusic,🎶 网易音乐
-  - RULE-SET,epic,🎮 游戏平台
-  - RULE-SET,origin,🎮 游戏平台
-  - RULE-SET,sony,🎮 游戏平台
-  - RULE-SET,steam,🎮 游戏平台
-  - RULE-SET,nintendo,🎮 游戏平台
-  - RULE-SET,youtube,📹 油管视频
-  - RULE-SET,netflix,🎥 奈飞视频
-  - RULE-SET,bahamut,📺 巴哈姆特
-  - RULE-SET,bilibilihmt,📺 哔哩哔哩
-  - RULE-SET,bilibili,📺 哔哩哔哩
-  - RULE-SET,chinamedia,🌏 国内媒体
-  - RULE-SET,proxymedia,🌍 国外媒体
-  - RULE-SET,gfwlist,🚀 节点选择
-  - RULE-SET,chinadomain,🎯 全球直连
-  - RULE-SET,chinacompanyip,🎯 全球直连
-  - RULE-SET,download,🎯 全球直连
+- RULE-SET,extra-direct,🎯 全球直连
+- RULE-SET,private,🎯 全球直连
+- RULE-SET,private-ip,🎯 全球直连,no-resolve
+- RULE-SET,unban,🎯 全球直连
+- RULE-SET,adrules,🛑 广告拦截
+- RULE-SET,anti-ad,🛑 广告拦截
+- AND,((NETWORK,udp),(DST-PORT,443),(NOT,((RULE-SET,cn)))),REJECT
+- RULE-SET,extra-ai,💬 Ai平台
+- RULE-SET,ai,💬 Ai平台
+- RULE-SET,googlefcm,📢 谷歌FCM
+- RULE-SET,google-cn,🎯 全球直连
+- RULE-SET,steam-cn,🎯 全球直连
+- RULE-SET,github,🚀 节点选择
+- RULE-SET,bing,Ⓜ️ 微软Bing
+- RULE-SET,onedrive,Ⓜ️ 微软云盘
+- RULE-SET,microsoft,Ⓜ️ 微软服务
+- RULE-SET,apple,🍎 苹果服务
+- RULE-SET,telegram,📲 电报消息
+- RULE-SET,telegram-ip,📲 电报消息,no-resolve
+- RULE-SET,netease,🎶 网易音乐
+- RULE-SET,epicgames,🎮 游戏平台
+- RULE-SET,ea,🎮 游戏平台
+- RULE-SET,sony,🎮 游戏平台
+- RULE-SET,playstation,🎮 游戏平台
+- RULE-SET,steam,🎮 游戏平台
+- RULE-SET,nintendo,🎮 游戏平台
+- RULE-SET,youtube,📹 油管视频
+- RULE-SET,netflix,🎥 奈飞视频
+- RULE-SET,netflix-ip,🎥 奈飞视频,no-resolve
+- RULE-SET,bahamut,📺 巴哈姆特
+- RULE-SET,bilibili,📺 哔哩哔哩
+- RULE-SET,proxymedia,🌍 国外媒体,no-resolve
+- RULE-SET,gfw,🚀 节点选择
+- RULE-SET,cn,🎯 全球直连,no-resolve
+- RULE-SET,geolocation-!cn,🐟 漏网之鱼
+- RULE-SET,cn-ip,🎯 全球直连

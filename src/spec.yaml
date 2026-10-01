@@ -1,0 +1,211 @@
+# ============================================================================
+# 唯一规则源头 —— 改完运行：python3 tools/build.py
+# 生成（请勿手改，CI 会校验一致性）：
+#   Clash/config/ACL4SSR_Online_Full_AdblockPlus.ini          subconverter · mihomo
+#   Clash/config/ACL4SSR_Online_Full_AdblockPlus_Stash.ini    subconverter · Stash
+#   Clash/customBaseConfigs/dns_enhanced.yml                  上面 ini 的底包 · mihomo
+#   Clash/customBaseConfigs/dns_enhanced_stash.yml            上面 ini 的底包 · Stash
+#   Xboard/custom.clashmeta.yaml                              Xboard 模板 · mihomo（电脑 Clash Party / 安卓 CMFA）
+#   Xboard/custom.stash.yaml                                  Xboard 模板 · Stash（iOS）
+#   Clash/override/overseas.yaml                              Clash Party 远程覆写 · 国外模式
+# ============================================================================
+
+# 规则下载 CDN（jsDelivr 失效时可换 https://fastly.jsdelivr.net/gh 或 https://cdn.jsdelivr.net/gh）
+cdn: https://testingcf.jsdelivr.net/gh
+self_repo: Hei-XiaoHu/ACL4SSR@master
+provider_interval: 86400
+
+test_url: https://cp.cloudflare.com/generate_204
+test_interval: 600            # 秒；url-test 组均 lazy，未被使用的组不测速
+
+# 节点名包含这些词的不参与任何分组（机场信息节点 / 高倍率节点）
+node_exclude: 剩余|到期|过期|官网|套餐|流量|重置|倍率
+
+# 地区组。{XX} 展开为"前后不挨着英文字母的 XX"，避免 US 误中 Australia/Russia、DE 误中 Sweden
+regions:
+  - {name: 🇭🇰 香港节点, match: '港|{HK}|Hong ?Kong', tolerance: 50}
+  - {name: 🇹🇼 台湾节点, match: '台|新北|彰化|{TW}|Taiwan', tolerance: 50}
+  - {name: 🇸🇬 狮城节点, match: '新加坡|坡|狮城|{SG}|Singapore', tolerance: 50}
+  - {name: 🇯🇵 日本节点, match: '日本|川日|东京|大阪|泉日|埼玉|沪日|深日|{JP}|Japan', tolerance: 50}
+  - {name: 🇺🇸 美国节点, match: '美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|{US}|United ?States', tolerance: 150}
+  - {name: 🇰🇷 韩国节点, match: '韩|韓|首尔|{KR}|{KOR}|Korea', tolerance: 50}
+  - {name: 🇩🇪 德国节点, match: '德国|法兰克福|柏林|{DE}|Germany', tolerance: 50}
+  - {name: 🇫🇷 法国节点, match: '法国|巴黎|马赛|{FR}|France', tolerance: 50}
+
+# 策略组。$regions = 全部地区组；$nodes = 全部节点（已排除 node_exclude）
+lists:
+  proxy_first: &P [🚀 节点选择, ♻️ 自动选择, $regions, $nodes, DIRECT, REJECT]
+  direct_first: &D [DIRECT, 🚀 节点选择, ♻️ 自动选择, $regions, $nodes, REJECT]
+
+groups:
+  - {name: 🎓 上网走 🚀 节点选择 · AI走 💬 Ai平台, proxies: [DIRECT, REJECT]}
+  - {name: 🚀 节点选择, proxies: [♻️ 自动选择, $regions, 🔯 自选, $nodes, DIRECT, REJECT]}
+  - {name: 🛰️ DNS-Proxy, proxies: *P}
+  - {name: 🔯 自选, proxies: [♻️ 自动选择, $regions, $nodes, DIRECT, REJECT]}
+  - {name: ♻️ 自动选择, type: url-test, proxies: [$nodes], tolerance: 50}
+  - {name: 📲 电报消息, proxies: *P}
+  - {name: 💬 Ai平台, proxies: *P}
+  - {name: 📹 油管视频, proxies: *P}
+  - {name: 🎥 奈飞视频, proxies: *P}
+  - {name: 📺 巴哈姆特, proxies: *P}
+  - {name: 📺 哔哩哔哩, proxies: *D}
+  - {name: 🌍 国外媒体, proxies: *P}
+  - {name: 📢 谷歌FCM, proxies: *P}
+  - {name: Ⓜ️ 微软Bing, proxies: *D}
+  - {name: Ⓜ️ 微软云盘, proxies: *D}
+  - {name: Ⓜ️ 微软服务, proxies: *D}
+  - {name: 🍎 苹果服务, proxies: *D}
+  - {name: 🎮 游戏平台, proxies: *P}
+  - {name: 🎶 网易音乐, proxies: *D}
+  - {name: 🎯 全球直连, proxies: *D}
+  - {name: 🛑 广告拦截, proxies: [REJECT, DIRECT]}
+  - {name: 🐟 漏网之鱼, proxies: *P}
+  - $regions
+
+# 规则集。简写：
+#   geosite: X / geoip: X   MetaCubeX/meta-rules-dat（mihomo 用 mrs，Stash 用 yaml）
+#   acl: 路径               ACL4SSR/ACL4SSR 的 classical 文本
+#   self: 路径              本仓库的 classical yaml
+#   meta: / stash:          仅对该客户端生效，或为该客户端单独指定来源
+providers:
+  extra-direct: {self: Clash/rule/extra-direct.txt}
+  extra-ai: {self: Clash/rule/extra-ai.txt}
+  private: {geosite: private}
+  private-ip: {geoip: private}
+  unban: {acl: Clash/UnBan.list}
+  adrules:
+    meta: {behavior: domain, format: mrs, url: '{cdn}/Cats-Team/AdRules@main/adrules-mihomo.mrs'}
+  anti-ad:
+    meta: {behavior: domain, format: mrs, url: https://anti-ad.net/mihomo.mrs}
+  awavenue:   # iOS 网络扩展内存上限约 50MB，装不下上面两个十几万条的列表
+    stash: {behavior: domain, format: yaml, url: '{cdn}/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.yaml'}
+  ai: {geosite: category-ai-!cn}
+  googlefcm: {geosite: googlefcm}
+  google-cn: {geosite: google-cn}
+  steam-cn: {geosite: steam@cn}
+  github: {geosite: github}
+  bing: {geosite: bing}
+  onedrive: {geosite: onedrive}
+  microsoft: {geosite: microsoft}
+  apple: {geosite: apple}
+  telegram: {geosite: telegram}
+  telegram-ip: {geoip: telegram}
+  netease: {geosite: netease}
+  epicgames: {geosite: epicgames}
+  ea: {geosite: ea}
+  sony: {geosite: sony}
+  playstation: {geosite: playstation}
+  steam: {geosite: steam}
+  nintendo: {geosite: nintendo}
+  youtube: {geosite: youtube}
+  netflix: {geosite: netflix}
+  netflix-ip: {geoip: netflix}
+  bahamut: {geosite: bahamut}
+  bilibili: {geosite: bilibili}
+  proxymedia: {acl: Clash/ProxyMedia.list}
+  gfw: {geosite: gfw}
+  cn:
+    meta: {geosite: cn}
+    stash: {acl: Clash/ChinaDomain.list}   # geosite:cn 文本版 11 万行，iOS 内存装不下
+  geolocation-!cn:
+    meta: {geosite: geolocation-!cn}
+  cn-ip:
+    meta: {geoip: cn}
+
+# 分流规则，自上而下匹配。
+#   set: 规则集名（该客户端没有此规则集时自动跳过）  raw: 原样规则
+#   no_resolve: 规则集里的 IP 规则不触发 DNS 解析（只匹配本来就是 IP 的连接）
+#   only: 仅对该客户端生效
+rules:
+  - {set: extra-direct, to: 🎯 全球直连}
+  - {set: private, to: 🎯 全球直连}
+  - {set: private-ip, to: 🎯 全球直连, no_resolve: true}
+  - {set: unban, to: 🎯 全球直连}
+  - {set: adrules, to: 🛑 广告拦截}
+  - {set: anti-ad, to: 🛑 广告拦截}
+  - {set: awavenue, to: 🛑 广告拦截}
+  # 走代理的 QUIC 一律拒绝，浏览器自动回落 TCP；国内目标不受影响
+  - {raw: 'AND,((NETWORK,udp),(DST-PORT,443),(NOT,((RULE-SET,cn)))),REJECT'}
+  # AI 放在微软/谷歌之前，否则 copilot.microsoft.com 等会被微软组截走
+  - {set: extra-ai, to: 💬 Ai平台}
+  - {set: ai, to: 💬 Ai平台}
+  - {set: googlefcm, to: 📢 谷歌FCM}
+  - {set: google-cn, to: 🎯 全球直连}
+  - {set: steam-cn, to: 🎯 全球直连}
+  # geosite:microsoft 含 GitHub，而微软组默认直连；GitHub 在国内直连很慢，先行截走
+  - {set: github, to: 🚀 节点选择}
+  - {set: bing, to: Ⓜ️ 微软Bing}
+  - {set: onedrive, to: Ⓜ️ 微软云盘}
+  - {set: microsoft, to: Ⓜ️ 微软服务}
+  - {set: apple, to: 🍎 苹果服务}
+  - {set: telegram, to: 📲 电报消息}
+  - {set: telegram-ip, to: 📲 电报消息, no_resolve: true}
+  - {set: netease, to: 🎶 网易音乐}
+  - {set: epicgames, to: 🎮 游戏平台}
+  - {set: ea, to: 🎮 游戏平台}
+  - {set: sony, to: 🎮 游戏平台}
+  - {set: playstation, to: 🎮 游戏平台}
+  - {set: steam, to: 🎮 游戏平台}
+  - {set: nintendo, to: 🎮 游戏平台}
+  - {set: youtube, to: 📹 油管视频}
+  - {set: netflix, to: 🎥 奈飞视频}
+  - {set: netflix-ip, to: 🎥 奈飞视频, no_resolve: true}
+  - {set: bahamut, to: 📺 巴哈姆特}
+  - {set: bilibili, to: 📺 哔哩哔哩}
+  - {set: proxymedia, to: 🌍 国外媒体, no_resolve: true}
+  - {set: gfw, to: 🚀 节点选择}
+  - {set: cn, to: 🎯 全球直连, no_resolve: true}
+  # 已知国外域名直接走漏网之鱼，免去下面 IP 规则触发的 DNS 解析
+  - {set: geolocation-!cn, to: 🐟 漏网之鱼}
+  # 以下两条需要解析域名得到 IP，放在最后，只有前面都没命中的域名才会解析
+  - {set: cn-ip, to: 🎯 全球直连}
+  - {raw: 'GEOIP,CN,🎯 全球直连', only: stash}
+  - {raw: 'MATCH,🐟 漏网之鱼'}
+
+# 国外模式（Clash Party 远程覆写）：AI 走 💬 Ai平台，其余全部直连，DNS 全部换成国外
+overseas:
+  rules:
+    - {set: private, to: DIRECT}
+    - {set: private-ip, to: DIRECT, no_resolve: true}
+    - {set: unban, to: DIRECT}
+    - {set: adrules, to: REJECT}
+    - {set: anti-ad, to: REJECT}
+    - {set: extra-ai, to: 💬 Ai平台}
+    - {set: ai, to: 💬 Ai平台}
+    - {raw: 'MATCH,DIRECT'}
+  dns:
+    enable: true
+    listen: 127.0.0.1:1053
+    ipv6: false
+    enhanced-mode: fake-ip
+    fake-ip-range: 198.18.0.1/16
+    fake-ip-filter-mode: blacklist
+    fake-ip-filter: $fake_ip_filter
+    respect-rules: false
+    use-hosts: true
+    use-system-hosts: true
+    default-nameserver: [1.1.1.1, 8.8.8.8]
+    nameserver: [https://1.1.1.1/dns-query, https://8.8.8.8/dns-query]
+    proxy-server-nameserver: [https://1.1.1.1/dns-query, https://8.8.8.8/dns-query]
+
+fake_ip_filter:
+  - +.lan
+  - +.local
+  - +.localhost
+  - +.home.arpa
+  - +.internal
+  - +.msftconnecttest.com
+  - +.msftncsi.com
+  - time.*.com
+  - ntp.*.com
+  - +.ntp.org
+  - +.stun.*.*
+  - +.stun.*.*.*
+  - localhost.ptlogin2.qq.com
+  - localhost.sec.qq.com
+  - localhost.work.weixin.qq.com
+
+# 国外 DoH（经 🛰️ DNS-Proxy 组发出）与国内 DoH
+dns_remote: [https://1.1.1.1/dns-query, https://8.8.8.8/dns-query]
+dns_china: [https://223.5.5.5/dns-query, https://doh.pub/dns-query]
+dns_bootstrap: [223.5.5.5, 119.29.29.29]

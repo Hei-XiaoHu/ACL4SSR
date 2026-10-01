@@ -1,16 +1,19 @@
-# Xboard 订阅模板 - Stash / iOS（custom.stash.yaml）
-# 与 Hei-XiaoHu/ACL4SSR 的 Full_AdblockPlus_Stash + dns_enhanced_stash.yml 同一套规则方案
-# Stash 无 mihomo 的 nameserver#组 语法，DNS 走节点由 dns.follow-rule + DoH IP 规则实现
-# iOS 网络扩展内存上限约 50MB，规则全部走 rule-provider 以降低解析峰值
-# 去广告用 AWAvenue 秋风规则（约 900 条，全量版已含广告+隐私跟踪+流氓推广）
-#   替代 adrules(18万行)+anti-ad(10万行)：iOS 上加载全量列表会撑爆内存被系统杀死导致断连
-# GitHub 规则集经 ghfast.top 加速；若失效，全局替换前缀为 https://ghproxy.net/ 或 https://gh-proxy.com/
+# Xboard 订阅模板 - Stash（iOS / macOS）（custom.stash.yaml）
+# 本文件由 tools/build.py 从 src/spec.yaml 生成，请勿手改；改规则请改 src/spec.yaml
+# 策略组内 /正则/i 为 Xboard 侧节点筛选；/^$/ 表示不追加任何节点
+# 规则：MetaCubeX/meta-rules-dat 的 yaml 版（Stash 不支持 mrs）；国内域名用 ACL4SSR ChinaDomain + GEOIP,CN
+#   （geosite:cn 文本版 11 万行，iOS 网络扩展约 50MB 内存上限装不下）
+# 去广告：AWAvenue 秋风规则（约 900 条，含广告+隐私跟踪+流氓推广）
+# DNS：follow-rule + 规则把 DoH IP 指向 🛰️ DNS-Proxy，等价 mihomo 的 nameserver#组；nameserver-policy 的 geosite 需 Stash iOS 3.4.0+
+# 规则 CDN 为 https://testingcf.jsdelivr.net/gh，失效时全局替换为 https://fastly.jsdelivr.net/gh
+
 mode: rule
-log-level: info
+log-level: warning
 ipv6: false
 profile:
   store-selected: true
   store-fake-ip: false
+
 dns:
   enable: true
   ipv6: false
@@ -24,6 +27,7 @@ dns:
   - +.internal
   - +.msftconnecttest.com
   - +.msftncsi.com
+  - +.ntp.org
   - localhost.ptlogin2.qq.com
   - localhost.sec.qq.com
   - localhost.work.weixin.qq.com
@@ -34,20 +38,21 @@ dns:
   nameserver:
   - https://1.1.1.1/dns-query
   - https://8.8.8.8/dns-query
-  - https://9.9.9.9/dns-query
-  - https://208.67.222.222/dns-query
-  - https://77.88.8.8/dns-query
   nameserver-policy:
     geosite:cn:
     - https://223.5.5.5/dns-query
     - https://doh.pub/dns-query
+
+# 节点由 Xboard 注入
 proxies: []
+
 proxy-groups:
 - name: 🎓 上网走 🚀 节点选择 · AI走 💬 Ai平台
   type: select
   proxies:
   - DIRECT
   - REJECT
+  - /^$/
 - name: 🚀 节点选择
   type: select
   proxies:
@@ -59,7 +64,9 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
   - 🔯 自选
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
 - name: 🛰️ DNS-Proxy
@@ -74,6 +81,8 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
 - name: 🔯 自选
@@ -87,14 +96,18 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
 - name: ♻️ 自动选择
   type: url-test
   url: https://cp.cloudflare.com/generate_204
-  interval: 300
+  interval: 600
   tolerance: 50
-  proxies: []
+  lazy: true
+  proxies:
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
 - name: 📲 电报消息
   type: select
   proxies:
@@ -107,6 +120,8 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
 - name: 💬 Ai平台
@@ -121,6 +136,8 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
 - name: 📹 油管视频
@@ -135,6 +152,8 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
 - name: 🎥 奈飞视频
@@ -149,6 +168,8 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
 - name: 📺 巴哈姆特
@@ -163,62 +184,8 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
-  - DIRECT
-  - REJECT
-- name: 🌍 国外媒体
-  type: select
-  proxies:
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - DIRECT
-  - REJECT
-- name: 📢 谷歌FCM
-  type: select
-  proxies:
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - DIRECT
-  - REJECT
-- name: 🎮 游戏平台
-  type: select
-  proxies:
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - DIRECT
-  - REJECT
-- name: 🐟 漏网之鱼
-  type: select
-  proxies:
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
 - name: 📺 哔哩哔哩
@@ -234,11 +201,12 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - REJECT
-- name: 🌏 国内媒体
+- name: 🌍 国外媒体
   type: select
   proxies:
-  - DIRECT
   - 🚀 节点选择
   - ♻️ 自动选择
   - 🇭🇰 香港节点
@@ -248,6 +216,25 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
+  - DIRECT
+  - REJECT
+- name: 📢 谷歌FCM
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
+  - DIRECT
   - REJECT
 - name: Ⓜ️ 微软Bing
   type: select
@@ -262,6 +249,8 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - REJECT
 - name: Ⓜ️ 微软云盘
   type: select
@@ -276,6 +265,8 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - REJECT
 - name: Ⓜ️ 微软服务
   type: select
@@ -290,6 +281,8 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - REJECT
 - name: 🍎 苹果服务
   type: select
@@ -304,6 +297,24 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
+  - REJECT
+- name: 🎮 游戏平台
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
+  - DIRECT
   - REJECT
 - name: 🎶 网易音乐
   type: select
@@ -318,6 +329,8 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - REJECT
 - name: 🎯 全球直连
   type: select
@@ -332,348 +345,173 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇰🇷 韩国节点
   - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - REJECT
 - name: 🛑 广告拦截
   type: select
   proxies:
   - REJECT
   - DIRECT
-- name: 🍃 应用净化
+  - /^$/
+- name: 🐟 漏网之鱼
   type: select
   proxies:
-  - REJECT
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
-- name: 🆎 AdBlock
-  type: select
-  proxies:
   - REJECT
-  - DIRECT
 - name: 🇭🇰 香港节点
   type: url-test
   url: https://cp.cloudflare.com/generate_204
-  interval: 300
+  interval: 600
   tolerance: 50
+  lazy: true
   proxies:
-  - /(港|HK|Hong Kong|HongKong)/i
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(港|(?<![A-Za-z])HK(?![A-Za-z])|Hong ?Kong)/i
   - REJECT
 - name: 🇹🇼 台湾节点
   type: url-test
   url: https://cp.cloudflare.com/generate_204
-  interval: 300
+  interval: 600
   tolerance: 50
+  lazy: true
   proxies:
-  - /(台|新北|彰化|TW|Taiwan)/i
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(台|新北|彰化|(?<![A-Za-z])TW(?![A-Za-z])|Taiwan)/i
   - REJECT
 - name: 🇸🇬 狮城节点
   type: url-test
   url: https://cp.cloudflare.com/generate_204
-  interval: 300
+  interval: 600
   tolerance: 50
+  lazy: true
   proxies:
-  - /(新加坡|坡|狮城|SG|Singapore)/i
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(新加坡|坡|狮城|(?<![A-Za-z])SG(?![A-Za-z])|Singapore)/i
   - REJECT
 - name: 🇯🇵 日本节点
   type: url-test
   url: https://cp.cloudflare.com/generate_204
-  interval: 300
+  interval: 600
   tolerance: 50
+  lazy: true
   proxies:
-  - /(日本|川日|东京|大阪|泉日|埼玉|沪日|深日|JP|Japan)/i
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(日本|川日|东京|大阪|泉日|埼玉|沪日|深日|(?<![A-Za-z])JP(?![A-Za-z])|Japan)/i
   - REJECT
 - name: 🇺🇸 美国节点
   type: url-test
   url: https://cp.cloudflare.com/generate_204
-  interval: 300
+  interval: 600
   tolerance: 150
+  lazy: true
   proxies:
-  - /(美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|US|United States)/i
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|(?<![A-Za-z])US(?![A-Za-z])|United ?States)/i
   - REJECT
 - name: 🇰🇷 韩国节点
   type: url-test
   url: https://cp.cloudflare.com/generate_204
-  interval: 300
+  interval: 600
   tolerance: 50
+  lazy: true
   proxies:
-  - /(KR|Korea|KOR|首尔|韩|韓)/i
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(韩|韓|首尔|(?<![A-Za-z])KR(?![A-Za-z])|(?<![A-Za-z])KOR(?![A-Za-z])|Korea)/i
   - REJECT
 - name: 🇩🇪 德国节点
   type: url-test
   url: https://cp.cloudflare.com/generate_204
-  interval: 300
+  interval: 600
   tolerance: 50
+  lazy: true
   proxies:
-  - /(德|法兰克福|柏林|DE|Germany)/i
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(德国|法兰克福|柏林|(?<![A-Za-z])DE(?![A-Za-z])|Germany)/i
   - REJECT
+- name: 🇫🇷 法国节点
+  type: url-test
+  url: https://cp.cloudflare.com/generate_204
+  interval: 600
+  tolerance: 50
+  lazy: true
+  proxies:
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(法国|巴黎|马赛|(?<![A-Za-z])FR(?![A-Za-z])|France)/i
+  - REJECT
+
 rule-providers:
-  extra-direct:
-    type: http
-    behavior: classical
-    format: yaml
-    interval: 86400
-    path: ./ruleset/extra-direct.yaml
-    url: https://ghfast.top/https://raw.githubusercontent.com/Hei-XiaoHu/ACL4SSR/master/Clash/rule/extra-direct.txt
-  lan:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/lan.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/LocalAreaNetwork.list
-  unban:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/unban.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/UnBan.list
-  banad:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/banad.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list
-  banprogramad:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/banprogramad.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list
-  awavenue:
-    type: http
-    behavior: domain
-    format: yaml
-    interval: 86400
-    path: ./ruleset/awavenue.yaml
-    url: https://ghfast.top/https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/Filters/AWAvenue-Ads-Rule-Clash.yaml
-  googlefcm:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/googlefcm.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/GoogleFCM.list
-  googlecn:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/googlecn.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/GoogleCN.list
-  steamcn:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/steamcn.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/SteamCN.list
-  bing:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/bing.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Bing.list
-  onedrive:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/onedrive.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/OneDrive.list
-  microsoft:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/microsoft.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Microsoft.list
-  apple:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/apple.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Apple.list
-  telegram:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/telegram.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Telegram.list
-  ai:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/ai.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/AI.list
-  openai:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/openai.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/OpenAi.list
-  neteasemusic:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/neteasemusic.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/NetEaseMusic.list
-  epic:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/epic.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Epic.list
-  origin:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/origin.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Origin.list
-  sony:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/sony.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Sony.list
-  steam:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/steam.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Steam.list
-  nintendo:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/nintendo.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Nintendo.list
-  youtube:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/youtube.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/YouTube.list
-  netflix:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/netflix.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Netflix.list
-  bahamut:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/bahamut.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Bahamut.list
-  bilibilihmt:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/bilibilihmt.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/BilibiliHMT.list
-  bilibili:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/bilibili.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Bilibili.list
-  chinamedia:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/chinamedia.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaMedia.list
-  proxymedia:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/proxymedia.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyMedia.list
-  gfwlist:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/gfwlist.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyGFWlist.list
-  chinadomain:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/chinadomain.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaDomain.list
-  chinacompanyip:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/chinacompanyip.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaCompanyIp.list
-  download:
-    type: http
-    behavior: classical
-    format: text
-    interval: 86400
-    path: ./ruleset/download.list
-    url: https://ghfast.top/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Download.list
+  extra-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-direct.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-direct.txt'}
+  extra-ai: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-ai.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-ai.txt'}
+  private: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/private.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.yaml'}
+  private-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/private-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/private.yaml'}
+  unban: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/unban.list, url: 'https://testingcf.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/UnBan.list'}
+  awavenue: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/awavenue.yaml, url: 'https://testingcf.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.yaml'}
+  ai: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ai.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-ai-!cn.yaml'}
+  googlefcm: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/googlefcm.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.yaml'}
+  google-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/google-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/google-cn.yaml'}
+  steam-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/steam-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/steam@cn.yaml'}
+  github: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/github.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/github.yaml'}
+  bing: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bing.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bing.yaml'}
+  onedrive: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/onedrive.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/onedrive.yaml'}
+  microsoft: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/microsoft.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/microsoft.yaml'}
+  apple: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/apple.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/apple.yaml'}
+  telegram: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/telegram.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/telegram.yaml'}
+  telegram-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/telegram-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/telegram.yaml'}
+  netease: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/netease.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/netease.yaml'}
+  epicgames: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/epicgames.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/epicgames.yaml'}
+  ea: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ea.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/ea.yaml'}
+  sony: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/sony.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/sony.yaml'}
+  playstation: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/playstation.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/playstation.yaml'}
+  steam: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/steam.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/steam.yaml'}
+  nintendo: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/nintendo.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/nintendo.yaml'}
+  youtube: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/youtube.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/youtube.yaml'}
+  netflix: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/netflix.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/netflix.yaml'}
+  netflix-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/netflix-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/netflix.yaml'}
+  bahamut: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bahamut.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bahamut.yaml'}
+  bilibili: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bilibili.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bilibili.yaml'}
+  proxymedia: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/proxymedia.list, url: 'https://testingcf.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/ProxyMedia.list'}
+  gfw: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/gfw.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/gfw.yaml'}
+  cn: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/cn.list, url: 'https://testingcf.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/ChinaDomain.list'}
+
 rules:
 - IP-CIDR,1.1.1.1/32,🛰️ DNS-Proxy,no-resolve
 - IP-CIDR,8.8.8.8/32,🛰️ DNS-Proxy,no-resolve
-- IP-CIDR,9.9.9.9/32,🛰️ DNS-Proxy,no-resolve
-- IP-CIDR,208.67.222.222/32,🛰️ DNS-Proxy,no-resolve
-- IP-CIDR,77.88.8.8/32,🛰️ DNS-Proxy,no-resolve
 - RULE-SET,extra-direct,🎯 全球直连
-- RULE-SET,lan,🎯 全球直连
+- RULE-SET,private,🎯 全球直连
+- RULE-SET,private-ip,🎯 全球直连,no-resolve
 - RULE-SET,unban,🎯 全球直连
-- RULE-SET,banad,🛑 广告拦截
-- RULE-SET,banprogramad,🍃 应用净化
-- RULE-SET,awavenue,🆎 AdBlock
+- RULE-SET,awavenue,🛑 广告拦截
+- AND,((NETWORK,udp),(DST-PORT,443),(NOT,((RULE-SET,cn)))),REJECT
+- RULE-SET,extra-ai,💬 Ai平台
+- RULE-SET,ai,💬 Ai平台
 - RULE-SET,googlefcm,📢 谷歌FCM
-- RULE-SET,googlecn,🎯 全球直连
-- RULE-SET,steamcn,🎯 全球直连
+- RULE-SET,google-cn,🎯 全球直连
+- RULE-SET,steam-cn,🎯 全球直连
+- RULE-SET,github,🚀 节点选择
 - RULE-SET,bing,Ⓜ️ 微软Bing
 - RULE-SET,onedrive,Ⓜ️ 微软云盘
 - RULE-SET,microsoft,Ⓜ️ 微软服务
 - RULE-SET,apple,🍎 苹果服务
 - RULE-SET,telegram,📲 电报消息
-- RULE-SET,ai,💬 Ai平台
-- RULE-SET,openai,💬 Ai平台
-- RULE-SET,neteasemusic,🎶 网易音乐
-- RULE-SET,epic,🎮 游戏平台
-- RULE-SET,origin,🎮 游戏平台
+- RULE-SET,telegram-ip,📲 电报消息,no-resolve
+- RULE-SET,netease,🎶 网易音乐
+- RULE-SET,epicgames,🎮 游戏平台
+- RULE-SET,ea,🎮 游戏平台
 - RULE-SET,sony,🎮 游戏平台
+- RULE-SET,playstation,🎮 游戏平台
 - RULE-SET,steam,🎮 游戏平台
 - RULE-SET,nintendo,🎮 游戏平台
 - RULE-SET,youtube,📹 油管视频
 - RULE-SET,netflix,🎥 奈飞视频
+- RULE-SET,netflix-ip,🎥 奈飞视频,no-resolve
 - RULE-SET,bahamut,📺 巴哈姆特
-- RULE-SET,bilibilihmt,📺 哔哩哔哩
 - RULE-SET,bilibili,📺 哔哩哔哩
-- RULE-SET,chinamedia,🌏 国内媒体
-- RULE-SET,proxymedia,🌍 国外媒体
-- RULE-SET,gfwlist,🚀 节点选择
-- RULE-SET,chinadomain,🎯 全球直连
-- RULE-SET,chinacompanyip,🎯 全球直连
-- RULE-SET,download,🎯 全球直连
+- RULE-SET,proxymedia,🌍 国外媒体,no-resolve
+- RULE-SET,gfw,🚀 节点选择
+- RULE-SET,cn,🎯 全球直连,no-resolve
 - GEOIP,CN,🎯 全球直连
 - MATCH,🐟 漏网之鱼

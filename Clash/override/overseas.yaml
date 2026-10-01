@@ -1,0 +1,54 @@
+# Clash Party 远程覆写 · 国外模式
+# 本文件由 tools/build.py 从 src/spec.yaml 生成，请勿手改；改规则请改 src/spec.yaml
+# 效果：AI 走 💬 Ai平台（自己选节点），广告拦截，其余全部直连；DNS 整段换成国外 DoH，不含任何国内 DNS
+# 用法：Clash Party → 覆写 → 导入远程链接：
+#   https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/override/overseas.yaml
+#   然后在订阅的「编辑信息」里勾选此覆写；回国后取消勾选即可
+# 前提：设置里关闭「控制 DNS 设置」，否则软件自身 DNS 设置优先级更高，本文件的 dns! 不生效
+# +rules 插在原规则最前面；dns! 强制整段替换
+
++rules:
+- RULE-SET,private,DIRECT
+- RULE-SET,private-ip,DIRECT,no-resolve
+- RULE-SET,unban,DIRECT
+- RULE-SET,adrules,REJECT
+- RULE-SET,anti-ad,REJECT
+- RULE-SET,extra-ai,💬 Ai平台
+- RULE-SET,ai,💬 Ai平台
+- MATCH,DIRECT
+
+dns!:
+  enable: true
+  listen: 127.0.0.1:1053
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter-mode: blacklist
+  fake-ip-filter:
+  - +.lan
+  - +.local
+  - +.localhost
+  - +.home.arpa
+  - +.internal
+  - +.msftconnecttest.com
+  - +.msftncsi.com
+  - time.*.com
+  - ntp.*.com
+  - +.ntp.org
+  - +.stun.*.*
+  - +.stun.*.*.*
+  - localhost.ptlogin2.qq.com
+  - localhost.sec.qq.com
+  - localhost.work.weixin.qq.com
+  respect-rules: false
+  use-hosts: true
+  use-system-hosts: true
+  default-nameserver:
+  - 1.1.1.1
+  - 8.8.8.8
+  nameserver:
+  - https://1.1.1.1/dns-query
+  - https://8.8.8.8/dns-query
+  proxy-server-nameserver:
+  - https://1.1.1.1/dns-query
+  - https://8.8.8.8/dns-query

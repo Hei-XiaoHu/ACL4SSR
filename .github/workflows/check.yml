@@ -1,0 +1,36 @@
+name: 配置一致性与内核校验
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install pyyaml
+
+      - name: 生成文件必须与 src/spec.yaml 一致
+        run: python3 tools/build.py --check
+
+      - name: 下载 mihomo
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          url=$(curl -s -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/repos/MetaCubeX/mihomo/releases/latest \
+            | grep -oE 'https://[^"]+/mihomo-linux-amd64-v[0-9.]+\.gz' | head -1)
+          echo "$url"
+          curl -sL "$url" | gunzip > mihomo
+          chmod +x mihomo
+          ./mihomo -v
+
+      - name: mihomo -t 校验（Xboard / subconverter / 国外覆写）
+        run: python3 tools/check.py ./mihomo
