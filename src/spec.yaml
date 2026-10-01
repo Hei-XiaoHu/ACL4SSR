@@ -134,6 +134,9 @@ rules:
   - {set: steam-cn, to: 🎯 全球直连}
   # geosite:microsoft 含 GitHub，而微软组默认直连；GitHub 在国内直连很慢，先行截走
   - {set: github, to: 🚀 节点选择}
+  # Play 商店下载走 services.googleapis.cn，国内直连不通；它不在 gfw / geolocation-!cn 中，
+  # 会被下面 cn 的 +.cn 截走直连，导致安装一直转圈（旧 ACL4SSR GFW 列表里有这条）
+  - {raw: 'DOMAIN-SUFFIX,googleapis.cn,🚀 节点选择'}
   - {set: bing, to: Ⓜ️ 微软Bing}
   - {set: onedrive, to: Ⓜ️ 微软云盘}
   - {set: microsoft, to: Ⓜ️ 微软服务}

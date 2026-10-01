@@ -492,6 +492,7 @@ rules:
 - RULE-SET,google-cn,🎯 全球直连
 - RULE-SET,steam-cn,🎯 全球直连
 - RULE-SET,github,🚀 节点选择
+- DOMAIN-SUFFIX,googleapis.cn,🚀 节点选择
 - RULE-SET,bing,Ⓜ️ 微软Bing
 - RULE-SET,onedrive,Ⓜ️ 微软云盘
 - RULE-SET,microsoft,Ⓜ️ 微软服务
