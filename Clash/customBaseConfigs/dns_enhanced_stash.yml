@@ -12,7 +12,7 @@ log-level: warning
 ipv6: false
 profile:
   store-selected: true
-  store-fake-ip: false
+  store-fake-ip: true
 
 dns:
   enable: true

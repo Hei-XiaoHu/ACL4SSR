@@ -187,7 +187,7 @@ def meta_general() -> dict:
         "tcp-concurrent": True,
         "unified-delay": True,
         "external-controller": "127.0.0.1:9090",
-        "profile": {"store-selected": True, "store-fake-ip": False},
+        "profile": {"store-selected": True, "store-fake-ip": True},
     }
 
 
@@ -239,7 +239,7 @@ def stash_general() -> dict:
         "mode": "rule",
         "log-level": "warning",
         "ipv6": False,
-        "profile": {"store-selected": True, "store-fake-ip": False},
+        "profile": {"store-selected": True, "store-fake-ip": True},
     }
 
 
