@@ -1,0 +1,5 @@
+# 强制走 🚀 节点选择：被墙但 geosite 漏收、会被 cn（含整个 .cn 后缀）截走直连的域名
+# 发现新的漏网域名，加在这里即可（mihomo 与 Stash 共用）
+payload:
+  # Play 商店下载（services.googleapis.cn），直连不通会导致安装一直转圈
+  - DOMAIN-SUFFIX,googleapis.cn

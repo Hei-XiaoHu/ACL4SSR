@@ -23,6 +23,7 @@ python3 tools/check.py /path/to/mihomo # 可选：用真实内核校验
 
 自定义补充规则（直接改，无需生成）：
 - `Clash/rule/extra-direct.txt`：强制直连
+- `Clash/rule/extra-proxy.txt`：强制走 🚀 节点选择（被墙但会被 cn 截走直连的域名）
 - `Clash/rule/extra-ai.txt`：geosite 未收录的 AI 域名
 
 ## 方案要点

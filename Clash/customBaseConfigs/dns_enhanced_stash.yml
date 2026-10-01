@@ -46,6 +46,7 @@ dns:
 rule-providers:
   extra-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-direct.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-direct.txt'}
   extra-ai: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-ai.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-ai.txt'}
+  extra-proxy: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-proxy.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-proxy.txt'}
   private: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/private.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.yaml'}
   private-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/private-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/private.yaml'}
   unban: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/unban.list, url: 'https://testingcf.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/UnBan.list'}
@@ -92,7 +93,7 @@ rules:
 - RULE-SET,google-cn,🎯 全球直连
 - RULE-SET,steam-cn,🎯 全球直连
 - RULE-SET,github,🚀 节点选择
-- DOMAIN-SUFFIX,googleapis.cn,🚀 节点选择
+- RULE-SET,extra-proxy,🚀 节点选择
 - RULE-SET,bing,Ⓜ️ 微软Bing
 - RULE-SET,onedrive,Ⓜ️ 微软云盘
 - RULE-SET,microsoft,Ⓜ️ 微软服务
