@@ -154,9 +154,11 @@ rules:
   - {set: bilibili, to: 📺 哔哩哔哩}
   - {set: proxymedia, to: 🌍 国外媒体, no_resolve: true}
   - {set: gfw, to: 🚀 节点选择}
-  - {set: cn, to: 🎯 全球直连, no_resolve: true}
-  # 已知国外域名直接走漏网之鱼，免去下面 IP 规则触发的 DNS 解析
+  # 已知国外域名直接走漏网之鱼，免去下面 IP 规则触发的 DNS 解析。
+  # 必须在 cn 之前：MetaCubeX 的 cn 合并了 felixonmars dnsmasq-china-list（“国内 DNS 解析更优”的域名），
+  # 含 browserleaks.com、acm.org、cambridge.org 等约 150 个国外站，放后面会被 cn 截走直连
   - {set: geolocation-!cn, to: 🐟 漏网之鱼}
+  - {set: cn, to: 🎯 全球直连, no_resolve: true}
   # 以下两条需要解析域名得到 IP，放在最后，只有前面都没命中的域名才会解析
   - {set: cn-ip, to: 🎯 全球直连}
   - {raw: 'GEOIP,CN,🎯 全球直连', only: stash}
