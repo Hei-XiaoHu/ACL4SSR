@@ -3,3 +3,6 @@
 payload:
   # Play 商店下载（services.googleapis.cn），直连不通会导致安装一直转圈
   - DOMAIN-SUFFIX,googleapis.cn
+  # OneDrive 网页版/分享页/API：被墙，但会被 onedrive 规则（默认直连）先截走；同步与文件传输域名不受影响，仍直连
+  - DOMAIN,onedrive.live.com
+  - DOMAIN-SUFFIX,onedrive.com
