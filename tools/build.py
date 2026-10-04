@@ -314,9 +314,16 @@ def stash_dns() -> dict:
 
 
 # ---------------------------------------------------------------- YAML 输出
+class _NoAliasDumper(yaml.SafeDumper):
+    """不输出 &id/*id 锚点别名：Stash 等客户端无法正确展开。"""
+
+    def ignore_aliases(self, data):
+        return True
+
+
 def _dump(obj, flow=False) -> str:
-    return yaml.safe_dump(
-        obj, allow_unicode=True, sort_keys=False, width=100000,
+    return yaml.dump(
+        obj, Dumper=_NoAliasDumper, allow_unicode=True, sort_keys=False, width=100000,
         default_flow_style=None if flow else False,
     )
 
@@ -440,7 +447,10 @@ def main() -> int:
     for rel, fn in OUTPUTS.items():
         path = ROOT / rel
         text = fn()
-        yaml.safe_load(text) if not rel.endswith(".ini") else None  # 自检：输出必须是合法 YAML
+        if not rel.endswith(".ini"):
+            yaml.safe_load(text)  # 自检：输出必须是合法 YAML
+            if re.search(r"[&*]id\d+", text):
+                sys.exit(f"{rel}: 输出含 YAML 锚点/别名，Stash 不支持")
         if path.exists() and path.read_text(encoding="utf-8") == text:
             continue
         stale.append(rel)

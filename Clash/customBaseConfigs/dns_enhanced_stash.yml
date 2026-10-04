@@ -56,7 +56,7 @@ dns:
   default-nameserver:
   - 223.5.5.5
   - 119.29.29.29
-  nameserver: &id002
+  nameserver:
   - https://1.1.1.1/dns-query
   - https://8.8.8.8/dns-query
   nameserver-policy:
@@ -98,157 +98,453 @@ dns:
     - system
     geosite:private:
     - system
-    +.amazonprimevideo.cn: &id001
+    +.amazonprimevideo.cn:
     - https://223.5.5.5/dns-query
     - https://doh.pub/dns-query
-    +.amazonprimevideo.com.cn: *id001
-    +.apple-itunes.cn: *id001
-    +.bluearchive-cn.com: *id001
-    +.client-update.queniuqe.com: *id001
-    +.csgo.com.cn: *id001
-    +.csgo.wmsj.cn: *id001
-    +.dl.steam.clngaa.com: *id001
-    +.dota2.com.cn: *id001
-    +.dota2.wmsj.cn: *id001
-    +.ggpht.cn: *id001
-    +.gstore.val.manlaxy.com: *id001
-    +.itunes-apple.cn: *id001
-    +.itunesapple.cn: *id001
-    +.itunesradio.cn: *id001
-    +.itunesradio.com.cn: *id001
-    +.leagueoflegends.cn: *id001
-    +.legendofzelda.cn: *id001
-    +.legendofzelda.com.cn: *id001
-    +.lpl.com.cn: *id001
-    +.mariokart.cn: *id001
-    +.mariokart.com.cn: *id001
-    +.miitomo.com.cn: *id001
-    +.nintendolabo.cn: *id001
-    +.nintendoswitch.cn: *id001
-    +.nintendoswitch.com.cn: *id001
-    +.shanghaidisneyresort.com: *id001
-    +.st.dl.bscstorage.net: *id001
-    +.st.dl.eccdnx.com: *id001
-    +.st.dl.pinyuncloud.com: *id001
-    +.steamchina.com: *id001
-    +.steampowered.com.8686c.com: *id001
-    +.steamserver.net: *id001
-    +.steamstatic.com.8686c.com: *id001
-    +.steamusercontent.com: *id001
-    +.supermariobros.com.cn: *id001
-    +.supersmashbros.cn: *id001
-    +.supersmashbros.com.cn: *id001
-    +.wmsjsteam.com: *id001
-    +.xboxlive.cn: *id001
-    +.xn--mts47c3w9b1qr.cn: *id001
-    +.yostar.cn: *id001
-    alibaba.cdn.steampipe.steamcontent.com: *id001
-    amp-api-edge-lb-cn.itunes-apple.com.akadns.net: *id001
-    amp-api-edge-lb.itunes-apple.com.akadns.net: *id001
-    amp-api-edge.music.apple.com: *id001
-    amp-api.music.apple.com: *id001
-    amp-api.podcasts.apple.com: *id001
-    aod-ssl.itunes.apple.com: *id001
-    aod.itunes.apple.com: *id001
-    apptrailers.itunes.apple.com: *id001
-    assets1.xboxlive.cn: *id001
-    assets2.xboxlive.cn: *id001
-    bag-cdn.itunes-apple.com.akadns.net: *id001
-    bag.itunes.apple.com: *id001
-    blzdist-d3.necdn.leihuo.netease.com: *id001
-    blzdist-di.necdn.leihuo.netease.com: *id001
-    blzdist-hs.necdn.leihuo.netease.com: *id001
-    blzdist-ow.necdn.leihuo.netease.com: *id001
-    blzdist-phx.necdn.leihuo.netease.com: *id001
-    blzdist-wow.necdn.leihuo.netease.com: *id001
-    bookkeeper.itunes.apple.com: *id001
-    cdn-ali.content.steamchina.com: *id001
-    cdn-qc.content.steamchina.com: *id001
-    cdn-ws.content.steamchina.com: *id001
-    client-api.itunes.apple.com: *id001
-    cma.itunes.apple.com: *id001
-    dl.delivery.mp.microsoft.com: *id001
-    dl.steam.clngaa.com: *id001
-    downloaddispatch.itunes.apple.com: *id001
-    entitlements-edge.itunes.apple.com: *id001
-    epicgames-download1-1251447533.file.myqcloud.com: *id001
-    fpinit.itunes.apple.com: *id001
-    gog.qtlglb.com: *id001
-    inappcheck-cn.itunes-apple.com.akadns.net: *id001
-    inappcheck-lb.itunes-apple.com.akadns.net: *id001
-    inappcheck.itunes.apple.com: *id001
-    init.itunes.apple.com: *id001
-    iosapps.itunes.apple.com: *id001
-    iosapps.itunes.g.aaplimg.com: *id001
-    is-ssl.mzstatic.com-cn-lb.itunes-apple.com.akadns.net: *id001
-    itunes-apple.com.akadns.net: *id001
-    itunes.apple.com: *id001
-    itunesconnect.apple.com: *id001
-    js-cdn.music.apple.com: *id001
-    lv.queniujq.cn: *id001
-    misc-assets.itunes.apple.com: *id001
-    music.apple.com: *id001
-    musicstatus.music.apple.com: *id001
-    mvod.itunes.apple.com: *id001
-    myapp.itunes.apple.com: *id001
-    np-edge.itunes.apple.com: *id001
-    osxapps.itunes.apple.com: *id001
-    osxapps.itunes.g.aaplimg.com: *id001
-    pd-nk.itunes.apple.com: *id001
-    pd.itunes.apple.com: *id001
-    play-edge.itunes.apple.com: *id001
-    play.itunes.apple.com: *id001
-    play.music.apple.com: *id001
-    podcasts.apple.com: *id001
-    podcasts.itunes.apple.com: *id001
-    se-edge.itunes.apple.com: *id001
-    se2.itunes.apple.com: *id001
-    search.itunes.apple.com: *id001
-    sf-api-token-service.itunes.apple.com: *id001
-    sp.itunes.apple.com: *id001
-    speedysub.music.apple.com: *id001
-    st-bak.viv.wanwang.space: *id001
-    st.dl.bscstorage.net: *id001
-    st.dl.eccdnx.com: *id001
-    streamingaudio.itunes.apple.com: *id001
-    su.itunes.apple.com: *id001
-    sync.itunes.apple.com: *id001
-    tf-feedback.itunes.apple.com: *id001
-    tlu.dl.delivery.mp.microsoft.com: *id001
-    trts.baishancdnx.cn: *id001
-    ubisoftconnect.eo-edgefunctions7.com: *id001
-    universal-activity-service.itunes.apple.com: *id001
-    uplaypc-s-ubisoft.cdn.ubionline.com.cn: *id001
-    upp.itunes.apple.com: *id001
-    xz.pphimalayanrt.com: *id001
-    +.anthropic.com: *id002
-    +.clau.de: *id002
-    +.claude.ai: *id002
-    +.claude.com: *id002
-    +.claude.app: *id002
-    +.claude.dev: *id002
-    +.claudemcpclient.com: *id002
-    +.claudemcpcontent.com: *id002
-    +.claudeusercontent.com: *id002
-    servd-anthropic-website.b-cdn.net: *id002
-    anthropic.com.cdn.cloudflare.net: *id002
-    challenges.cloudflare.com: *id002
-    client-api.arkoselabs.com: *id002
-    +.together.ai: *id002
-    +.together.xyz: *id002
-    ai.azure.com: *id002
-    sydney.bing.com: *id002
-    +.googleapis.cn: *id002
-    onedrive.live.com: *id002
-    +.onedrive.com: *id002
-    geosite:category-game-platforms-download: *id001
-    geosite:category-entertainment-cn: *id001
-    geosite:category-ai-!cn: *id002
-    geosite:category-games-!cn: *id002
-    geosite:category-entertainment: *id002
-    geosite:gfw: *id002
-    geosite:geolocation-!cn: *id002
-    geosite:cn: *id001
+    +.amazonprimevideo.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.apple-itunes.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.bluearchive-cn.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.client-update.queniuqe.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.csgo.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.csgo.wmsj.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.dl.steam.clngaa.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.dota2.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.dota2.wmsj.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.ggpht.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.gstore.val.manlaxy.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.itunes-apple.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.itunesapple.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.itunesradio.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.itunesradio.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.leagueoflegends.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.legendofzelda.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.legendofzelda.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.lpl.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.mariokart.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.mariokart.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.miitomo.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.nintendolabo.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.nintendoswitch.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.nintendoswitch.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.shanghaidisneyresort.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.st.dl.bscstorage.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.st.dl.eccdnx.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.st.dl.pinyuncloud.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.steamchina.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.steampowered.com.8686c.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.steamserver.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.steamstatic.com.8686c.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.steamusercontent.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.supermariobros.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.supersmashbros.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.supersmashbros.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.wmsjsteam.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.xboxlive.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.xn--mts47c3w9b1qr.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.yostar.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    alibaba.cdn.steampipe.steamcontent.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    amp-api-edge-lb-cn.itunes-apple.com.akadns.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    amp-api-edge-lb.itunes-apple.com.akadns.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    amp-api-edge.music.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    amp-api.music.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    amp-api.podcasts.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    aod-ssl.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    aod.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    apptrailers.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    assets1.xboxlive.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    assets2.xboxlive.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    bag-cdn.itunes-apple.com.akadns.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    bag.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    blzdist-d3.necdn.leihuo.netease.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    blzdist-di.necdn.leihuo.netease.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    blzdist-hs.necdn.leihuo.netease.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    blzdist-ow.necdn.leihuo.netease.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    blzdist-phx.necdn.leihuo.netease.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    blzdist-wow.necdn.leihuo.netease.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    bookkeeper.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    cdn-ali.content.steamchina.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    cdn-qc.content.steamchina.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    cdn-ws.content.steamchina.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    client-api.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    cma.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    dl.delivery.mp.microsoft.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    dl.steam.clngaa.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    downloaddispatch.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    entitlements-edge.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    epicgames-download1-1251447533.file.myqcloud.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    fpinit.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    gog.qtlglb.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    inappcheck-cn.itunes-apple.com.akadns.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    inappcheck-lb.itunes-apple.com.akadns.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    inappcheck.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    init.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    iosapps.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    iosapps.itunes.g.aaplimg.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    is-ssl.mzstatic.com-cn-lb.itunes-apple.com.akadns.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    itunes-apple.com.akadns.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    itunesconnect.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    js-cdn.music.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    lv.queniujq.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    misc-assets.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    music.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    musicstatus.music.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    mvod.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    myapp.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    np-edge.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    osxapps.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    osxapps.itunes.g.aaplimg.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    pd-nk.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    pd.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    play-edge.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    play.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    play.music.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    podcasts.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    podcasts.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    se-edge.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    se2.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    search.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    sf-api-token-service.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    sp.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    speedysub.music.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    st-bak.viv.wanwang.space:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    st.dl.bscstorage.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    st.dl.eccdnx.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    streamingaudio.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    su.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    sync.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    tf-feedback.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    tlu.dl.delivery.mp.microsoft.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    trts.baishancdnx.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    ubisoftconnect.eo-edgefunctions7.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    universal-activity-service.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    uplaypc-s-ubisoft.cdn.ubionline.com.cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    upp.itunes.apple.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    xz.pphimalayanrt.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.anthropic.com:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.clau.de:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.claude.ai:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.claude.com:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.claude.app:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.claude.dev:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.claudemcpclient.com:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.claudemcpcontent.com:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.claudeusercontent.com:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    servd-anthropic-website.b-cdn.net:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    anthropic.com.cdn.cloudflare.net:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    challenges.cloudflare.com:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    client-api.arkoselabs.com:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.together.ai:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.together.xyz:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    ai.azure.com:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    sydney.bing.com:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.googleapis.cn:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    onedrive.live.com:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    +.onedrive.com:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    geosite:category-game-platforms-download:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    geosite:category-entertainment-cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    geosite:category-ai-!cn:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    geosite:category-games-!cn:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    geosite:category-entertainment:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    geosite:gfw:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    geosite:geolocation-!cn:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    geosite:cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
 
 rule-providers:
   extra-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-direct.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-direct.txt'}

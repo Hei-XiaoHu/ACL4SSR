@@ -94,10 +94,12 @@ dns:
   nameserver:
   - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
   - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
-  proxy-server-nameserver: &id001
+  proxy-server-nameserver:
   - https://223.5.5.5/dns-query
   - https://doh.pub/dns-query
-  direct-nameserver: *id001
+  direct-nameserver:
+  - https://223.5.5.5/dns-query
+  - https://doh.pub/dns-query
   nameserver-policy:
     rule-set:private:
     - system
@@ -137,23 +139,51 @@ dns:
     - system
     localhost.work.weixin.qq.com:
     - system
-    rule-set:claude: &id002
+    rule-set:claude:
     - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
     - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
-    rule-set:shared-auth: *id002
-    rule-set:extra-ai: *id002
-    rule-set:extra-proxy: *id002
-    rule-set:games-cn: *id001
-    rule-set:game-download-cn: *id001
-    rule-set:game-download: *id001
-    rule-set:entertainment-cn: *id001
-    rule-set:entertainment-cn-attr: *id001
-    rule-set:ai: *id002
-    rule-set:games: *id002
-    rule-set:proxymedia: *id002
-    rule-set:gfw: *id002
-    rule-set:geolocation-!cn: *id002
-    rule-set:cn: *id001
+    rule-set:shared-auth:
+    - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
+    - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
+    rule-set:extra-ai:
+    - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
+    - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
+    rule-set:extra-proxy:
+    - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
+    - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
+    rule-set:games-cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    rule-set:game-download-cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    rule-set:game-download:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    rule-set:entertainment-cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    rule-set:entertainment-cn-attr:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    rule-set:ai:
+    - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
+    - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
+    rule-set:games:
+    - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
+    - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
+    rule-set:proxymedia:
+    - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
+    - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
+    rule-set:gfw:
+    - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
+    - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
+    rule-set:geolocation-!cn:
+    - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
+    - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
+    rule-set:cn:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
 
 rule-providers:
   extra-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-direct.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-direct.txt'}
