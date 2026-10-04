@@ -10,11 +10,16 @@
 +rules:
 - RULE-SET,private,DIRECT
 - RULE-SET,private-ip,DIRECT,no-resolve
-- RULE-SET,unban,DIRECT
+- RULE-SET,functional-direct,DIRECT
+- RULE-SET,claude-telemetry,REJECT
+- RULE-SET,claude-essential,💬 Ai平台
+- RULE-SET,shared-auth,DIRECT
 - RULE-SET,adrules,REJECT
 - RULE-SET,anti-ad,REJECT
+- RULE-SET,claude,💬 Ai平台
 - RULE-SET,extra-ai,💬 Ai平台
 - RULE-SET,ai,💬 Ai平台
+- RULE-SET,claude-ip,💬 Ai平台,no-resolve
 - MATCH,DIRECT
 
 dns!:
@@ -27,9 +32,22 @@ dns!:
   fake-ip-filter:
   - +.lan
   - +.local
+  - +.localdomain
   - +.localhost
   - +.home.arpa
   - +.internal
+  - +.ts.net
+  - +.tplinkwifi.net
+  - +.tendawifi.com
+  - +.router.ctc
+  - asusrouter.com
+  - router.asus.com
+  - routerlogin.com
+  - tplogin.cn
+  - miwifi.com
+  - localhost.ptlogin2.qq.com
+  - localhost.sec.qq.com
+  - localhost.work.weixin.qq.com
   - +.msftconnecttest.com
   - +.msftncsi.com
   - time.*.com
@@ -37,9 +55,12 @@ dns!:
   - +.ntp.org
   - +.stun.*.*
   - +.stun.*.*.*
-  - localhost.ptlogin2.qq.com
-  - localhost.sec.qq.com
-  - localhost.work.weixin.qq.com
+  - +.stun.*.*.*.*
+  - +.stun.*.*.*.*.*
+  - '*.n.n.srv.nintendo.net'
+  - +.stun.playstation.net
+  - xbox.*.*.microsoft.com
+  - '*.*.xboxlive.com'
   respect-rules: false
   use-hosts: true
   use-system-hosts: true
@@ -52,3 +73,42 @@ dns!:
   proxy-server-nameserver:
   - https://1.1.1.1/dns-query
   - https://8.8.8.8/dns-query
+  nameserver-policy:
+    rule-set:private:
+    - system
+    +.lan:
+    - system
+    +.local:
+    - system
+    +.localdomain:
+    - system
+    +.localhost:
+    - system
+    +.home.arpa:
+    - system
+    +.internal:
+    - system
+    +.ts.net:
+    - system
+    +.tplinkwifi.net:
+    - system
+    +.tendawifi.com:
+    - system
+    +.router.ctc:
+    - system
+    asusrouter.com:
+    - system
+    router.asus.com:
+    - system
+    routerlogin.com:
+    - system
+    tplogin.cn:
+    - system
+    miwifi.com:
+    - system
+    localhost.ptlogin2.qq.com:
+    - system
+    localhost.sec.qq.com:
+    - system
+    localhost.work.weixin.qq.com:
+    - system

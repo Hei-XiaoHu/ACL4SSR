@@ -34,3 +34,6 @@ jobs:
 
       - name: mihomo -t 校验（Xboard / subconverter / 国外覆写）
         run: python3 tools/check.py ./mihomo
+
+      - name: QQ / Claude / DNS / 广告分流行为回归（本地夹具）
+        run: python3 tools/check_routing.py ./mihomo

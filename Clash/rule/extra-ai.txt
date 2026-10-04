@@ -8,5 +8,3 @@ payload:
   - DOMAIN,ai.azure.com
   # Bing Copilot 旧接口（否则会被 bing 规则分到 Ⓜ️ 微软Bing，默认直连）
   - DOMAIN,sydney.bing.com
-  # ChatGPT 登录人机验证，与 AI 同出口避免 IP 不一致触发风控
-  - DOMAIN,client-api.arkoselabs.com

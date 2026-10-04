@@ -63,14 +63,13 @@ def xboard_render(tpl: dict) -> dict:
     cfg = copy.deepcopy(tpl)
     cfg["proxies"] = proxies()
     for g in cfg["proxy-groups"]:
-        out, filtered = [], False
-        for p in g["proxies"]:
-            if _is_regex(p):
-                filtered = True
-                out += [n for n in NODES if _pcre(p).search(n)]
-            else:
-                out.append(p)
-        g["proxies"] = out if filtered else out + NODES
+        # 上游先移除 regex，再在末尾追加匹配节点；不是在 regex 原位置插入。
+        # 零节点时上游清理循环不执行，不能用“理想渲染”掩盖该限制。
+        if NODES:
+            regex = [p for p in g["proxies"] if _is_regex(p)]
+            literals = [p for p in g["proxies"] if not _is_regex(p)]
+            matched = [n for n in NODES if any(_pcre(p).search(n) for p in regex)] if regex else NODES
+            g["proxies"] = list(dict.fromkeys([*literals, *matched]))
     cfg["proxy-groups"] = [g for g in cfg["proxy-groups"] if g["proxies"]]
     return cfg
 
@@ -169,6 +168,32 @@ def main():
         mihomo_test(exe, sub, "subconverter-meta", tmp)
         mihomo_test(exe, party_override(sub, ov), "subconverter-meta+overseas", tmp)
         mihomo_test(exe, party_override(xb, ov), "xboard-meta+overseas", tmp)
+        # 只有香港节点，以及全部为信息/倍率节点：地区组和自动组均不得补 DIRECT。
+        global NODES
+        original_nodes = NODES
+        try:
+            for label, sample in (
+                ("only-hk", [original_nodes[0]]),
+                ("all-filtered", sorted(JUNK)),
+            ):
+                NODES = sample
+                for renderer, cfg in (
+                    ("xboard", xboard_render(meta_tpl)),
+                    ("subconverter", subconverter_render(base, ini)),
+                ):
+                    empty = [*build.REGIONS, "♻️ 自动选择"] if label == "all-filtered" else [
+                        name for name in build.REGIONS if name != "🇭🇰 香港节点"
+                    ]
+                    groups = {g["name"]: g["proxies"] for g in cfg["proxy-groups"]}
+                    assert all(groups[name] == ["REJECT"] for name in empty), (renderer, label, groups)
+                    mihomo_test(exe, cfg, f"{renderer}-{label}", tmp)
+            NODES = []
+            zero_sub = subconverter_render(base, ini)
+            mihomo_test(exe, zero_sub, "subconverter-zero-nodes", tmp)
+            assert any(_is_regex(p) for g in xboard_render(meta_tpl)["proxy-groups"] for p in g["proxies"])
+            print("! Xboard 零节点：上游可能残留 regex，需要订阅服务端处理；未声称可直接导入")
+        finally:
+            NODES = original_nodes
 
 
 if __name__ == "__main__":

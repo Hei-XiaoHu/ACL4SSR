@@ -1,0 +1,15 @@
+# Claude 官方与参考页中的可选遥测/错误报告；主机共用时其他应用上报也会被拦。
+# https://code.claude.com/docs/en/network-config
+# https://code.claude.com/docs/en/data-usage
+# 不泛化整个 Datadog/Sentry/Statsig 供应商；不含核心 api.anthropic.com。
+# Statsig events 是事件上报，initialize/config API 不在此新增封禁。
+# https://docs.statsig.com/client/Next
+# https://sentry.io/changelog/ingestion-ip-addresses-are-changing/
+payload:
+  - http-intake.logs.us5.datadoghq.com
+  - browser-intake-us5-datadoghq.com
+  - +.ingest.sentry.io
+  - +.ingest.us.sentry.io
+  - +.ingest.de.sentry.io
+  - events.statsigapi.net
+  - cdn.usefathom.com

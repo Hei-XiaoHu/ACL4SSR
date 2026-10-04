@@ -1,10 +1,11 @@
 # Xboard 订阅模板 - Stash（iOS / macOS）（custom.stash.yaml）
 # 本文件由 tools/build.py 从 src/spec.yaml 生成，请勿手改；改规则请改 src/spec.yaml
 # 策略组内 /正则/i 为 Xboard 侧节点筛选；/^$/ 表示不追加任何节点
-# 规则：MetaCubeX/meta-rules-dat 的 yaml 版（Stash 不支持 mrs）；国内域名用 ACL4SSR ChinaDomain + GEOIP,CN
-#   （geosite:cn 文本版 11 万行，iOS 网络扩展约 50MB 内存上限装不下）
+# 规则：MetaCubeX/meta-rules-dat 的 domain/ipcidr yaml；国内外兜底复用 Stash 原生 GEOSITE + GEOIP,CN
+#   （与 geosite DNS policy 顺序对齐，不额外下载全量 cn/geolocation-!cn 文本）
 # 去广告：AWAvenue 秋风规则（约 900 条，含广告+隐私跟踪+流氓推广）
-# DNS：follow-rule + 规则把 DoH IP 指向 🛰️ DNS-Proxy，等价 mihomo 的 nameserver#组；nameserver-policy 的 geosite 需 Stash iOS 3.4.0+
+# DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS-Proxy；内网系统 DNS、国外优先境外 DoH；geosite policy 需 Stash iOS 3.4.0+
+# GEOSITE 数据首次从 GitHub 按需加载，请确保 GitHub 可达；少量国内属性标签已展开为 DNS 字面域名
 # 规则 CDN 为 https://testingcf.jsdelivr.net/gh，失效时全局替换为 https://fastly.jsdelivr.net/gh
 
 mode: rule
@@ -19,29 +20,235 @@ dns:
   ipv6: false
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
+  follow-rule: true
   fake-ip-filter:
   - +.lan
   - +.local
+  - +.localdomain
   - +.localhost
   - +.home.arpa
   - +.internal
-  - +.msftconnecttest.com
-  - +.msftncsi.com
-  - +.ntp.org
+  - +.ts.net
+  - +.tplinkwifi.net
+  - +.tendawifi.com
+  - +.router.ctc
+  - asusrouter.com
+  - router.asus.com
+  - routerlogin.com
+  - tplogin.cn
+  - miwifi.com
   - localhost.ptlogin2.qq.com
   - localhost.sec.qq.com
   - localhost.work.weixin.qq.com
-  follow-rule: true
+  - +.msftconnecttest.com
+  - +.msftncsi.com
+  - time.*.com
+  - ntp.*.com
+  - +.ntp.org
+  - +.stun.*.*
+  - +.stun.*.*.*
+  - +.stun.*.*.*.*
+  - +.stun.*.*.*.*.*
+  - '*.n.n.srv.nintendo.net'
+  - +.stun.playstation.net
+  - xbox.*.*.microsoft.com
+  - '*.*.xboxlive.com'
   default-nameserver:
   - 223.5.5.5
   - 119.29.29.29
-  nameserver:
+  nameserver: &id002
   - https://1.1.1.1/dns-query
   - https://8.8.8.8/dns-query
   nameserver-policy:
-    geosite:cn:
+    +.lan:
+    - system
+    +.local:
+    - system
+    +.localdomain:
+    - system
+    +.localhost:
+    - system
+    +.home.arpa:
+    - system
+    +.internal:
+    - system
+    +.ts.net:
+    - system
+    +.tplinkwifi.net:
+    - system
+    +.tendawifi.com:
+    - system
+    +.router.ctc:
+    - system
+    asusrouter.com:
+    - system
+    router.asus.com:
+    - system
+    routerlogin.com:
+    - system
+    tplogin.cn:
+    - system
+    miwifi.com:
+    - system
+    localhost.ptlogin2.qq.com:
+    - system
+    localhost.sec.qq.com:
+    - system
+    localhost.work.weixin.qq.com:
+    - system
+    geosite:private:
+    - system
+    +.amazonprimevideo.cn: &id001
     - https://223.5.5.5/dns-query
     - https://doh.pub/dns-query
+    +.amazonprimevideo.com.cn: *id001
+    +.apple-itunes.cn: *id001
+    +.bluearchive-cn.com: *id001
+    +.client-update.queniuqe.com: *id001
+    +.csgo.com.cn: *id001
+    +.csgo.wmsj.cn: *id001
+    +.dl.steam.clngaa.com: *id001
+    +.dota2.com.cn: *id001
+    +.dota2.wmsj.cn: *id001
+    +.ggpht.cn: *id001
+    +.gstore.val.manlaxy.com: *id001
+    +.itunes-apple.cn: *id001
+    +.itunesapple.cn: *id001
+    +.itunesradio.cn: *id001
+    +.itunesradio.com.cn: *id001
+    +.leagueoflegends.cn: *id001
+    +.legendofzelda.cn: *id001
+    +.legendofzelda.com.cn: *id001
+    +.lpl.com.cn: *id001
+    +.mariokart.cn: *id001
+    +.mariokart.com.cn: *id001
+    +.miitomo.com.cn: *id001
+    +.nintendolabo.cn: *id001
+    +.nintendoswitch.cn: *id001
+    +.nintendoswitch.com.cn: *id001
+    +.shanghaidisneyresort.com: *id001
+    +.st.dl.bscstorage.net: *id001
+    +.st.dl.eccdnx.com: *id001
+    +.st.dl.pinyuncloud.com: *id001
+    +.steamchina.com: *id001
+    +.steampowered.com.8686c.com: *id001
+    +.steamserver.net: *id001
+    +.steamstatic.com.8686c.com: *id001
+    +.steamusercontent.com: *id001
+    +.supermariobros.com.cn: *id001
+    +.supersmashbros.cn: *id001
+    +.supersmashbros.com.cn: *id001
+    +.wmsjsteam.com: *id001
+    +.xboxlive.cn: *id001
+    +.xn--mts47c3w9b1qr.cn: *id001
+    +.yostar.cn: *id001
+    alibaba.cdn.steampipe.steamcontent.com: *id001
+    amp-api-edge-lb-cn.itunes-apple.com.akadns.net: *id001
+    amp-api-edge-lb.itunes-apple.com.akadns.net: *id001
+    amp-api-edge.music.apple.com: *id001
+    amp-api.music.apple.com: *id001
+    amp-api.podcasts.apple.com: *id001
+    aod-ssl.itunes.apple.com: *id001
+    aod.itunes.apple.com: *id001
+    apptrailers.itunes.apple.com: *id001
+    assets1.xboxlive.cn: *id001
+    assets2.xboxlive.cn: *id001
+    bag-cdn.itunes-apple.com.akadns.net: *id001
+    bag.itunes.apple.com: *id001
+    blzdist-d3.necdn.leihuo.netease.com: *id001
+    blzdist-di.necdn.leihuo.netease.com: *id001
+    blzdist-hs.necdn.leihuo.netease.com: *id001
+    blzdist-ow.necdn.leihuo.netease.com: *id001
+    blzdist-phx.necdn.leihuo.netease.com: *id001
+    blzdist-wow.necdn.leihuo.netease.com: *id001
+    bookkeeper.itunes.apple.com: *id001
+    cdn-ali.content.steamchina.com: *id001
+    cdn-qc.content.steamchina.com: *id001
+    cdn-ws.content.steamchina.com: *id001
+    client-api.itunes.apple.com: *id001
+    cma.itunes.apple.com: *id001
+    dl.delivery.mp.microsoft.com: *id001
+    dl.steam.clngaa.com: *id001
+    downloaddispatch.itunes.apple.com: *id001
+    entitlements-edge.itunes.apple.com: *id001
+    epicgames-download1-1251447533.file.myqcloud.com: *id001
+    fpinit.itunes.apple.com: *id001
+    gog.qtlglb.com: *id001
+    inappcheck-cn.itunes-apple.com.akadns.net: *id001
+    inappcheck-lb.itunes-apple.com.akadns.net: *id001
+    inappcheck.itunes.apple.com: *id001
+    init.itunes.apple.com: *id001
+    iosapps.itunes.apple.com: *id001
+    iosapps.itunes.g.aaplimg.com: *id001
+    is-ssl.mzstatic.com-cn-lb.itunes-apple.com.akadns.net: *id001
+    itunes-apple.com.akadns.net: *id001
+    itunes.apple.com: *id001
+    itunesconnect.apple.com: *id001
+    js-cdn.music.apple.com: *id001
+    lv.queniujq.cn: *id001
+    misc-assets.itunes.apple.com: *id001
+    music.apple.com: *id001
+    musicstatus.music.apple.com: *id001
+    mvod.itunes.apple.com: *id001
+    myapp.itunes.apple.com: *id001
+    np-edge.itunes.apple.com: *id001
+    osxapps.itunes.apple.com: *id001
+    osxapps.itunes.g.aaplimg.com: *id001
+    pd-nk.itunes.apple.com: *id001
+    pd.itunes.apple.com: *id001
+    play-edge.itunes.apple.com: *id001
+    play.itunes.apple.com: *id001
+    play.music.apple.com: *id001
+    podcasts.apple.com: *id001
+    podcasts.itunes.apple.com: *id001
+    se-edge.itunes.apple.com: *id001
+    se2.itunes.apple.com: *id001
+    search.itunes.apple.com: *id001
+    sf-api-token-service.itunes.apple.com: *id001
+    sp.itunes.apple.com: *id001
+    speedysub.music.apple.com: *id001
+    st-bak.viv.wanwang.space: *id001
+    st.dl.bscstorage.net: *id001
+    st.dl.eccdnx.com: *id001
+    streamingaudio.itunes.apple.com: *id001
+    su.itunes.apple.com: *id001
+    sync.itunes.apple.com: *id001
+    tf-feedback.itunes.apple.com: *id001
+    tlu.dl.delivery.mp.microsoft.com: *id001
+    trts.baishancdnx.cn: *id001
+    ubisoftconnect.eo-edgefunctions7.com: *id001
+    universal-activity-service.itunes.apple.com: *id001
+    uplaypc-s-ubisoft.cdn.ubionline.com.cn: *id001
+    upp.itunes.apple.com: *id001
+    xz.pphimalayanrt.com: *id001
+    +.anthropic.com: *id002
+    +.clau.de: *id002
+    +.claude.ai: *id002
+    +.claude.com: *id002
+    +.claude.app: *id002
+    +.claude.dev: *id002
+    +.claudemcpclient.com: *id002
+    +.claudemcpcontent.com: *id002
+    +.claudeusercontent.com: *id002
+    servd-anthropic-website.b-cdn.net: *id002
+    anthropic.com.cdn.cloudflare.net: *id002
+    challenges.cloudflare.com: *id002
+    client-api.arkoselabs.com: *id002
+    +.together.ai: *id002
+    +.together.xyz: *id002
+    ai.azure.com: *id002
+    sydney.bing.com: *id002
+    +.googleapis.cn: *id002
+    onedrive.live.com: *id002
+    +.onedrive.com: *id002
+    geosite:category-game-platforms-download: *id001
+    geosite:category-entertainment-cn: *id001
+    geosite:category-ai-!cn: *id002
+    geosite:category-games-!cn: *id002
+    geosite:category-entertainment: *id002
+    geosite:gfw: *id002
+    geosite:geolocation-!cn: *id002
+    geosite:cn: *id001
 
 # 节点由 Xboard 注入
 proxies: []
@@ -108,6 +315,7 @@ proxy-groups:
   lazy: true
   proxies:
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
+  - REJECT
 - name: 📲 电报消息
   type: select
   proxies:
@@ -447,51 +655,68 @@ rule-providers:
   extra-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-direct.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-direct.txt'}
   extra-ai: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-ai.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-ai.txt'}
   extra-proxy: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-proxy.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-proxy.txt'}
+  claude: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/claude.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/claude.txt'}
+  claude-essential: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/claude-essential.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/claude-essential.txt'}
+  claude-telemetry: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/claude-telemetry.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/claude-telemetry.txt'}
+  claude-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/claude-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/claude-ip.txt'}
+  shared-auth: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/shared-auth.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/shared-auth.txt'}
+  quic-exempt: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/quic-exempt.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/quic-exempt.txt'}
   private: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/private.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.yaml'}
   private-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/private-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/private.yaml'}
-  unban: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/unban.list, url: 'https://testingcf.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/UnBan.list'}
+  functional-direct: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/functional-direct.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/functional-direct.txt'}
   awavenue: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/awavenue.yaml, url: 'https://testingcf.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.yaml'}
   ai: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ai.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-ai-!cn.yaml'}
   googlefcm: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/googlefcm.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.yaml'}
   google-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/google-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/google-cn.yaml'}
-  steam-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/steam-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/steam@cn.yaml'}
+  games-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/games-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-games@cn.yaml'}
+  game-download-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-download-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-game-platforms-download@cn.yaml'}
+  game-download: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-download.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-game-platforms-download.yaml'}
   github: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/github.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/github.yaml'}
   bing: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bing.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bing.yaml'}
   onedrive: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/onedrive.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/onedrive.yaml'}
   microsoft: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/microsoft.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/microsoft.yaml'}
   apple: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/apple.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/apple.yaml'}
   telegram: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/telegram.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/telegram.yaml'}
+  communication: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/communication.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-communication.yaml'}
   telegram-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/telegram-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/telegram.yaml'}
   netease: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/netease.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/netease.yaml'}
   epicgames: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/epicgames.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/epicgames.yaml'}
   ea: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ea.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/ea.yaml'}
   sony: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/sony.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/sony.yaml'}
-  playstation: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/playstation.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/playstation.yaml'}
   steam: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/steam.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/steam.yaml'}
   nintendo: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/nintendo.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/nintendo.yaml'}
+  games: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/games.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-games-!cn.yaml'}
   youtube: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/youtube.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/youtube.yaml'}
   netflix: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/netflix.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/netflix.yaml'}
   netflix-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/netflix-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/netflix.yaml'}
   bahamut: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bahamut.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bahamut.yaml'}
   bilibili: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bilibili.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bilibili.yaml'}
-  proxymedia: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/proxymedia.list, url: 'https://testingcf.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/ProxyMedia.list'}
+  entertainment-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/entertainment-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-entertainment-cn.yaml'}
+  entertainment-cn-attr: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/entertainment-cn-attr.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-entertainment@cn.yaml'}
+  proxymedia: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/proxymedia.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-entertainment.yaml'}
   gfw: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/gfw.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/gfw.yaml'}
-  cn: {type: http, behavior: classical, format: text, interval: 86400, path: ./ruleset/cn.list, url: 'https://testingcf.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/ChinaDomain.list'}
 
 rules:
 - IP-CIDR,1.1.1.1/32,🛰️ DNS-Proxy,no-resolve
 - IP-CIDR,8.8.8.8/32,🛰️ DNS-Proxy,no-resolve
 - RULE-SET,extra-direct,🎯 全球直连
-- RULE-SET,private,🎯 全球直连
-- RULE-SET,private-ip,🎯 全球直连,no-resolve
-- RULE-SET,unban,🎯 全球直连
+- RULE-SET,private,DIRECT
+- RULE-SET,private-ip,DIRECT,no-resolve
+- RULE-SET,functional-direct,🎯 全球直连
+- RULE-SET,claude-telemetry,🛑 广告拦截
+- AND,((NETWORK,udp),(PROTOCOL,QUIC),(OR,((OR,((RULE-SET,claude),(RULE-SET,extra-ai),(RULE-SET,ai),(RULE-SET,youtube),(RULE-SET,netflix),(RULE-SET,shared-auth),(RULE-SET,extra-proxy),(RULE-SET,proxymedia),(RULE-SET,gfw),(GEOSITE,geolocation-!cn))),(RULE-SET,claude-ip,no-resolve))),(NOT,((AND,((GEOSITE,cn),(NOT,((GEOSITE,geolocation-!cn))))))),(NOT,((GEOIP,CN,no-resolve))),(NOT,((OR,((RULE-SET,quic-exempt),(RULE-SET,google-cn),(RULE-SET,bing),(RULE-SET,onedrive),(RULE-SET,microsoft),(RULE-SET,apple),(RULE-SET,netease),(RULE-SET,bilibili),(RULE-SET,games-cn),(RULE-SET,game-download-cn),(RULE-SET,game-download),(RULE-SET,games),(RULE-SET,epicgames),(RULE-SET,ea),(RULE-SET,sony),(RULE-SET,steam),(RULE-SET,nintendo),(RULE-SET,entertainment-cn),(RULE-SET,entertainment-cn-attr),(RULE-SET,communication)))))),REJECT
+- RULE-SET,claude-essential,💬 Ai平台
+- RULE-SET,shared-auth,🚀 节点选择
 - RULE-SET,awavenue,🛑 广告拦截
-- AND,((NETWORK,udp),(DST-PORT,443),(NOT,((RULE-SET,cn)))),REJECT
+- RULE-SET,claude,💬 Ai平台
 - RULE-SET,extra-ai,💬 Ai平台
 - RULE-SET,ai,💬 Ai平台
+- RULE-SET,claude-ip,💬 Ai平台,no-resolve
 - RULE-SET,googlefcm,📢 谷歌FCM
 - RULE-SET,google-cn,🎯 全球直连
-- RULE-SET,steam-cn,🎯 全球直连
+- RULE-SET,games-cn,🎯 全球直连
+- RULE-SET,game-download-cn,🎯 全球直连
+- RULE-SET,game-download,🎯 全球直连
 - RULE-SET,github,🚀 节点选择
 - RULE-SET,extra-proxy,🚀 节点选择
 - RULE-SET,bing,Ⓜ️ 微软Bing
@@ -504,7 +729,6 @@ rules:
 - RULE-SET,epicgames,🎮 游戏平台
 - RULE-SET,ea,🎮 游戏平台
 - RULE-SET,sony,🎮 游戏平台
-- RULE-SET,playstation,🎮 游戏平台
 - RULE-SET,steam,🎮 游戏平台
 - RULE-SET,nintendo,🎮 游戏平台
 - RULE-SET,youtube,📹 油管视频
@@ -512,8 +736,12 @@ rules:
 - RULE-SET,netflix-ip,🎥 奈飞视频,no-resolve
 - RULE-SET,bahamut,📺 巴哈姆特
 - RULE-SET,bilibili,📺 哔哩哔哩
-- RULE-SET,proxymedia,🌍 国外媒体,no-resolve
+- RULE-SET,entertainment-cn,🎯 全球直连
+- RULE-SET,entertainment-cn-attr,🎯 全球直连
+- RULE-SET,games,🎮 游戏平台
+- RULE-SET,proxymedia,🌍 国外媒体
 - RULE-SET,gfw,🚀 节点选择
-- RULE-SET,cn,🎯 全球直连,no-resolve
+- GEOSITE,geolocation-!cn,🐟 漏网之鱼
+- GEOSITE,cn,🎯 全球直连
 - GEOIP,CN,🎯 全球直连
 - MATCH,🐟 漏网之鱼

@@ -1,0 +1,20 @@
+# Claude 域名家族（domain YAML）；接受前置广告/遥测规则检查。
+# 精确匹配第三方 CDN，不泛化 b-cdn.net。
+# 核对依据：
+# https://code.claude.com/docs/en/network-config
+# https://code.claude.com/docs/en/desktop
+# https://github.com/v2fly/domain-list-community/blob/master/data/anthropic
+# 网站/API/OAuth/更新、Artifacts、Chrome bridge、MCP 内容均使用 💬 Ai平台。
+payload:
+  - +.anthropic.com
+  - +.clau.de
+  - +.claude.ai
+  - +.claude.com
+  - +.claude.app
+  - +.claude.dev
+  - +.claudemcpclient.com
+  - +.claudemcpcontent.com
+  - +.claudeusercontent.com
+  - servd-anthropic-website.b-cdn.net
+  # Anthropic 专属的 Cloudflare CDN 别名；不泛化整个 cloudflare.net
+  - anthropic.com.cdn.cloudflare.net

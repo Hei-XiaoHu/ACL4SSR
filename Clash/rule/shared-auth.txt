@@ -1,0 +1,6 @@
+# 人机验证的共享端点：仅匹配明确主机，不泛化整个 Cloudflare / Arkose。
+# 默认走 🚀 节点选择，而非 AI 专用出口；国外覆写中跟随其余通用业务直连。
+# 域名规则不能识别“是哪一个网站调用了同一验证码主机”。
+payload:
+  - challenges.cloudflare.com
+  - client-api.arkoselabs.com

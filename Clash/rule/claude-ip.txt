@@ -1,0 +1,8 @@
+# Anthropic, PBC 注册的自有网段；2026-10-04 用 ARIN RDAP 核实。
+# https://rdap.arin.net/registry/ip/160.79.104.0
+# https://rdap.arin.net/registry/ip/2607:6bc0::
+# 仅在域名规则未命中时兜底，RULE-SET 使用 no-resolve，不强制解析每个域名。
+# 注册归属不代表所有 Claude 服务都部署在这些网段；共享 CDN 不在此列表。
+payload:
+  - 160.79.104.0/21
+  - 2607:6bc0::/32

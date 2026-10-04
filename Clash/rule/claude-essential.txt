@@ -1,0 +1,27 @@
+# 仅明确的 Claude 功能端点可优先于广告集合；不放行 *.anthropic.com / *.claude.ai。
+# https://code.claude.com/docs/en/network-config
+# https://code.claude.com/docs/en/desktop
+# api.anthropic.com 同时承载核心 API 与部分 event_logging，域名规则无法按路径区分。
+payload:
+  - claude.ai
+  - www.claude.ai
+  - downloads.claude.ai
+  - claude.com
+  - platform.claude.com
+  - code.claude.com
+  - claude.app
+  - api.anthropic.com
+  - a-api.anthropic.com
+  - console.anthropic.com
+  - mcp-proxy.anthropic.com
+  - a-cdn.anthropic.com
+  - s-cdn.anthropic.com
+  - assets-proxy.anthropic.com
+  - a.claude.ai
+  - a-cdn.claude.ai
+  - assets.claude.ai
+  - +.livepreview.claude.ai
+  - +.livepreview.claude.app
+  # 官方 Desktop 清单明确的用户内容和 MCP 内容，不是第三方通用 CDN
+  - +.claudeusercontent.com
+  - +.claudemcpcontent.com
