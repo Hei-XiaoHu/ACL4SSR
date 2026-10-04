@@ -363,7 +363,7 @@ HDR_META = [
     "规则：MetaCubeX/meta-rules-dat（v2fly 社区，每日同步）mrs 二进制规则集，匹配快、内存小",
     "去广告：AdRules + anti-AD（mrs）；默认走代理的境外 UDP443 回落 TCP，默认直连/国内/游戏/下载/未知 IP 保留",
     "DNS：AI/代理补充/已知国外域名优先走境外 DoH；国内用国内 DoH，内网用系统 DNS",
-    "安全：allow-lan 关闭，DNS 仅监听 127.0.0.1；find-process-mode off（无进程规则，省 CPU）",
+    "安全：allow-lan 关闭，DNS 仅监听 127.0.0.1；find-process-mode always（仅用于连接列表显示应用名）",
     f"规则 CDN 为 {CDN}，失效时全局替换为 https://fastly.jsdelivr.net/gh",
 ]
 HDR_STASH = [

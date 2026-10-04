@@ -27,7 +27,8 @@ clients:
       allow-lan: false
       mode: rule
       log-level: warning
-      find-process-mode: "off"
+      # 无进程分流规则，开启仅为在连接列表里显示应用名；开销很小。客户端自身设置可覆盖
+      find-process-mode: always
       tcp-concurrent: true
       unified-delay: true
       external-controller: 127.0.0.1:9090
