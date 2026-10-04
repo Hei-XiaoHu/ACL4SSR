@@ -102,6 +102,7 @@ groups:
   - {name: 📺 哔哩哔哩, proxies: *D}
   - {name: 🌍 国外媒体, proxies: *P}
   - {name: 📢 谷歌FCM, proxies: *P}
+  - {name: 🌐 谷歌服务, proxies: *P}
   - {name: Ⓜ️ 微软Bing, proxies: *D}
   - {name: Ⓜ️ 微软云盘, proxies: *D}
   - {name: Ⓜ️ 微软服务, proxies: *D}
@@ -140,6 +141,7 @@ providers:
   ai: {geosite: category-ai-!cn}
   googlefcm: {geosite: googlefcm}
   google-cn: {geosite: google-cn}
+  google: {geosite: google}
   games-cn: {geosite: category-games@cn}   # 含原 steam@cn 全部条目与国内主机/游戏平台
   game-download-cn: {geosite: category-game-platforms-download@cn}
   game-download: {geosite: category-game-platforms-download}
@@ -203,13 +205,12 @@ rules:
   # 已核实的 Anthropic 自有网段兜底；不把共享 Cloudflare/CDN IP 全部送进 AI
   - {set: claude-ip, to: 💬 Ai平台, no_resolve: true}
   - {set: googlefcm, to: 📢 谷歌FCM}
-  - {set: google-cn, to: 🎯 全球直连}
   - {set: games-cn, to: 🎯 全球直连}
   - {set: game-download-cn, to: 🎯 全球直连}
   - {set: game-download, to: 🎯 全球直连}
   # geosite:microsoft 含 GitHub，而微软组默认直连；GitHub 在国内直连很慢，先行截走
   - {set: github, to: 🚀 节点选择}
-  # 被墙但 gfw / geolocation-!cn 漏收、会被下面 cn（含 +.cn）截走直连的域名，如 googleapis.cn
+  # 被墙但默认服务分组走直连的域名补充
   - {set: extra-proxy, to: 🚀 节点选择}
   - {set: bing, to: Ⓜ️ 微软Bing}
   - {set: onedrive, to: Ⓜ️ 微软云盘}
@@ -224,6 +225,9 @@ rules:
   - {set: steam, to: 🎮 游戏平台}
   - {set: nintendo, to: 🎮 游戏平台}
   - {set: youtube, to: 📹 油管视频}
+  # 专用 AI / FCM / YouTube 策略优先，其他 Google 服务统一到谷歌组
+  - {set: google-cn, to: 🌐 谷歌服务}
+  - {set: google, to: 🌐 谷歌服务}
   - {set: netflix, to: 🎥 奈飞视频}
   - {set: netflix-ip, to: 🎥 奈飞视频, no_resolve: true}
   - {set: bahamut, to: 📺 巴哈姆特}
@@ -281,14 +285,14 @@ overseas:
 # 已有国内真实 IP 豁免；cn/!cn 域名交集采用明确境外归属优先。
 quic_reject_sets: [claude, extra-ai, ai, youtube, netflix, shared-auth, extra-proxy, proxymedia, gfw, geolocation-!cn]
 quic_reject_ip_sets: [claude-ip]
-# 豁免：自定义列表；默认直连的服务（直连不存在代理转发 UDP 的问题）；
+# 豁免：自定义列表、保留 google-cn 的 QUIC 兼容例外；默认直连的服务；
 # UDP443 也可能是游戏/语音协议，保护游戏、下载、通信与国内娱乐。
 # 只按默认分组判断；手动切换策略组后规则无法感知。
 quic_exempt_sets: [quic-exempt, google-cn, bing, onedrive, microsoft, apple, netease, bilibili, games-cn, game-download-cn, game-download, games, epicgames, ea, sony, steam, nintendo, entertainment-cn, entertainment-cn-attr, communication]
 
 # 国内/国外 DNS 分流：本地补充与已知国外集合先于 cn，避免 .cn 和集合交集截走。
 # Stash 的原生 geosite DNS policy 需 iOS 3.4.0+；数据首次从 GitHub 按需加载。
-dns_remote_sets: [claude, shared-auth, extra-ai, extra-proxy, ai, games, proxymedia, gfw, geolocation-!cn]
+dns_remote_sets: [claude, shared-auth, extra-ai, extra-proxy, ai, google-cn, google, games, proxymedia, gfw, geolocation-!cn]
 # 国内游戏标签先于整个 Steam/Nintendo 等境外公司集合，保持下载/国行服务的国内解析
 dns_china_sets: [games-cn, game-download-cn, game-download, entertainment-cn, entertainment-cn-attr]
 # Stash 文档未确认 DNS geosite:name@cn 语法，少量国内标签展开为字面域名。

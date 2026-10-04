@@ -1,4 +1,4 @@
-# 功能例外：只保留原 UnBan 中的反跟踪资源、地震通知、软件下载和视频播放接口。
+# 功能例外：只保留原 UnBan 中的反跟踪资源、地震通知和视频播放接口。
 # 不放行 tracking.miui.com、app.adjust.com、友盟统计等跟踪域名。
 # 每条必须有明确功能用途；不要把统计服务的整个后缀加进来。
 payload:
@@ -6,8 +6,6 @@ payload:
   - tracking-protection.cdn.mozilla.net
   # 地震通知
   - dizhensubao.getui.com
-  # Google 软件下载
-  - dl.google.com
   # QQ 视频播放/版权接口，限定精确域名
   - fairplay.l.qq.com
   - livew.l.qq.com

@@ -112,6 +112,12 @@ def config(dns_port: int, sink_port: int, socks_port: int) -> dict:
     providers["geolocation-!cn"]["payload"] = overlap
     providers["cn-ip"]["payload"] = ["116.131.56.103/32", "223.5.5.5/32"]
     providers["youtube"]["payload"] = ["+.youtube.com", "+.googlevideo.com"]
+    providers["google"]["payload"] = [
+        "+.google.com", "+.googleapis.cn", "+.gstatic.com", "+.googleusercontent.com",
+        "+.googlevideo.com", "+.openai.com", "+.googletraveladservices.com",
+    ]
+    providers["google-cn"]["payload"] = ["+.gstatic.cn"]
+    providers["googlefcm"]["payload"] = ["mtalk.google.com"]
     providers["netflix"]["payload"] = ["+.netflix.com", "+.nflxvideo.net"]
     providers["ai"]["payload"] = ["+.openai.com"]
     providers["games-cn"]["payload"] = ["+.nintendoswitch.cn", "gog.qtlglb.com"]
@@ -205,7 +211,7 @@ def assert_outputs():
             assert rules.index("GEOSITE,geolocation-!cn,🐟 漏网之鱼") < rules.index("GEOSITE,cn,🎯 全球直连")
     assert "claude.app" in "".join(build.local_provider_domains("claude"))
     assert stash["nameserver-policy"]["+.claude.app"] == build.S["dns_remote"]
-    assert stash["nameserver-policy"]["+.googleapis.cn"] == build.S["dns_remote"]
+    assert stash["nameserver-policy"]["geosite:google"] == build.S["dns_remote"]
     assert stash["nameserver-policy"]["challenges.cloudflare.com"] == build.S["dns_remote"]
     assert "RULE-SET,shared-auth,🚀 节点选择" in build.rules("meta")
     assert "RULE-SET,shared-auth,🚀 节点选择" in build.rules("stash")
@@ -350,6 +356,14 @@ def native_regressions(exe: str):
             await_line(ready)
             essentials = set(build.local_provider_domains("claude-essential"))
             cases = [
+                ("tcp", "chromewebstore.google.com", 443, "google", "🌐 谷歌服务"),
+                ("tcp", "dl.google.com", 443, "google", "🌐 谷歌服务"),
+                ("tcp", "services.googleapis.cn", 443, "google", "🌐 谷歌服务"),
+                ("tcp", "www.gstatic.com", 443, "google", "🌐 谷歌服务"),
+                ("tcp", "lh3.googleusercontent.com", 443, "google", "🌐 谷歌服务"),
+                ("tcp", "www.gstatic.cn", 443, "google-cn", "🌐 谷歌服务"),
+                ("tcp", "mtalk.google.com", 443, "googlefcm", "📢 谷歌FCM"),
+                ("tcp", "video.googlevideo.com", 443, "youtube", "📹 油管视频"),
                 # 截图中的 QQ 纯 IP，以及国内域名/未知 IP，绝不能被 QUIC blanket rule 拒绝。
                 ("udp", "116.131.56.103", 443, "cn-ip", "🎯 全球直连"),
                 ("udp", "223.5.5.5", 443, "cn-ip", "🎯 全球直连"),
@@ -477,6 +491,7 @@ def native_regressions(exe: str):
             for host in [
                 "claude.ai", "platform.claude.com", "claude.app", "api.anthropic.com",
                 "challenges.cloudflare.com", "services.googleapis.cn", "onedrive.live.com",
+                "chromewebstore.google.com", "www.gstatic.cn",
                 "browserleaks.com", "acm.org", "cambridge.org",
                 "api.battle.net", "www.disneyplus.com",
             ]:

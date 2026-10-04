@@ -512,9 +512,6 @@ dns:
     sydney.bing.com:
     - https://1.1.1.1/dns-query
     - https://8.8.8.8/dns-query
-    +.googleapis.cn:
-    - https://1.1.1.1/dns-query
-    - https://8.8.8.8/dns-query
     onedrive.live.com:
     - https://1.1.1.1/dns-query
     - https://8.8.8.8/dns-query
@@ -528,6 +525,12 @@ dns:
     - https://223.5.5.5/dns-query
     - https://doh.pub/dns-query
     geosite:category-ai-!cn:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    geosite:google-cn:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    geosite:google:
     - https://1.1.1.1/dns-query
     - https://8.8.8.8/dns-query
     geosite:category-games-!cn:
@@ -725,6 +728,22 @@ proxy-groups:
   - DIRECT
   - REJECT
 - name: 📢 谷歌FCM
+  type: select
+  proxies:
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - 🇭🇰 香港节点
+  - 🇹🇼 台湾节点
+  - 🇸🇬 狮城节点
+  - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
+  - 🇰🇷 韩国节点
+  - 🇩🇪 德国节点
+  - 🇫🇷 法国节点
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
+  - DIRECT
+  - REJECT
+- name: 🌐 谷歌服务
   type: select
   proxies:
   - 🚀 节点选择
@@ -964,6 +983,7 @@ rule-providers:
   ai: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ai.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-ai-!cn.yaml'}
   googlefcm: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/googlefcm.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.yaml'}
   google-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/google-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/google-cn.yaml'}
+  google: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/google.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/google.yaml'}
   games-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/games-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-games@cn.yaml'}
   game-download-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-download-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-game-platforms-download@cn.yaml'}
   game-download: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-download.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-game-platforms-download.yaml'}
@@ -1009,7 +1029,6 @@ rules:
 - RULE-SET,ai,💬 Ai平台
 - RULE-SET,claude-ip,💬 Ai平台,no-resolve
 - RULE-SET,googlefcm,📢 谷歌FCM
-- RULE-SET,google-cn,🎯 全球直连
 - RULE-SET,games-cn,🎯 全球直连
 - RULE-SET,game-download-cn,🎯 全球直连
 - RULE-SET,game-download,🎯 全球直连
@@ -1028,6 +1047,8 @@ rules:
 - RULE-SET,steam,🎮 游戏平台
 - RULE-SET,nintendo,🎮 游戏平台
 - RULE-SET,youtube,📹 油管视频
+- RULE-SET,google-cn,🌐 谷歌服务
+- RULE-SET,google,🌐 谷歌服务
 - RULE-SET,netflix,🎥 奈飞视频
 - RULE-SET,netflix-ip,🎥 奈飞视频,no-resolve
 - RULE-SET,bahamut,📺 巴哈姆特
