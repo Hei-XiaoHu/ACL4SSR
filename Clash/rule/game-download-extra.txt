@@ -1,0 +1,12 @@
+# 游戏下载补充直连（domain 集合，同时用于国内 DNS policy）。
+# 上游 category-game-platforms-download 只逐个列出 cacheN-xxx.steamcontent.com，
+# 新编号/新机房（如 cache10-hkg1）会漏到 geosite:steam → 🎮 游戏平台（默认代理）。
+# 这里恢复旧 ACL4SSR SteamCN.list 中直连、但当前上游集合未覆盖的条目。
+payload:
+  # Steam 内容/下载 CDN（SteamPipe 仓库与各地 cache 节点）
+  - +.steamcontent.com
+  # Steam CM 连接服务器（旧 SteamCN 直连）
+  - +.cm.steampowered.com
+  # Steam 国内下载 CDN（旧 SteamCN 直连，上游 @cn 集合未收录）
+  - dl.steam.ksyna.com
+  - steampipe.steamcontent.tnkjmec.com

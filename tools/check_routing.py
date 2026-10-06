@@ -124,6 +124,7 @@ def config(dns_port: int, sink_port: int, socks_port: int) -> dict:
     providers["games"]["payload"] = ["+.battle.net", "+.ubisoft.com", "+.gog.com", "+.nintendoswitch.cn"]
     providers["game-download-cn"]["payload"] = ["dl.delivery.mp.microsoft.com", "blzdist-wow.necdn.leihuo.netease.com"]
     providers["game-download"]["payload"] = ["+.dl.playstation.net", "steampipe.akamaized.net"]
+    providers["steam"]["payload"] = ["+.steamcontent.com", "+.steampowered.com"]
     providers["communication"]["payload"] = ["+.discord.media"]
     providers["apple"]["payload"] = ["+.apple.com"]
     providers["microsoft"]["payload"] = ["+.microsoft.com"]
@@ -132,6 +133,7 @@ def config(dns_port: int, sink_port: int, socks_port: int) -> dict:
     providers["geolocation-!cn"]["payload"] += [
         "+.battle.net", "+.dl.playstation.net", "steampipe.akamaized.net", "+.discord.media",
         "+.apple.com", "+.microsoft.com", "+.examplegame.com",
+        "+.steamcontent.com", "+.steampowered.com",
     ]
     providers["entertainment-cn"]["payload"] = ["+.iqiyi.com", "+.youku.com"]
     providers["entertainment-cn-attr"]["payload"] = ["+.shanghaidisneyresort.com"]
@@ -382,6 +384,7 @@ def native_regressions(exe: str):
                 ("udp", "api.battle.net", 443, "games", "🎮 游戏平台"),
                 ("udp", "a.dl.playstation.net", 443, "game-download", "🎯 全球直连"),
                 ("udp", "steampipe.akamaized.net", 443, "game-download", "🎯 全球直连"),
+                ("udp", "cache10-hkg1.steamcontent.com", 443, "game-download-extra", "🎯 全球直连"),
                 ("udp", "call.discord.media", 443, "geolocation-!cn", "🐟 漏网之鱼"),
                 # 默认直连的境外服务与自定义豁免：QUIC 不拦
                 ("udp", "www.apple.com", 443, "apple", "🍎 苹果服务"),
@@ -451,6 +454,10 @@ def native_regressions(exe: str):
                 ("tcp", "www.shanghaidisneyresort.com", 443, "entertainment-cn-attr", "🎯 全球直连"),
                 ("tcp", "a.dl.playstation.net", 443, "game-download", "🎯 全球直连"),
                 ("tcp", "steampipe.akamaized.net", 443, "game-download", "🎯 全球直连"),
+                # 上游只逐个列 cacheN-xxx；新节点与 CM 服务器仍应直连，商店走游戏平台
+                ("tcp", "cache10-hkg1.steamcontent.com", 443, "game-download-extra", "🎯 全球直连"),
+                ("tcp", "cm1-hkg1.cm.steampowered.com", 27017, "game-download-extra", "🎯 全球直连"),
+                ("tcp", "store.steampowered.com", 443, "steam", "🎮 游戏平台"),
             ]
             for network, host, port, expected_rule, expected_policy in cases:
                 tcp = socket.create_connection(("127.0.0.1", socks_port), timeout=3)
@@ -503,6 +510,7 @@ def native_regressions(exe: str):
                 "dl.delivery.mp.microsoft.com", "blzdist-wow.necdn.leihuo.netease.com",
                 "www.iqiyi.com", "www.youku.com", "www.shanghaidisneyresort.com",
                 "a.dl.playstation.net", "steampipe.akamaized.net",
+                "cache10-hkg1.steamcontent.com", "cm1-hkg1.cm.steampowered.com",
             ):
                 result = dns_query(dns_port, host)
                 assert result == "116.131.56.103", (host, result, "应使用国内 DNS policy")

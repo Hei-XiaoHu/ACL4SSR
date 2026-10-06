@@ -521,6 +521,18 @@ dns:
     geosite:category-game-platforms-download:
     - https://223.5.5.5/dns-query
     - https://doh.pub/dns-query
+    +.steamcontent.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.cm.steampowered.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    dl.steam.ksyna.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    steampipe.steamcontent.tnkjmec.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
     geosite:category-entertainment-cn:
     - https://223.5.5.5/dns-query
     - https://doh.pub/dns-query
@@ -987,6 +999,7 @@ rule-providers:
   games-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/games-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-games@cn.yaml'}
   game-download-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-download-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-game-platforms-download@cn.yaml'}
   game-download: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-download.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-game-platforms-download.yaml'}
+  game-download-extra: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-download-extra.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/game-download-extra.txt'}
   github: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/github.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/github.yaml'}
   bing: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bing.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bing.yaml'}
   onedrive: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/onedrive.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/onedrive.yaml'}
@@ -1020,7 +1033,7 @@ rules:
 - RULE-SET,private-ip,DIRECT,no-resolve
 - RULE-SET,functional-direct,🎯 全球直连
 - RULE-SET,claude-telemetry,🛑 广告拦截
-- AND,((NETWORK,udp),(PROTOCOL,QUIC),(OR,((OR,((RULE-SET,claude),(RULE-SET,extra-ai),(RULE-SET,ai),(RULE-SET,youtube),(RULE-SET,netflix),(RULE-SET,shared-auth),(RULE-SET,extra-proxy),(RULE-SET,proxymedia),(RULE-SET,gfw),(GEOSITE,geolocation-!cn))),(RULE-SET,claude-ip,no-resolve))),(NOT,((AND,((GEOSITE,cn),(NOT,((GEOSITE,geolocation-!cn))))))),(NOT,((GEOIP,CN,no-resolve))),(NOT,((OR,((RULE-SET,quic-exempt),(RULE-SET,google-cn),(RULE-SET,bing),(RULE-SET,onedrive),(RULE-SET,microsoft),(RULE-SET,apple),(RULE-SET,netease),(RULE-SET,bilibili),(RULE-SET,games-cn),(RULE-SET,game-download-cn),(RULE-SET,game-download),(RULE-SET,games),(RULE-SET,epicgames),(RULE-SET,ea),(RULE-SET,sony),(RULE-SET,steam),(RULE-SET,nintendo),(RULE-SET,entertainment-cn),(RULE-SET,entertainment-cn-attr),(RULE-SET,communication)))))),REJECT
+- AND,((NETWORK,udp),(PROTOCOL,QUIC),(OR,((OR,((RULE-SET,claude),(RULE-SET,extra-ai),(RULE-SET,ai),(RULE-SET,youtube),(RULE-SET,netflix),(RULE-SET,shared-auth),(RULE-SET,extra-proxy),(RULE-SET,proxymedia),(RULE-SET,gfw),(GEOSITE,geolocation-!cn))),(RULE-SET,claude-ip,no-resolve))),(NOT,((AND,((GEOSITE,cn),(NOT,((GEOSITE,geolocation-!cn))))))),(NOT,((GEOIP,CN,no-resolve))),(NOT,((OR,((RULE-SET,quic-exempt),(RULE-SET,google-cn),(RULE-SET,bing),(RULE-SET,onedrive),(RULE-SET,microsoft),(RULE-SET,apple),(RULE-SET,netease),(RULE-SET,bilibili),(RULE-SET,games-cn),(RULE-SET,game-download-cn),(RULE-SET,game-download),(RULE-SET,game-download-extra),(RULE-SET,games),(RULE-SET,epicgames),(RULE-SET,ea),(RULE-SET,sony),(RULE-SET,steam),(RULE-SET,nintendo),(RULE-SET,entertainment-cn),(RULE-SET,entertainment-cn-attr),(RULE-SET,communication)))))),REJECT
 - RULE-SET,claude-essential,💬 Ai平台
 - RULE-SET,shared-auth,🚀 节点选择
 - RULE-SET,awavenue,🛑 广告拦截
@@ -1032,6 +1045,7 @@ rules:
 - RULE-SET,games-cn,🎯 全球直连
 - RULE-SET,game-download-cn,🎯 全球直连
 - RULE-SET,game-download,🎯 全球直连
+- RULE-SET,game-download-extra,🎯 全球直连
 - RULE-SET,github,🚀 节点选择
 - RULE-SET,extra-proxy,🚀 节点选择
 - RULE-SET,bing,Ⓜ️ 微软Bing

@@ -145,6 +145,8 @@ providers:
   games-cn: {geosite: category-games@cn}   # 含原 steam@cn 全部条目与国内主机/游戏平台
   game-download-cn: {geosite: category-game-platforms-download@cn}
   game-download: {geosite: category-game-platforms-download}
+  # 上游下载集合只逐个列主机名；补 Steam 整个内容 CDN 与旧 SteamCN 直连条目
+  game-download-extra: {self: Clash/rule/game-download-extra.txt, behavior: domain}
   github: {geosite: github}
   bing: {geosite: bing}
   onedrive: {geosite: onedrive}
@@ -208,6 +210,7 @@ rules:
   - {set: games-cn, to: 🎯 全球直连}
   - {set: game-download-cn, to: 🎯 全球直连}
   - {set: game-download, to: 🎯 全球直连}
+  - {set: game-download-extra, to: 🎯 全球直连}
   # geosite:microsoft 含 GitHub，而微软组默认直连；GitHub 在国内直连很慢，先行截走
   - {set: github, to: 🚀 节点选择}
   # 被墙但默认服务分组走直连的域名补充
@@ -288,13 +291,13 @@ quic_reject_ip_sets: [claude-ip]
 # 豁免：自定义列表、保留 google-cn 的 QUIC 兼容例外；默认直连的服务；
 # UDP443 也可能是游戏/语音协议，保护游戏、下载、通信与国内娱乐。
 # 只按默认分组判断；手动切换策略组后规则无法感知。
-quic_exempt_sets: [quic-exempt, google-cn, bing, onedrive, microsoft, apple, netease, bilibili, games-cn, game-download-cn, game-download, games, epicgames, ea, sony, steam, nintendo, entertainment-cn, entertainment-cn-attr, communication]
+quic_exempt_sets: [quic-exempt, google-cn, bing, onedrive, microsoft, apple, netease, bilibili, games-cn, game-download-cn, game-download, game-download-extra, games, epicgames, ea, sony, steam, nintendo, entertainment-cn, entertainment-cn-attr, communication]
 
 # 国内/国外 DNS 分流：本地补充与已知国外集合先于 cn，避免 .cn 和集合交集截走。
 # Stash 的原生 geosite DNS policy 需 iOS 3.4.0+；数据首次从 GitHub 按需加载。
 dns_remote_sets: [claude, shared-auth, extra-ai, extra-proxy, ai, google-cn, google, games, proxymedia, gfw, geolocation-!cn]
 # 国内游戏标签先于整个 Steam/Nintendo 等境外公司集合，保持下载/国行服务的国内解析
-dns_china_sets: [games-cn, game-download-cn, game-download, entertainment-cn, entertainment-cn-attr]
+dns_china_sets: [games-cn, game-download-cn, game-download, game-download-extra, entertainment-cn, entertainment-cn-attr]
 # Stash 文档未确认 DNS geosite:name@cn 语法，少量国内标签展开为字面域名。
 # 使用 python3 tools/update_stash_dns.py 更新此生成缓存，再运行 build.py。
 stash_dns_cn_cache: src/stash-dns-cn.yaml

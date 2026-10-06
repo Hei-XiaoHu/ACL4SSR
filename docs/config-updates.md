@@ -25,6 +25,7 @@
 | 遥测补充 | 对照参考页：Datadog 两端点外，补 Sentry 接收端（ingest.sentry.io / us / de）、Statsig 事件上报 events.statsigapi.net、Fathom 统计 cdn.usefathom.com，两端都显式拦截。不拦 Statsig 配置初始化（影响功能开关）、Intercom 客服、Sift 风控（可能影响登录/支付）；不使用 datadog/sentry/sift 关键词 |
 | QUIC 扩大 | 从 AI/YouTube/Netflix 扩至全部已识别境外域名集合，加 Anthropic 自有 IP；豁免国内、游戏、下载、通信。cn 与 !cn 交集站点按境外处理，与路由/DNS 一致 |
 | 游戏下载 | 新增完整下载集合（mihomo 491 / Stash 492 条）并默认直连、国内 DNS；此前只有国内子集 |
+| Steam 下载补漏 | 上游只逐个列 `cacheN-xxx.steamcontent.com`（如缺 cache10-hkg1），漏网主机落入 geosite:steam → 🎮 游戏平台走代理。新增 `game-download-extra.txt`：`+.steamcontent.com`、`+.cm.steampowered.com` 及旧 SteamCN 的 dl.steam.ksyna.com、steampipe.steamcontent.tnkjmec.com，恢复旧 SteamCN 直连并走国内 DNS；商店/社区仍走游戏平台 |
 
 ## 非规则配置复核
 

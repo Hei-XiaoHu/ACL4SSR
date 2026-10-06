@@ -30,6 +30,7 @@ python3 tools/check_routing.py /path/to/mihomo # 离线连接、DNS、QUIC 与�
 - `Clash/rule/extra-ai.txt`：geosite 未收录的 AI 域名
 - `Clash/rule/claude*.txt`：Claude 家族、必要功能例外、可选遥测和自有 IP
 - `Clash/rule/shared-auth.txt`：共享验证码，走通用节点，不固定到 AI
+- `Clash/rule/game-download-extra.txt`：游戏下载补充直连（整个 `steamcontent.com`、Steam CM 服务器等上游逐条列举时会漏掉的主机），同时走国内 DNS
 - `Clash/rule/quic-exempt.txt`：某个游戏/应用因 QUIC 拦截连不上时，把域名加到这里
 - `Clash/rule/functional-direct.txt`：精简的功能白名单，替换宽泛 UnBan
 
@@ -53,7 +54,7 @@ python3 tools/update_stash_dns.py --check # 只核对上游差异，不写文件
 - **安全**：mihomo `allow-lan:false`，代理控制器与 DNS 监听本机；DNS `ipv6:false` 只控制解析，不能代替系统 IPv6 设置。Bootstrap 仍用明文引导 DNS。
 - **QUIC**：默认走代理的境外域名（AI、媒体、gfw、geolocation-!cn、共享验证码等）及 Anthropic 自有 IP 的 QUIC 被拒绝，回落 TCP（VLESS 等 TCP 传输承载 QUIC 效果差）。默认直连的苹果/微软/Bing/OneDrive/网易云/B站、国内、游戏、游戏下载、通信语音、`quic-exempt.txt` 和未知裸 IP 不拦；保留 `google-cn` 的 QUIC 豁免。mihomo 按 UDP443 判断；Stash 用 `PROTOCOL,QUIC` 只拦真正的 QUIC。规则按默认分组判断，手动切换策略组后不会跟着变。
 - **谷歌服务**：`google-cn` 与完整 `google` 集合走 `🌐 谷歌服务`，默认选择 `🚀 节点选择`，使用境外 DNS；Chrome 商店、Google 资源与 `dl.google.com` 下载统一分流。AI、谷歌 FCM 和 YouTube 保留各自专用策略。
-- **分类**：游戏下载使用完整的 `category-game-platforms-download`（约 490 条，含 Steam/PSN/Epic 等全球 CDN），默认直连；国内下载/娱乐子集优先；Battle.net、Ubisoft、GOG 等补入游戏平台。通用媒体改用社区娱乐集合。
+- **分类**：游戏下载使用完整的 `category-game-platforms-download`（约 490 条，含 Steam/PSN/Epic 等全球 CDN），默认直连；上游只逐个列 Steam `cacheN-xxx` 主机，新节点由 `game-download-extra.txt` 兜底直连；国内下载/娱乐子集优先；Battle.net、Ubisoft、GOG 等补入游戏平台。通用媒体改用社区娱乐集合。
 - **iOS**：Stash 规则与 mihomo 基本一致，差异仅在广告源（AWAvenue 轻量版）及用 Stash 原生 GEOSITE/GEOIP 替代 cn、geolocation-!cn、cn-ip 规则集。若希望与电脑完全一致，可用内置 mihomo 内核的 Clash Mi（KaringX/clashmi，App Store 上架，iOS 15+），直接使用 mihomo 模板；本仓库未做 Clash Mi 实机测试。
 - **Stash**：DNS geosite policy 需 iOS3.4.0+。原生 GEOSITE 数据首次从 GitHub 按需加载，需 GitHub 可达；未加入需要3.6+的独立节点 DNS 字段。
 
