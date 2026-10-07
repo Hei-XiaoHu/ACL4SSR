@@ -271,6 +271,25 @@ def assert_outputs():
     print("✓ mihomo / Stash / 国外覆写 DNS、STUN、白名单、Claude 与游戏优先级、漏网之鱼仅兜底", flush=True)
 
 
+def warmup(socks_port: int, await_line, timeout: float = 60) -> None:
+    """监听建立后规则与策略组仍在初始化，期间到达的连接会被静默丢弃且不留日志。
+    反复发探测连接，直到日志出现它的匹配记录，之后的测试才可靠。"""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        with socket.create_connection(("127.0.0.1", socks_port), timeout=3) as c:
+            c.settimeout(3)
+            c.sendall(b"\x05\x01\x00")
+            recv_exact(c, 2)
+            c.sendall(b"\x05\x01\x00" + address("warmup.audit.invalid", 443) + b"GET / HTTP/1.0\r\n\r\n")
+            src = c.getsockname()[1]
+            try:
+                await_line(lambda l: f":{src} -->" in l and "warmup.audit.invalid:443" in l, timeout=3)
+                return
+            except RuntimeError:
+                continue
+    raise RuntimeError("mihomo 迟迟未就绪")
+
+
 def dns_query(port: int, host: str) -> str:
     question = b"".join(bytes([len(label)]) + label.encode() for label in host.split("."))
     packet = b"\xa1\xb2\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00"
@@ -417,6 +436,7 @@ def native_regressions(exe: str):
                 return not waiting
 
             await_line(ready)
+            warmup(socks_port, await_line)
             essentials = set(build.local_rows("ai-essential"))
             cases = [
                 ("tcp", "chromewebstore.google.com", 443, "google", "🔍 谷歌"),

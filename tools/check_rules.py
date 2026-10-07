@@ -22,7 +22,7 @@ from pathlib import Path
 import yaml
 
 import build
-from check_routing import address, recv_exact, start_dns
+from check_routing import address, recv_exact, start_dns, warmup
 
 # (域名, 端口, 期望集合, 期望策略组)；只放长期稳定、用户明确要求的分流
 CASES = [
@@ -149,7 +149,7 @@ def main() -> int:
 
         try:
             wait(lambda l: "SOCKS proxy listening at" in l)
-            time.sleep(2)  # 监听建立后规则/策略组仍在初始化，过早的连接会被静默丢弃
+            warmup(socks_port, wait)
             def probe(host, port, timeout):
                 with socket.create_connection(("127.0.0.1", socks_port), timeout=3) as c:
                     c.settimeout(3)
@@ -164,10 +164,7 @@ def main() -> int:
                 return wait(lambda l: f":{src} -->" in l and f"{host}:{port}" in l and "match " in l, timeout)
 
             for host, port, want_set, want_group in CASES:
-                try:
-                    line = probe(host, port, 5)
-                except RuntimeError:
-                    line = probe(host, port, 10)  # 偶发丢弃时重试一次
+                line = probe(host, port, 10)
                 want_group = "_direct" if want_group == "DIRECT" else want_group
                 ok = (f"RuleSet({want_set})" in line or f"RuleSet/{want_set}" in line) and want_group in line
                 print(f"{'✓' if ok else '✗'} {host}:{port} → {want_set} / {want_group}"

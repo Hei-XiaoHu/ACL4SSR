@@ -94,6 +94,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if [ "$(gh repo view ${{ github.repository }} --json hasIssuesEnabled -q .hasIssuesEnabled)" != "true" ]; then
+            echo "仓库未开启 Issues，跳过通知（失败仍会显示在 Actions 页面并发邮件）"; exit 0
+          fi
           n=$(gh issue list --state open --search "in:title $ISSUE_TITLE" --json number,title \
                 -q "map(select(.title == \"$ISSUE_TITLE\")) | .[0].number // empty")
           [ -n "$n" ] && gh issue close "$n" -c "已恢复：${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" || true
@@ -103,6 +106,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if [ "$(gh repo view ${{ github.repository }} --json hasIssuesEnabled -q .hasIssuesEnabled)" != "true" ]; then
+            echo "仓库未开启 Issues，跳过通知（失败仍会显示在 Actions 页面并发邮件）"; exit 0
+          fi
           run="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           body="$(date -u +%F) 构建失败，本次未发布，客户端继续使用上一版规则。日志：$run"
           n=$(gh issue list --state open --search "in:title $ISSUE_TITLE" --json number,title \
