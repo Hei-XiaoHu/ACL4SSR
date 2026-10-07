@@ -2,6 +2,18 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-10-07 旧规则对比与每周报告（重构第 4 步）
+
+一次性对比旧 ACL4SSR 31 个列表（约 9800 条域名规则）与当前规则的默认去向，2834 条有变化：
+
+- 约 2600 条“→ 按 IP”（主要是旧 GFWList 与 `.hk/.jp/.tw` 等整域）：新规则未直接命中，经境外 DNS 后落到 🐟，仍走代理。整类标记已审阅。
+- 采纳：运营商一键登录（移动/联通/电信）与网易易盾被广告源拦截 → `rules/local-direct.txt` 放行（`log.cmpassport.com` 仍拦）；
+  群晖 DDNS / QuickConnect / TeamViewer → `rules/direct.txt`；B站国际版与港澳台 Akamai CDN → 新增 `rules/bilibili.txt`；
+  Statsig 功能开关 `featuregates.org` 被广告源拦截 → `rules/ai-essential.txt`。
+- 其余逐条记入 `src/legacy-review.yaml` 并附理由（谷歌 CN 统一走 🔍、UnBan 精简、统计上报被拦、bootcss/staticfile 供应链投毒等）。
+
+`tools/legacy_diff.py` 复现对比；`.github/workflows/weekly.yml` 每周一生成报告（旧规则新差异 + 游戏下载 / AI 上游集合增删），写入 issue 与 `report` 分支。Issues 已开启，规则构建失败也会记到 issue。发布把关的关键域名增至 55 个。
+
 ## 2026-10-07 规则集合并与每日发布（重构第 3 步）
 
 - 本地规则从 `Clash/rule/` 的 12 个历史文件改为 `rules/` 下 10 个文件，与合并集合一一同名；格式统一为每行一条。

@@ -171,6 +171,9 @@ overseas:
   dns_bootstrap: [1.1.1.1, 8.8.8.8]
   dns: [https://1.1.1.1/dns-query, https://8.8.8.8/dns-query, tls://1.1.1.1, tls://8.8.8.8]
 
+# 每周报告关注的上游集合：列出相比上周的增删（下载集合删掉仍在用的主机时需要补进 rules/direct.txt）
+watch: ['geosite:category-game-platforms-download', 'geosite:category-ai-!cn']
+
 # 定向 QUIC 拒绝：已识别境外域名与明确自有 IP 让 UDP443 回落 TCP，不把未知 IP 当境外。
 # 已有国内真实 IP 豁免；cn/!cn 域名交集采用明确境外归属优先。
 quic_reject: [ai, auth, proxy, media, foreign]

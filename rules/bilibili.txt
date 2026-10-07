@@ -1,0 +1,8 @@
+# 格式：每行一条；example.com 精确匹配，+.example.com 含子域名；# 开头为注释。
+
+# 📺 B站补充：与上游 geosite:bilibili 合并。默认直连，看港澳台番剧时切到港台节点，整站跟随。
+# B站国际版（bstar）与港澳台视频的 Akamai CDN，上游未收录（旧 ACL4SSR BilibiliHMT）
+p-bstarstatic.akamaized.net
+upos-bstar-mirrorakam.akamaized.net
+upos-bstar1-mirrorakam.akamaized.net
+upos-hz-mirrorakam.akamaized.net

@@ -1,0 +1,198 @@
+# 旧 ACL4SSR 与当前规则差异的审阅结论（tools/legacy_diff.py 与每周报告读取）
+# lists：按变化类型整类忽略（"*" 表示所有旧列表）；domains：逐条记录，便于新差异仍能出现在报告里
+# 新增审阅：把报告中的条目连同理由加到 domains 下对应分组
+
+lists:
+  "*":
+    # 新版域名规则都未命中、按 IP 判断：国外站经境外 DNS 解析后走 🐟（仍是代理），国内站按国内 IP 直连
+    changes: [代理→按IP, 直连→按IP, 拦截→按IP]
+
+domains:
+  # AI：🤖 AI → 🛑 广告（Statsig 事件上报，按遥测拦截）
+  "+.events.statsigapi.net": AI
+  # Apple：🍎 苹果 → 🛑 广告（统计/崩溃上报）
+  "+.crashlytics.com": Apple
+  "apple.comscoreresearch.com": Apple
+  # BanAD：🛑 广告 → 🎯 直连（上游广告源不再收录；同盾反欺诈等，放行更安全）
+  "+.fraudmetrix.cn": BanAD
+  "+.g2q3e.cn": BanAD
+  # BanProgramAD：🛑 广告 → 🎯 直连（上游广告源不再收录；360 更新、QQ 视频播放接口等）
+  "+.adm.10jqka.com.cn": BanProgramAD
+  "+.f10.baidu.com": BanProgramAD
+  "+.fc-.cdn.bcebos.com": BanProgramAD
+  "+.livew.l.qq.com": BanProgramAD
+  "+.update.360safe.com": BanProgramAD
+  # BanProgramAD：🛑 广告 → 🚀 节点选择（上游广告源不再收录）
+  "+.ads.cdn.tvb.com": BanProgramAD
+  # Bing：Ⓜ️ 微软 → 🤖 AI（Copilot 归 AI，有意）
+  "+.copilot.cloud.microsoft": Bing
+  "+.copilot.microsoft.com": Bing
+  # ChinaDomain：🎯 直连 → 🚀 节点选择（境外公司官网，走代理可接受）
+  "+.alibabacloud.com": ChinaDomain
+  "+.images-amazon.com": ChinaDomain
+  "+.oracle.com": ChinaDomain
+  "+.simplecd.me": ChinaDomain
+  # ChinaDomain：🎯 直连 → 🛑 广告（广告源收录的统计/推送 SDK、bootcss/staticfile（2024 供应链投毒）；运营商登录已在 local-direct 放行）
+  "+.71.am": ChinaDomain
+  "+.bootcss.com": ChinaDomain
+  "+.easou.com": ChinaDomain
+  "+.koowo.com": ChinaDomain
+  "+.meitustat.com": ChinaDomain
+  "+.mob.com": ChinaDomain
+  "+.p2cdn.com": ChinaDomain
+  "+.qhupdate.com": ChinaDomain
+  "+.staticfile.org": ChinaDomain
+  "+.tencentmind.com": ChinaDomain
+  "+.toutiaopage.com": ChinaDomain
+  "+.umengcloud.com": ChinaDomain
+  "+.zmzfile.com": ChinaDomain
+  "log.cmpassport.com": ChinaDomain
+  "log1.cmpassport.com": ChinaDomain
+  # GoogleCN：🎯 直连 → 🔍 谷歌（谷歌服务统一走 🔍，有意（48e987b））
+  "+.265.com": GoogleCN
+  "+.alt1-mtalk.google.com": GoogleCN
+  "+.alt2-mtalk.google.com": GoogleCN
+  "+.alt3-mtalk.google.com": GoogleCN
+  "+.alt4-mtalk.google.com": GoogleCN
+  "+.alt5-mtalk.google.com": GoogleCN
+  "+.alt6-mtalk.google.com": GoogleCN
+  "+.alt7-mtalk.google.com": GoogleCN
+  "+.alt8-mtalk.google.com": GoogleCN
+  "+.cache.pack.google.com": GoogleCN
+  "+.crl.pki.goog": GoogleCN
+  "+.dl.google.com": GoogleCN
+  "+.dl.l.google.com": GoogleCN
+  "+.gtm.oasisfeng.com": GoogleCN
+  "+.mtalk.google.com": GoogleCN
+  "+.ocsp.pki.goog": GoogleCN
+  "+.recaptcha.net": GoogleCN
+  "+.safebrowsing-cache.google.com": GoogleCN
+  "+.toolbarqueries.google.com": GoogleCN
+  "+.tools.google.com": GoogleCN
+  "+.tools.l.google.com": GoogleCN
+  # GoogleCN：🎯 直连 → 🛑 广告（谷歌广告/统计）
+  "+.2mdn.net": GoogleCN
+  "+.app-measurement.com": GoogleCN
+  "+.clickserve.dartsearch.net": GoogleCN
+  "+.googletagmanager.com": GoogleCN
+  "+.googletagservices.com": GoogleCN
+  "+.settings.crashlytics.com": GoogleCN
+  "+.ssl-google-analytics.l.google.com": GoogleCN
+  "+.www-googletagmanager.l.google.com": GoogleCN
+  # Microsoft：Ⓜ️ 微软 → 🚀 节点选择（Akamai 通用基础设施/证书域名，很少直接访问）
+  "+.akadns.net": Microsoft
+  "+.edgesuite.net": Microsoft
+  "+.omniroot.com": Microsoft
+  "+.public-trust.com": Microsoft
+  # NetEaseMusic：🎯 直连 → 🛑 广告（网易 APM 上报）
+  "+.mam.netease.com": NetEaseMusic
+  # OneDrive：Ⓜ️ 微软 → 🚀 节点选择（OneDrive 网页版/分享页被墙，有意（rules/proxy.txt））
+  "+.onedrive.com": OneDrive
+  "+.onedrive.live.com": OneDrive
+  # OpenAi：🤖 AI → 🛑 广告（Sentry 上报）
+  "+.sentry.io": OpenAi
+  # ProxyGFWlist：🚀 节点选择 → Ⓜ️ 微软（微软官网与 Azure 托管，归微软组）
+  "+.azurewebsites.net": ProxyGFWlist
+  "+.microsoft.com": ProxyGFWlist
+  # ProxyGFWlist：🚀 节点选择 → 🍎 苹果（苹果短链，归苹果组）
+  "+.appsto.re": ProxyGFWlist
+  # ProxyGFWlist：🚀 节点选择 → 🎯 直连（已被 geosite:cn 收录的站点）
+  "+.bbs.tuitui.info": ProxyGFWlist
+  "+.blog.syx86.cn": ProxyGFWlist
+  "+.bx.in.th": ProxyGFWlist
+  "+.cnex.org.cn": ProxyGFWlist
+  "+.ddns.ms": ProxyGFWlist
+  "+.edmontonchina.cn": ProxyGFWlist
+  "+.hasi.wang": ProxyGFWlist
+  "+.hotels.cn": ProxyGFWlist
+  "+.ip138.com": ProxyGFWlist
+  "+.keso.cn": ProxyGFWlist
+  "+.kissbbao.cn": ProxyGFWlist
+  "+.lanterncn.cn": ProxyGFWlist
+  "+.laod.cn": ProxyGFWlist
+  "+.leeao.com.cn": ProxyGFWlist
+  "+.openwrt.org.cn": ProxyGFWlist
+  "+.qixianglu.cn": ProxyGFWlist
+  "+.sjum.cn": ProxyGFWlist
+  "+.tianyantong.org.cn": ProxyGFWlist
+  "+.vanemu.cn": ProxyGFWlist
+  "+.zhuanxing.cn": ProxyGFWlist
+  # ProxyGFWlist：🚀 节点选择 → 🛑 广告（广告/成人/恶意 DDNS，广告源拦截）
+  "+.adsense.com": ProxyGFWlist
+  "+.adultfriendfinder.com": ProxyGFWlist
+  "+.advertisercommunity.com": ProxyGFWlist
+  "+.amplitude.com": ProxyGFWlist
+  "+.app.heywire.com": ProxyGFWlist
+  "+.appbrain.com": ProxyGFWlist
+  "+.bidswitch.net": ProxyGFWlist
+  "+.blogcatalog.com": ProxyGFWlist
+  "+.bloglines.com": ProxyGFWlist
+  "+.bongacams.com": ProxyGFWlist
+  "+.crwdcntrl.net": ProxyGFWlist
+  "+.ddns.name": ProxyGFWlist
+  "+.dnset.com": ProxyGFWlist
+  "+.dnvod.tv": ProxyGFWlist
+  "+.dynamic-dns.net": ProxyGFWlist
+  "+.erabaru.net": ProxyGFWlist
+  "+.getiton.com": ProxyGFWlist
+  "+.googleanalytics.com": ProxyGFWlist
+  "+.incloak.com": ProxyGFWlist
+  "+.internetdefenseleague.org": ProxyGFWlist
+  "+.joyourself.com": ProxyGFWlist
+  "+.livejasmin.com": ProxyGFWlist
+  "+.mmaaxx.com": ProxyGFWlist
+  "+.newrelic.com": ProxyGFWlist
+  "+.nr-data.net": ProxyGFWlist
+  "+.nutaku.net": ProxyGFWlist
+  "+.nytlog.com": ProxyGFWlist
+  "+.onmypc.net": ProxyGFWlist
+  "+.page.tl": ProxyGFWlist
+  "+.page2rss.com": ProxyGFWlist
+  "+.partycasino.com": ProxyGFWlist
+  "+.partypoker.com": ProxyGFWlist
+  "+.streamate.com": ProxyGFWlist
+  "+.topsy.com": ProxyGFWlist
+  "+.traffichaus.com": ProxyGFWlist
+  "+.urchin.com": ProxyGFWlist
+  "+.vid.me": ProxyGFWlist
+  "+.xhcdn.com": ProxyGFWlist
+  # ProxyMedia：🎬 流媒体 → 🍎 苹果（Apple TV / iTunes，归苹果组）
+  "+.tv.apple.com": ProxyMedia
+  "gspe1-ssl.ls.apple.com": ProxyMedia
+  "np-edge.itunes.apple.com": ProxyMedia
+  "play-edge.itunes.apple.com": ProxyMedia
+  # ProxyMedia：🎬 流媒体 → 🛑 广告（流媒体统计/广告）
+  "+.bam.nr-data.net": ProxyMedia
+  "+.bbc.co": ProxyMedia
+  "+.braze.com": ProxyMedia
+  "+.cws-hulu.conviva.com": ProxyMedia
+  "+.cws.conviva.com": ProxyMedia
+  "+.d9.flashtalking.com": ProxyMedia
+  "+.disney.demdex.net": ProxyMedia
+  "+.disney.my.sentry.io": ProxyMedia
+  "+.disneyplus.bn5x.net": ProxyMedia
+  "+.disneyplus.com.ssl.sc.omtrdc.net": ProxyMedia
+  "+.hulu.hb.omtrdc.net": ProxyMedia
+  "+.hulu.sc.omtrdc.net": ProxyMedia
+  "+.js-agent.newrelic.com": ProxyMedia
+  "+.mobileanalytics.us-east-1.amazonaws.com": ProxyMedia
+  "+.yb.uncn.jp": ProxyMedia
+  "mytvsuperlimited.hb.omtrdc.net": ProxyMedia
+  "mytvsuperlimited.sc.omtrdc.net": ProxyMedia
+  # Steam：🎮 游戏 → 🎯 直连（下载 CDN 直连，有意）
+  "steampipe.akamaized.net": Steam
+  # SteamCN：🎯 直连 → 🎮 游戏（Steam CM 走游戏组，有意）
+  "+.cm.steampowered.com": SteamCN
+  # UnBan：🎯 直连 → 🎮 游戏（UnBan 精简，有意）
+  "+.ol.epicgames.com": UnBan
+  # UnBan：🎯 直连 → 🔍 谷歌（谷歌服务统一走 🔍，有意）
+  "dl.google.com": UnBan
+  # UnBan：🎯 直连 → 🛑 广告（UnBan 精简：跟踪域名不再放行，有意）
+  "+.googletraveladservices.com": UnBan
+  "app.adjust.com": UnBan
+  "errlog.umeng.com": UnBan
+  "msg.umeng.com": UnBan
+  "msg.umengcloud.com": UnBan
+  "tracking.miui.com": UnBan
+  # YouTube：🎬 流媒体 → 🛑 广告（谷歌统计）
+  "+.gvt2.com": YouTube

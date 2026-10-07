@@ -15,13 +15,14 @@
 
 | 文件 | 去向 | 放什么 |
 |---|---|---|
-| `rules/local-direct.txt` | 🎯 直连（最前） | 必须先于广告与一切分流的直连；唯一允许 `regex:` |
+| `rules/local-direct.txt` | 🎯 直连（最前） | 必须先于广告与一切分流的直连（功能白名单、运营商一键登录、易盾）；唯一允许 `regex:` |
 | `rules/telemetry.txt` | 🛑 广告 | Claude 相关遥测上报 |
-| `rules/ai-essential.txt` | 🤖 AI | 必须先于广告放行的 AI 端点（Claude 核心、Sift） |
+| `rules/ai-essential.txt` | 🤖 AI | 必须先于广告放行的 AI 端点（Claude 核心、Sift、Statsig 功能开关） |
 | `rules/auth.txt` | 🚀 节点选择 | 共享验证码（CF / Arkose），先于广告 |
 | `rules/ai.txt` / `ai-ip.txt` | 🤖 AI | Claude 家族、其他 AI 补充；Anthropic 自有 IP |
 | `rules/game-proxy.txt` | 🎮 游戏 | Steam CM 等需先于国内游戏集合的条目 |
-| `rules/direct.txt` | 🎯 直连 | 游戏下载 CDN 漏网条目（Stash 同时走国内 DNS） |
+| `rules/bilibili.txt` | 📺 B站 | B站国际版 / 港澳台视频 CDN |
+| `rules/direct.txt` | 🎯 直连 | 游戏下载 CDN 漏网条目、群晖 DDNS、TeamViewer（Stash 同时走国内 DNS） |
 | `rules/proxy.txt` | 🚀 节点选择 | 被墙但会被默认直连组或 cn 截走的域名 |
 | `rules/quic-exempt.txt` | 不改去向 | 因 QUIC 拦截连不上的游戏/应用 |
 
@@ -40,6 +41,10 @@ python3 tools/build_rules.py --out dist --mihomo /path/to/mihomo   # 本地试�
 python3 tools/check_rules.py --dist dist --mihomo /path/to/mihomo  # 真实规则集关键域名分流
 python3 tools/build_rules.py --conflicts   # 报告集合间的覆盖关系（调整顺序前看一眼）
 ```
+
+**每周报告**：`.github/workflows/weekly.yml` 每周一北京时间 05:00 运行 `tools/weekly_report.py`，更新 issue“每周规则报告”：
+旧 ACL4SSR 列表中新出现、未审阅的去向差异（`tools/legacy_diff.py`，审阅结论记在 `src/legacy-review.yaml`），
+以及 spec `watch` 中上游集合（游戏下载、AI）相比上周的增删。基准与历次报告存于 `report` 分支；只有出现新条目时才追加评论。
 
 Stash 的结论来自官方文档与静态检查，不能用 mihomo 代替 Stash 实机验证。
 

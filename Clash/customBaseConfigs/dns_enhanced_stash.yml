@@ -134,6 +134,54 @@ dns:
     cdn-hw.gog.com:
     - https://223.5.5.5/dns-query
     - https://doh.pub/dns-query
+    +.synology.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.synology.me:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.quickconnect.to:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.myds.me:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.diskstation.me:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.i234.me:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.dscloud.biz:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.dscloud.me:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.dscloud.mobi:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.dsmynas.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.dsmynas.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.dsmynas.org:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.familyds.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.familyds.net:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.familyds.org:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+    +.teamviewer.com:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
     geosite:cn:
     - https://223.5.5.5/dns-query
     - https://doh.pub/dns-query

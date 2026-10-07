@@ -19,3 +19,20 @@ dizhensubao.getui.com
 fairplay.l.qq.com
 livew.l.qq.com
 vd.l.qq.com
+
+# 运营商“本机号码一键登录”与网易易盾验证码：旧 ACL4SSR 特意直连，现被 AdRules / anti-AD 收录。
+# 被拦会导致 App 一键登录失败、易盾验证卡住；只放行功能端点，日志上报（log.cmpassport.com）仍拦。
+# 中国移动
+config.cmpassport.com
+# 中国联通
+auth.wosms.cn
+enrichgw.10010.com
+nishub1.10010.com
+hmrz.wo.cn
+id.mail.wo.cn
+mdn.open.wo.cn
+opencloud.wostore.cn
+# 中国电信
++.id6.me
+# 网易易盾
+ye.dun.163yun.com

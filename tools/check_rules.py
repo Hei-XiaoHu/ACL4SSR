@@ -73,6 +73,18 @@ CASES = [
     ("www.baidu.com", 443, "cn", "🎯 直连"),
     ("www.qq.com", 443, "cn", "🎯 直连"),
     ("tracking-protection.cdn.mozilla.net", 443, "local-direct", "🎯 直连"),
+    # 运营商一键登录与易盾验证码先于广告放行；日志上报仍拦
+    ("config.cmpassport.com", 443, "local-direct", "🎯 直连"),
+    ("verify.id6.me", 443, "local-direct", "🎯 直连"),
+    ("ye.dun.163yun.com", 443, "local-direct", "🎯 直连"),
+    ("log.cmpassport.com", 443, "ads", "🛑 广告"),
+    # Statsig 功能开关不拦
+    ("featuregates.org", 443, "ai-essential", "🤖 AI"),
+    # 群晖 DDNS / TeamViewer 直连；B站港澳台 CDN 跟随 B站组
+    ("mynas.myds.me", 5001, "direct", "🎯 直连"),
+    ("global.quickconnect.to", 443, "direct", "🎯 直连"),
+    ("www.teamviewer.com", 443, "direct", "🎯 直连"),
+    ("upos-bstar1-mirrorakam.akamaized.net", 443, "bilibili", "📺 B站"),
     ("160.79.104.10", 443, "ai-ip", "🤖 AI"),
     ("router.lan", 80, "private", "DIRECT"),
 ]

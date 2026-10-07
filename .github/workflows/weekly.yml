@@ -1,0 +1,80 @@
+name: 每周规则报告
+
+on:
+  schedule:
+    - cron: "0 21 * * 0"   # 北京时间每周一 05:00
+  workflow_dispatch:
+
+concurrency:
+  group: weekly-report
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  ISSUE_TITLE: 每周规则报告
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install pyyaml
+
+      - name: 取出 report 分支（上周基准）
+        run: |
+          remote="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          if ! git clone -q --depth=1 --branch report "$remote" report-branch 2>/dev/null; then
+            mkdir report-branch && git -C report-branch init -q -b report
+          fi
+
+      - name: 生成报告
+        id: report
+        run: cd tools && python3 weekly_report.py --baseline-dir ../report-branch --out ../report-branch/report.md --github-output "$GITHUB_OUTPUT"
+
+      - name: 写入运行摘要
+        run: cat report-branch/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 提交到 report 分支（保留历史）
+        run: |
+          cd report-branch
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "report: $(date -u +%F)" || echo "无变化"
+          git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" report
+
+      - name: 更新固定 issue（有新条目才追加评论）
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HAS_NEW: ${{ steps.report.outputs.has_new }}
+          SUMMARY: ${{ steps.report.outputs.summary }}
+        run: |
+          link="${{ github.server_url }}/${{ github.repository }}/blob/report/report.md"
+          # issue 正文上限 65536 字符，超长时截断并指向 report 分支的完整版
+          python3 - "$link" <<'EOF'
+          import sys
+          body = open("report-branch/report.md", encoding="utf-8").read()
+          if len(body) > 60000:
+              body = body[:60000] + f"\n\n……内容过长已截断，完整报告见 {sys.argv[1]}\n"
+          open("issue-body.md", "w", encoding="utf-8").write(body)
+          EOF
+          n=$(gh issue list --state all --search "in:title $ISSUE_TITLE" --json number,title \
+                -q "map(select(.title == \"$ISSUE_TITLE\")) | .[0].number // empty")
+          if [ -z "$n" ]; then
+            gh issue create -t "$ISSUE_TITLE" -F issue-body.md
+          else
+            gh issue edit "$n" -F issue-body.md
+            gh issue reopen "$n" 2>/dev/null || true
+            if [ "$HAS_NEW" = "true" ]; then
+              gh issue comment "$n" -b "本周有新变化：$SUMMARY。详见正文或 $link"
+            fi
+          fi

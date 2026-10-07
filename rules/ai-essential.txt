@@ -32,3 +32,5 @@ assets.claude.ai
 # 全局生效：其他网站的 Sift 也会走 AI。
 +.sift.com
 +.siftscience.com
+# Statsig 功能开关接口（ChatGPT 等使用）：被广告源收录。原则是只拦事件上报、不拦功能开关
++.featuregates.org

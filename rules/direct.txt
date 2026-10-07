@@ -20,3 +20,21 @@ download.dm.origin.com
 # GOG Galaxy 下载 CDN（上游只收录 gog-cdn-fastly 等少数主机）
 cdn.gog.com
 cdn-hw.gog.com
+# 群晖 NAS：DDNS 域名指向家里的 IP，走代理会“出国再绕回国内”；QuickConnect 中继与官网一并直连
++.synology.com
++.synology.me
++.quickconnect.to
++.myds.me
++.diskstation.me
++.i234.me
++.dscloud.biz
++.dscloud.me
++.dscloud.mobi
++.dsmynas.com
++.dsmynas.net
++.dsmynas.org
++.familyds.com
++.familyds.net
++.familyds.org
+# TeamViewer 远程控制：国内直连可用，走代理延迟高
++.teamviewer.com

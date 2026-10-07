@@ -8,7 +8,7 @@
      且 Stash 的 GEOSITE,cn 兜底可能把它判为直连。
   2. 排在广告规则之后的本地 AI 域名（rules/ai.txt）被广告源整域拦截：
      会被 REJECT 而不是走 AI。需要的端点应挪进 rules/ai-essential.txt。
-  3. 本地直连/游戏/代理补充条目（rules/direct.txt、game-proxy.txt、proxy.txt）被广告源拦截。
+  3. 本地直连/游戏/代理补充条目（rules/direct.txt、game-proxy.txt、proxy.txt、bilibili.txt）被广告源拦截。
 广告源只拦截某个子域（如 Intercom 的分析上报）属预期，不算失败。
 """
 from __future__ import annotations
@@ -82,7 +82,7 @@ def main() -> int:
             hit = covers(data["geosite:cn"], domain)
             if hit:
                 problems.append(f"[cn] {name}: {domain} 被 geosite:cn 的 {hit} 收录")
-    after_ads = {n: local(n) for n in ("ai", "direct", "game-proxy", "proxy")}
+    after_ads = {n: local(n) for n in ("ai", "direct", "game-proxy", "proxy", "bilibili")}
     for source in ("AdRules", "anti-AD", "AWAvenue"):
         for name, domains in after_ads.items():
             for domain in domains:
