@@ -1,0 +1,22 @@
+# 格式：每行一条；example.com 精确匹配，+.example.com 含子域名；# 开头为注释。
+
+# 🎯 直连补充：与上游国内游戏、全部游戏下载、网易云、国内娱乐合并为 direct 集合。
+# Stash 另把本文件条目用于国内 DNS policy（Stash 没有 direct-nameserver）。
+# 原则：国外游戏平台的大流量下载 CDN 一律直连；商店/登录/社区/CM 等小流量走 🎮 游戏。
+# 上游 category-game-platforms-download 只逐个列主机名，以下是核对后发现的漏网条目。
+# Steam 内容/下载 CDN：上游只列 cacheN-xxx，新编号（如 cache10-hkg1）会漏到 🎮 游戏
++.steamcontent.com
+# Steam 创意工坊/用户内容，以及 Steam 中国（蒸汽平台）下载；上游 games@cn 有，但不在 geosite:cn
++.steamusercontent.com
++.steamchina.com
++.wmsjsteam.com
++.st.dl.pinyuncloud.com
+# Steam 国内下载 CDN（旧 SteamCN 直连，上游 @cn 集合未收录）
+dl.steam.ksyna.com
+steampipe.steamcontent.tnkjmec.com
+# EA app 下载 CDN（Level3/Cloudflare 等均在 cdn.ea.com 下；商店与登录的 ea.com 本体仍走代理）
++.cdn.ea.com
+download.dm.origin.com
+# GOG Galaxy 下载 CDN（上游只收录 gog-cdn-fastly 等少数主机）
+cdn.gog.com
+cdn-hw.gog.com

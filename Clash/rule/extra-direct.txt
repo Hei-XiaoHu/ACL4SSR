@@ -1,7 +1,0 @@
-payload:
-  # Epic 的下载域名；按仍在维护的 v2fly epicgames 源匹配，不能放行任意同名站点。
-  # https://github.com/v2fly/domain-list-community/blob/master/data/epicgames
-  # 上游 MRS/domain YAML 不包含这些 regexp，故在本地 classical 集合补齐。
-  - 'DOMAIN-REGEX,^epicgames-download[0-9]\.akamaized\.net$'
-  - 'DOMAIN-REGEX,^epicgames-download[0-9]-[0-9]+\.file\.myqcloud\.com$'
-  - 'DOMAIN-REGEX,^cdn[0-9]-epicgames-[0-9]+\.file\.myqcloud\.com$'

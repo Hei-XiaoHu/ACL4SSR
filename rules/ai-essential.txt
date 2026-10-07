@@ -1,0 +1,34 @@
+# 格式：每行一条；example.com 精确匹配，+.example.com 含子域名；# 开头为注释。
+
+# 🤖 AI 必需端点：排在广告规则之前（广告源误收也不会被拦）。
+# 仅明确的 Claude 功能端点可优先于广告集合；不放行 *.anthropic.com / *.claude.ai。
+# https://code.claude.com/docs/en/network-config
+# https://code.claude.com/docs/en/desktop
+# api.anthropic.com 同时承载核心 API 与部分 event_logging，域名规则无法按路径区分。
+claude.ai
+www.claude.ai
+downloads.claude.ai
+claude.com
+platform.claude.com
+code.claude.com
+claude.app
+api.anthropic.com
+a-api.anthropic.com
+console.anthropic.com
+mcp-proxy.anthropic.com
+a-cdn.anthropic.com
+s-cdn.anthropic.com
+assets-proxy.anthropic.com
+a.claude.ai
+a-cdn.claude.ai
+assets.claude.ai
++.livepreview.claude.ai
++.livepreview.claude.app
+# 官方 Desktop 清单明确的用户内容和 MCP 内容，不是第三方通用 CDN
++.claudeusercontent.com
++.claudemcpcontent.com
+# Sift 反欺诈：把设备指纹与 IP 交给 Anthropic 风控，必须与 Claude 同出口。
+# AdRules / anti-AD 都收录了 sift.com / siftscience.com，必须排在广告规则之前，否则会被拦截。
+# 全局生效：其他网站的 Sift 也会走 AI。
++.sift.com
++.siftscience.com

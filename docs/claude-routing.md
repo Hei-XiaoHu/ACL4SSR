@@ -6,11 +6,11 @@
 
 | 类别 | 范围 | 策略 |
 |---|---|---|
-| 明确的核心功能端点 | 官方 API、OAuth、安装更新、CDN、桌面预览、用户内容与 MCP 内容；Sift 反欺诈 | `claude-essential` → 🤖 AI；排在广告集合之前。Sift 被 AdRules / anti-AD 收录，只有放在这里才不会被拦 |
-| Claude 域名家族 | anthropic.com、claude.ai/com/app/dev、clau.de、MCP/content 父域、两个专属第三方 CDN 主机、anthropic.auth0.com、anthropic-com.ghost.io、Intercom | `claude` → 🤖 AI；位于广告集合之后，不给整个 Claude 家族广告豁免（Intercom 分析上报仍被广告源拦截） |
-| 明确的可选遥测 | Datadog 各区域 RUM / 日志摄取端点，Sentry 摄取端（含 us/de），Statsig 事件上报，Fathom 统计 | `claude-telemetry` → 🛑 广告 |
-| 共享人机验证 | challenges.cloudflare.com、client-api.arkoselabs.com | `shared-auth` → 🚀 节点选择（低延迟节点，验证更快） |
-| 已核实的自有 IP | 160.79.104.0/21、2607:6bc0::/32 | 域名规则之后使用 `claude-ip` → 🤖 AI，no-resolve |
+| 明确的核心功能端点 | 官方 API、OAuth、安装更新、CDN、桌面预览、用户内容与 MCP 内容；Sift 反欺诈 | `ai-essential`（rules/ai-essential.txt） → 🤖 AI；排在广告集合之前。Sift 被 AdRules / anti-AD 收录，只有放在这里才不会被拦 |
+| Claude 域名家族 | anthropic.com、claude.ai/com/app/dev、clau.de、MCP/content 父域、两个专属第三方 CDN 主机、anthropic.auth0.com、anthropic-com.ghost.io、Intercom | `ai`（rules/ai.txt） → 🤖 AI；位于广告集合之后，不给整个 Claude 家族广告豁免（Intercom 分析上报仍被广告源拦截） |
+| 明确的可选遥测 | Datadog 各区域 RUM / 日志摄取端点，Sentry 摄取端（含 us/de），Statsig 事件上报，Fathom 统计 | `telemetry` → 🛑 广告 |
+| 共享人机验证 | challenges.cloudflare.com、client-api.arkoselabs.com | `auth` → 🚀 节点选择（低延迟节点，验证更快） |
+| 已核实的自有 IP | 160.79.104.0/21、2607:6bc0::/32 | 域名规则之后使用 `ai-ip` → 🤖 AI，no-resolve |
 | 其他共享服务 | GitHub、npm、Google Storage、通用 JS/font CDN、Auth0 其他租户、WorkOS 等 | 按原有通用/平台分流；不把整个供应商后缀塞入 AI |
 
 Claude、共享验证码和广告规则的顺序为：明确遥测拦截 → 定向 QUIC → 必要功能例外 → 通用广告集合 → Claude 家族/其他 AI → 自有 IP 兜底。
@@ -21,7 +21,7 @@ Claude、共享验证码和广告规则的顺序为：明确遥测拦截 → 定
 
 ## 遥测边界
 
-本地规则明确拦截（完整列表见 `Clash/rule/claude-telemetry.txt`）：
+本地规则明确拦截（完整列表见 `rules/telemetry.txt`）：
 
 ```text
 browser-intake-{,us3-,us5-,ap1-,ap2-}datadoghq.com / browser-intake-datadoghq.eu / browser-intake-ddog-gov.com
@@ -43,10 +43,10 @@ Datadog 浏览器端点是连字符域名（不是 datadoghq.com 的子域），
 | anthropic / claude / content / MCP 后缀 | 与官方/社区域名相符，保留明确归属的分流 |
 | servd-anthropic-website.b-cdn.net | 精确 Anthropic 租户主机，已在社区源中；不扩大为整个 b-cdn.net |
 | anthropic.com.cdn.cloudflare.net | 作为专属别名精确补充；不扩大为所有 cloudflare.net |
-| anthropic.auth0.com | Anthropic 专属 Auth0 租户（不是整个 Auth0）。登录会记录 IP，走 AI 保持出口一致；不在广告源中，放在 `claude` 即可 |
+| anthropic.auth0.com | Anthropic 专属 Auth0 租户（不是整个 Auth0）。登录会记录 IP，走 AI 保持出口一致；不在广告源中，放在 `ai`（rules/ai.txt） 即可 |
 | anthropic-com.ghost.io | 博客/CMS，按用户决定同走 AI；不是核心端点，不放进 essential |
 | sentry.io / statsigapi.net / datadog | 只精确拦截上报端点；Statsig 初始化决定功能开关，不拦；不使用关键词 |
-| sift | 反欺诈，把设备指纹与 IP 交给 Anthropic 风控。广告源（AdRules / anti-AD）收录了 sift.com / siftscience.com，之前实际被拦。现放入 `claude-essential`（排在广告前）走 AI，保证与 Claude 同出口；不使用 `sift` 关键词 |
+| sift | 反欺诈，把设备指纹与 IP 交给 Anthropic 风控。广告源（AdRules / anti-AD）收录了 sift.com / siftscience.com，之前实际被拦。现放入 `ai-essential`（rules/ai-essential.txt）（排在广告前）走 AI，保证与 Claude 同出口；不使用 `sift` 关键词 |
 | intercom.io / intercomcdn.com | 客服会话绑定账户与 IP，走 AI。全局生效：其他网站的 Intercom 也会走 AI；Intercom 分析上报仍被广告源拦截 |
 | cdn.usefathom.com | 访问统计，显式拦截（Stash 的 AWAvenue 未收录） |
 | 两个 IP 段 / AS399358 | ARIN RDAP 注册主体均为 Anthropic, PBC；添加两个自有前缀。ASN 规则未额外引入，避免依赖客户端 ASN 数据库与重复覆盖 |

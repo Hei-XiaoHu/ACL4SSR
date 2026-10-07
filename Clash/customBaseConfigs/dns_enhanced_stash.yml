@@ -1,12 +1,12 @@
 # subconverter 底包（Stash），需配合 ACL4SSR_Online_Full_AdblockPlus_Stash.ini 使用（依赖其中的策略组）
 # 本文件由 tools/build.py 从 src/spec.yaml 生成，请勿手改；改规则请改 src/spec.yaml
 # MATCH 兜底由 ini 生成，排在本文件 rules 之后
-# 规则：MetaCubeX/meta-rules-dat 的 domain/ipcidr yaml；国内外兜底复用 Stash 原生 GEOSITE + GEOIP,CN
-#   （与 geosite DNS policy 顺序对齐，不额外下载全量 cn/geolocation-!cn 文本）
+# 规则：本仓库 rules 分支的 domain/ipcidr yaml；国内外兜底复用 Stash 原生 GEOSITE + GEOIP,CN
+#   （不额外下载全量 cn/geolocation-!cn 文本）
 # 去广告：AWAvenue 秋风规则（约 900 条，含广告+隐私跟踪+流氓推广）
 # DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS；内网系统 DNS，已知国内与游戏下载走国内 DoH，其余境外 DoH
 # geosite DNS policy 需 Stash iOS 3.4.0+；GEOSITE 数据首次从 GitHub 按需加载，请确保 GitHub 可达
-# 规则 CDN 为 https://testingcf.jsdelivr.net/gh，失效时全局替换为 https://fastly.jsdelivr.net/gh
+# 规则 CDN 为 https://fastly.jsdelivr.net/gh，失效时全局替换为 https://cdn.jsdelivr.net/gh
 
 mode: rule
 log-level: warning
@@ -139,101 +139,54 @@ dns:
     - https://doh.pub/dns-query
 
 rule-providers:
-  extra-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-direct.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-direct.txt'}
-  extra-ai: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-ai.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-ai.txt'}
-  extra-proxy: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-proxy.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-proxy.txt'}
-  claude: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/claude.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/claude.txt'}
-  claude-essential: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/claude-essential.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/claude-essential.txt'}
-  claude-telemetry: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/claude-telemetry.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/claude-telemetry.txt'}
-  claude-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/claude-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/claude-ip.txt'}
-  shared-auth: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/shared-auth.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/shared-auth.txt'}
-  quic-exempt: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/quic-exempt.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/quic-exempt.txt'}
-  private: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/private.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.yaml'}
-  private-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/private-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/private.yaml'}
-  functional-direct: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/functional-direct.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/functional-direct.txt'}
-  awavenue: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/awavenue.yaml, url: 'https://testingcf.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.yaml'}
-  ai: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ai.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-ai-!cn.yaml'}
-  googlefcm: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/googlefcm.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.yaml'}
-  google-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/google-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/google-cn.yaml'}
-  google: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/google.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/google.yaml'}
-  game-proxy-extra: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-proxy-extra.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/game-proxy-extra.txt'}
-  games-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/games-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-games@cn.yaml'}
-  game-download-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-download-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-game-platforms-download@cn.yaml'}
-  game-download: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-download.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-game-platforms-download.yaml'}
-  game-download-extra: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-download-extra.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/game-download-extra.txt'}
-  github: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/github.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/github.yaml'}
-  bing: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bing.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bing.yaml'}
-  onedrive: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/onedrive.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/onedrive.yaml'}
-  microsoft: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/microsoft.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/microsoft.yaml'}
-  apple: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/apple.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/apple.yaml'}
-  telegram: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/telegram.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/telegram.yaml'}
-  communication: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/communication.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-communication.yaml'}
-  telegram-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/telegram-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/telegram.yaml'}
-  netease: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/netease.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/netease.yaml'}
-  epicgames: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/epicgames.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/epicgames.yaml'}
-  ea: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ea.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/ea.yaml'}
-  sony: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/sony.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/sony.yaml'}
-  steam: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/steam.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/steam.yaml'}
-  nintendo: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/nintendo.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/nintendo.yaml'}
-  games: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/games.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-games-!cn.yaml'}
-  youtube: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/youtube.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/youtube.yaml'}
-  netflix: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/netflix.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/netflix.yaml'}
-  netflix-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/netflix-ip.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/netflix.yaml'}
-  bahamut: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bahamut.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bahamut.yaml'}
-  bilibili: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bilibili.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/bilibili.yaml'}
-  entertainment-cn: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/entertainment-cn.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-entertainment-cn.yaml'}
-  entertainment-cn-attr: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/entertainment-cn-attr.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-entertainment@cn.yaml'}
-  proxymedia: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/proxymedia.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-entertainment.yaml'}
-  gfw: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/gfw.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/gfw.yaml'}
+  local-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/local-direct.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/local-direct.yaml'}
+  private: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/private.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/private.yaml'}
+  private-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/private-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/private-ip.yaml'}
+  telemetry: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/telemetry.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/telemetry.yaml'}
+  ai-essential: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ai-essential.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ai-essential.yaml'}
+  auth: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/auth.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/auth.yaml'}
+  ads: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ads.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ads.yaml'}
+  ai: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ai.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ai.yaml'}
+  ai-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/ai-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ai-ip.yaml'}
+  game-proxy: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-proxy.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/game-proxy.yaml'}
+  bilibili: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bilibili.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/bilibili.yaml'}
+  apple: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/apple.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/apple.yaml'}
+  direct: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/direct.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/direct.yaml'}
+  proxy: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/proxy.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/proxy.yaml'}
+  proxy-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/proxy-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/proxy-ip.yaml'}
+  microsoft: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/microsoft.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/microsoft.yaml'}
+  games: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/games.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/games.yaml'}
+  media: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/media.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/media.yaml'}
+  media-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/media-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/media-ip.yaml'}
+  google: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/google.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/google.yaml'}
+  foreign: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/foreign.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/foreign.yaml'}
+  quic-exempt: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/quic-exempt.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/quic-exempt.yaml'}
 
 rules:
 - IP-CIDR,1.1.1.1/32,🛰️ DNS,no-resolve
 - IP-CIDR,8.8.8.8/32,🛰️ DNS,no-resolve
-- RULE-SET,extra-direct,🎯 直连
+- RULE-SET,local-direct,🎯 直连
 - RULE-SET,private,DIRECT
 - RULE-SET,private-ip,DIRECT,no-resolve
-- RULE-SET,functional-direct,🎯 直连
-- RULE-SET,claude-telemetry,🛑 广告
-- AND,((NETWORK,udp),(PROTOCOL,QUIC),(OR,((OR,((RULE-SET,claude),(RULE-SET,extra-ai),(RULE-SET,ai),(RULE-SET,youtube),(RULE-SET,netflix),(RULE-SET,shared-auth),(RULE-SET,extra-proxy),(RULE-SET,proxymedia),(RULE-SET,gfw),(GEOSITE,geolocation-!cn))),(RULE-SET,claude-ip,no-resolve))),(NOT,((AND,((GEOSITE,cn),(NOT,((GEOSITE,geolocation-!cn))))))),(NOT,((GEOIP,CN,no-resolve))),(NOT,((OR,((RULE-SET,quic-exempt),(RULE-SET,google-cn),(RULE-SET,bing),(RULE-SET,onedrive),(RULE-SET,microsoft),(RULE-SET,apple),(RULE-SET,netease),(RULE-SET,bilibili),(RULE-SET,games-cn),(RULE-SET,game-download-cn),(RULE-SET,game-download),(RULE-SET,game-download-extra),(RULE-SET,games),(RULE-SET,epicgames),(RULE-SET,ea),(RULE-SET,sony),(RULE-SET,steam),(RULE-SET,nintendo),(RULE-SET,entertainment-cn),(RULE-SET,entertainment-cn-attr),(RULE-SET,communication)))))),REJECT
-- RULE-SET,claude-essential,🤖 AI
-- RULE-SET,shared-auth,🚀 节点选择
-- RULE-SET,awavenue,🛑 广告
-- RULE-SET,claude,🤖 AI
-- RULE-SET,extra-ai,🤖 AI
+- RULE-SET,telemetry,🛑 广告
+- AND,((NETWORK,udp),(PROTOCOL,QUIC),(OR,((RULE-SET,ai),(RULE-SET,auth),(RULE-SET,proxy),(RULE-SET,media),(OR,((RULE-SET,foreign),(GEOSITE,geolocation-!cn))),(RULE-SET,ai-ip,no-resolve))),(NOT,((AND,((GEOSITE,cn),(NOT,((OR,((RULE-SET,foreign),(GEOSITE,geolocation-!cn))))))))),(NOT,((GEOIP,CN,no-resolve))),(NOT,((OR,((RULE-SET,quic-exempt),(RULE-SET,direct),(RULE-SET,bilibili),(RULE-SET,microsoft),(RULE-SET,apple),(RULE-SET,games),(RULE-SET,game-proxy)))))),REJECT
+- RULE-SET,ai-essential,🤖 AI
+- RULE-SET,auth,🚀 节点选择
+- RULE-SET,ads,🛑 广告
 - RULE-SET,ai,🤖 AI
-- RULE-SET,claude-ip,🤖 AI,no-resolve
-- RULE-SET,googlefcm,🔍 谷歌
-- RULE-SET,game-proxy-extra,🎮 游戏
-- RULE-SET,games-cn,🎯 直连
-- RULE-SET,game-download-cn,🎯 直连
-- RULE-SET,game-download,🎯 直连
-- RULE-SET,game-download-extra,🎯 直连
-- RULE-SET,github,🚀 节点选择
-- RULE-SET,extra-proxy,🚀 节点选择
-- RULE-SET,bing,Ⓜ️ 微软
-- RULE-SET,onedrive,Ⓜ️ 微软
-- RULE-SET,microsoft,Ⓜ️ 微软
-- RULE-SET,apple,🍎 苹果
-- RULE-SET,telegram,🚀 节点选择
-- RULE-SET,telegram-ip,🚀 节点选择,no-resolve
-- RULE-SET,netease,🎯 直连
-- RULE-SET,epicgames,🎮 游戏
-- RULE-SET,ea,🎮 游戏
-- RULE-SET,sony,🎮 游戏
-- RULE-SET,steam,🎮 游戏
-- RULE-SET,nintendo,🎮 游戏
-- RULE-SET,youtube,🎬 流媒体
-- RULE-SET,google-cn,🔍 谷歌
-- RULE-SET,google,🔍 谷歌
-- RULE-SET,netflix,🎬 流媒体
-- RULE-SET,netflix-ip,🎬 流媒体,no-resolve
-- RULE-SET,bahamut,🎬 流媒体
+- RULE-SET,ai-ip,🤖 AI,no-resolve
+- RULE-SET,game-proxy,🎮 游戏
 - RULE-SET,bilibili,📺 B站
-- RULE-SET,entertainment-cn,🎯 直连
-- RULE-SET,entertainment-cn-attr,🎯 直连
+- RULE-SET,apple,🍎 苹果
+- RULE-SET,direct,🎯 直连
+- RULE-SET,proxy,🚀 节点选择
+- RULE-SET,proxy-ip,🚀 节点选择,no-resolve
+- RULE-SET,microsoft,Ⓜ️ 微软
 - RULE-SET,games,🎮 游戏
-- RULE-SET,proxymedia,🎬 流媒体
-- RULE-SET,gfw,🚀 节点选择
+- RULE-SET,media,🎬 流媒体
+- RULE-SET,media-ip,🎬 流媒体,no-resolve
+- RULE-SET,google,🔍 谷歌
+- RULE-SET,foreign,🚀 节点选择
 - GEOSITE,geolocation-!cn,🚀 节点选择
 - GEOSITE,cn,🎯 直连
 - GEOIP,CN,🎯 直连

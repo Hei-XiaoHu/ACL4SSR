@@ -11,7 +11,23 @@
 
 ## 修改规则
 
-配置、策略组、DNS 与嗅探参数统一在 `src/spec.yaml`。本地规则在 `Clash/rule/`；修改后重新生成：
+**加一条规则**：先想它该走哪个组，然后在 `rules/` 下同名文件里加一行（`example.com` 精确，`+.example.com` 含子域名），推送即可。Action 会在几分钟内重新合并并发布。
+
+| 文件 | 去向 | 放什么 |
+|---|---|---|
+| `rules/local-direct.txt` | 🎯 直连（最前） | 必须先于广告与一切分流的直连；唯一允许 `regex:` |
+| `rules/telemetry.txt` | 🛑 广告 | Claude 相关遥测上报 |
+| `rules/ai-essential.txt` | 🤖 AI | 必须先于广告放行的 AI 端点（Claude 核心、Sift） |
+| `rules/auth.txt` | 🚀 节点选择 | 共享验证码（CF / Arkose），先于广告 |
+| `rules/ai.txt` / `ai-ip.txt` | 🤖 AI | Claude 家族、其他 AI 补充；Anthropic 自有 IP |
+| `rules/game-proxy.txt` | 🎮 游戏 | Steam CM 等需先于国内游戏集合的条目 |
+| `rules/direct.txt` | 🎯 直连 | 游戏下载 CDN 漏网条目（Stash 同时走国内 DNS） |
+| `rules/proxy.txt` | 🚀 节点选择 | 被墙但会被默认直连组或 cn 截走的域名 |
+| `rules/quic-exempt.txt` | 不改去向 | 因 QUIC 拦截连不上的游戏/应用 |
+
+**发布流程**：`src/spec.yaml` 的 `sets` 定义每个集合 = 同名本地文件 + 上游列表，顺序即分流顺序。`.github/workflows/rules.yml` 每天北京时间 04:00（以及本地规则改动时）运行 `tools/build_rules.py` 合并去重，经 `tools/check_rules.py` 用真实规则集验证关键域名后，发布到 `rules` 分支（单提交、不留历史）并刷新 jsDelivr 缓存。上游下载失败或某集合条目数骤减 30% 以上时不发布，在“规则集构建失败” issue 里记录。客户端只从 `rules` 分支下载：`https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/{mihomo,stash}/<集合>`。
+
+改了 `src/spec.yaml`（组、DNS、集合顺序）后需重新生成配置：
 
 ```bash
 pip install pyyaml
@@ -20,21 +36,12 @@ python3 tools/build.py --check         # 检查七份输出一致
 python3 tools/check.py /path/to/mihomo  # 渲染与真实内核校验，含节点全过滤/零节点场景
 python3 tools/check_routing.py /path/to/mihomo # 离线连接、DNS 泄露、QUIC 与广告回归
 python3 tools/check_upstream.py        # 联网：Claude 域名不在 cn、AI/下载补充未被广告源拦截
+python3 tools/build_rules.py --out dist --mihomo /path/to/mihomo   # 本地试构建规则集
+python3 tools/check_rules.py --dist dist --mihomo /path/to/mihomo  # 真实规则集关键域名分流
+python3 tools/build_rules.py --conflicts   # 报告集合间的覆盖关系（调整顺序前看一眼）
 ```
 
-推送后 GitHub Actions 会检查生成文件一致性，并用最新 mihomo 校验配置和离线分流。Stash 的结论来自官方文档与静态检查，不能用 mihomo 代替 Stash 实机验证。
-
-主要本地规则：
-
-- `Clash/rule/extra-direct.txt`：强制直连
-- `Clash/rule/extra-proxy.txt`：强制走 🚀 节点选择（被墙但会被 cn 截走直连的域名）
-- `Clash/rule/extra-ai.txt`：geosite 未收录的 AI 域名
-- `Clash/rule/claude*.txt`：Claude 家族、必要功能例外（含 Sift，须排在广告前）、遥测拦截和自有 IP
-- `Clash/rule/shared-auth.txt`：共享验证码，走通用节点，不固定到 AI
-- `Clash/rule/game-download-extra.txt`：游戏下载补充直连（整个 `steamcontent.com`、EA / GOG 下载 CDN 等上游逐条列举时会漏掉的主机）；Stash 同时用于国内 DNS
-- `Clash/rule/game-proxy-extra.txt`：游戏平台补充代理（Steam CM 信令），排在国内游戏集合之前
-- `Clash/rule/quic-exempt.txt`：某个游戏/应用因 QUIC 拦截连不上时，把域名加到这里
-- `Clash/rule/functional-direct.txt`：精简的功能白名单，替换宽泛 UnBan
+Stash 的结论来自官方文档与静态检查，不能用 mihomo 代替 Stash 实机验证。
 
 ## 方案要点
 
@@ -56,8 +63,8 @@ python3 tools/check_upstream.py        # 联网：Claude 域名不在 cn、AI/�
 | 🛰️ DNS | 🚀 | 境外 DoH 的出口 |
 | 🛑 广告 | REJECT | 广告与遥测 |
 
-- **规则来源**：MetaCubeX/meta-rules-dat（v2fly 社区，每日同步）。mihomo 用 mrs 二进制格式，匹配快、内存小；Stash 用 yaml 版。
-- **去广告**：mihomo 保留 AdRules + anti-AD（mrs），两者有独有规则；Stash 用轻量 AWAvenue。规则条数不能直接证明 iOS 峰值内存。
+- **规则来源**：本地 `rules/*.txt` + MetaCubeX/meta-rules-dat（v2fly 社区）等上游，每日合并为 24 个集合发布到 `rules` 分支。mihomo 用 mrs 二进制格式，匹配快、内存小；Stash 用 yaml 版。
+- **去广告**：mihomo 用 AdRules + anti-AD 合并去重后的单个集合（约 21 万条），两者有独有规则；Stash 用轻量 AWAvenue。规则条数不能直接证明 iOS 峰值内存。
 - **性能**：已有 IP 的直接分类使用 `no-resolve`，需要额外解析的 `cn-ip` / `GEOIP,CN` 放末尾；已知国外域名提前分流。
 - **测速**：600 秒；Xboard 显式 `lazy:true`，INI 的 mihomo 依赖内核默认 true，其他转换器/客户端以实际输出为准。节点全被过滤时自动选择组保留 REJECT。测速不验证 AI/媒体解锁，AI 应手动选支持地区的节点。
 - **DNS**：已知国内（`cn`）→ 国内 DoH；其余 → 经 `🛰️ DNS` 查境外 DoH；内网 → system。走代理的连接把域名交给节点远端解析，本地不查询；本地解析只发生在 IP 规则、DIRECT、fake-ip-filter 与节点域名上。mihomo 的 DIRECT 用国内 `direct-nameserver`（follow-policy 只为让内网名走 system）；Stash 没有该字段，另给游戏下载集合指定国内 DNS。Stash follow-rule 加 DoH 端点 IP 绑定指定组；绑定也影响这些 IP 的其他流量。
@@ -65,7 +72,7 @@ python3 tools/check_upstream.py        # 联网：Claude 域名不在 cn、AI/�
 - **安全**：mihomo `allow-lan:false`，代理控制器与 DNS 监听本机；DNS `ipv6:false` 只控制解析，不能代替系统 IPv6 设置。Bootstrap 仍用明文引导 DNS。
 - **QUIC**：默认走代理的境外域名（AI、媒体、gfw、geolocation-!cn、共享验证码等）及 Anthropic 自有 IP 的 QUIC 被拒绝，回落 TCP（VLESS 等 TCP 传输承载 QUIC 效果差）。默认直连的苹果/微软/Bing/OneDrive/网易云/B站、国内、游戏、游戏下载、通信语音、`quic-exempt.txt` 和未知裸 IP 不拦；保留 `google-cn` 的 QUIC 豁免。mihomo 按 UDP443 判断；Stash 用 `PROTOCOL,QUIC` 只拦真正的 QUIC。规则按默认分组判断，手动切换策略组后不会跟着变。
 - **谷歌服务**：`google-cn` 与完整 `google` 集合走 `🔍 谷歌`，默认选择 `🚀 节点选择`，使用境外 DNS；Chrome 商店、Google 资源与 `dl.google.com` 下载统一分流。AI、谷歌 FCM 和 YouTube 保留各自专用策略。
-- **分类**：游戏下载使用完整的 `category-game-platforms-download`（约 490 条，含 Steam/PSN/Epic 等全球 CDN），默认直连；上游只逐个列 Steam `cacheN-xxx` 主机，新节点由 `game-download-extra.txt` 兜底直连；国内下载/娱乐子集优先；Battle.net、Ubisoft、GOG 等补入游戏平台。通用媒体改用社区娱乐集合。
+- **分类**：游戏下载使用完整的 `category-game-platforms-download`（约 490 条，含 Steam/PSN/Epic 等全球 CDN），默认直连；上游只逐个列 Steam `cacheN-xxx` 主机，新节点与 EA/GOG 漏网 CDN 由 `rules/direct.txt` 兜底直连；Steam CM 由 `rules/game-proxy.txt` 走游戏组。集合顺序经 `build_rules.py --conflicts` 核对：游戏平台先于流媒体（社区娱乐集合收录了大量游戏域名），苹果先于国内娱乐（收录了 Apple Music）。
 - **iOS**：Stash 规则与 mihomo 基本一致，差异仅在广告源（AWAvenue 轻量版）及用 Stash 原生 GEOSITE/GEOIP 替代 cn、geolocation-!cn、cn-ip 规则集。若希望与电脑完全一致，可用内置 mihomo 内核的 Clash Mi（KaringX/clashmi，App Store 上架，iOS 15+），直接使用 mihomo 模板；本仓库未做 Clash Mi 实机测试。
 - **Stash**：DNS geosite policy 需 iOS3.4.0+。原生 GEOSITE 数据首次从 GitHub 按需加载，需 GitHub 可达；未加入需要3.6+的独立节点 DNS 字段。
 

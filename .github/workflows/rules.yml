@@ -1,0 +1,110 @@
+name: 构建并发布规则集（rules 分支）
+
+on:
+  schedule:
+    - cron: "0 20 * * *"   # 北京时间每天 04:00
+  push:
+    branches: [master]
+    paths:
+      - rules/**
+      - src/spec.yaml
+      - tools/build.py
+      - tools/build_rules.py
+      - tools/check_rules.py
+      - .github/workflows/rules.yml
+  workflow_dispatch:
+
+concurrency:
+  group: rules-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  ISSUE_TITLE: 规则集构建失败
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install pyyaml
+
+      - name: 下载 mihomo
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          url=$(curl -s -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/repos/MetaCubeX/mihomo/releases/latest \
+            | grep -oE 'https://[^"]+/mihomo-linux-amd64-v[0-9.]+\.gz' | head -1)
+          curl -sL "$url" | gunzip > mihomo
+          chmod +x mihomo
+          ./mihomo -v
+
+      - name: 读取上一版清单
+        run: |
+          if git fetch --depth=1 origin rules 2>/dev/null; then
+            git show origin/rules:manifest.json > prev.json || : > prev.json
+          else
+            : > prev.json
+          fi
+
+      - name: 合并规则（上游失败或条目数骤减即中止）
+        run: python3 tools/build_rules.py --out dist --mihomo ./mihomo --previous prev.json
+
+      - name: 发布前把关：真实规则集关键域名分流
+        run: cd tools && python3 check_rules.py --dist ../dist --mihomo ../mihomo
+
+      - name: 内容未变则跳过发布
+        id: diff
+        run: |
+          new=$(python3 -c "import json;print(json.load(open('dist/manifest.json'))['content_sha256'])")
+          old=$(python3 -c "import json,sys;d=open('prev.json').read();print(json.loads(d).get('content_sha256','') if d.strip() else '')")
+          echo "changed=$([ "$new" != "$old" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "old=$old new=$new"
+
+      - name: 发布到 rules 分支（单提交，强制覆盖，不留历史）
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          cd dist
+          git init -q -b rules
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "rules: $(date -u +%Y-%m-%dT%H:%MZ) from ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" rules
+
+      - name: 刷新 jsDelivr 缓存
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          cd dist
+          find mihomo stash -type f | sort | while read -r f; do
+            curl -s -o /dev/null --max-time 20 "https://purge.jsdelivr.net/gh/${{ github.repository }}@rules/$f" || echo "purge 失败: $f"
+          done
+
+      - name: 成功后关闭失败通知
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          n=$(gh issue list --state open --search "in:title $ISSUE_TITLE" --json number,title \
+                -q "map(select(.title == \"$ISSUE_TITLE\")) | .[0].number // empty")
+          [ -n "$n" ] && gh issue close "$n" -c "已恢复：${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" || true
+
+      - name: 失败时记录到固定 issue（上一版规则保持不变）
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          body="$(date -u +%F) 构建失败，本次未发布，客户端继续使用上一版规则。日志：$run"
+          n=$(gh issue list --state open --search "in:title $ISSUE_TITLE" --json number,title \
+                -q "map(select(.title == \"$ISSUE_TITLE\")) | .[0].number // empty")
+          if [ -n "$n" ]; then gh issue comment "$n" -b "$body"; else gh issue create -t "$ISSUE_TITLE" -b "$body"; fi

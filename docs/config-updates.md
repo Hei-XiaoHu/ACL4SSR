@@ -2,6 +2,15 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-10-07 规则集合并与每日发布（重构第 3 步）
+
+- 本地规则从 `Clash/rule/` 的 12 个历史文件改为 `rules/` 下 10 个文件，与合并集合一一同名；格式统一为每行一条。
+- 约 50 个 provider 合并为 24 个集合（`src/spec.yaml` 的 `sets`，顺序即分流顺序）。AdRules 与 anti-AD 合并去重为一个 mrs（21 万条，约 2 MB）。
+- `tools/build_rules.py` 合并去重（同集合内被 `+.父域` 覆盖的条目删除）并转换 mrs；`.github/workflows/rules.yml` 每日 04:00 及本地规则改动时构建，发布到 `rules` 分支并刷新 fastly jsDelivr 缓存；内容指纹不变则不发布。
+- 失败保护：上游下载失败、集合条目骤减 30% 以上、mrs 转换失败或 `tools/check_rules.py`（真实规则集 46 个关键域名）不通过时不发布，记录到“规则集构建失败” issue，成功后自动关闭。
+- 顺序核对（`build_rules.py --conflicts`）：`category-entertainment` 收录约 870 个游戏平台域名，游戏集合必须先于流媒体；`category-entertainment@cn` 收录 Apple Music / iTunes，苹果先于 direct。与重构前相比，唯一的去向变化是 `ggpht.cn`（本已被广告源拦截）。
+- 规则 CDN 由 testingcf 改为 fastly（推送后 purge 即时生效）。
+
 ## 2026-10-07 策略组精简（重构第 2 步）
 
 31 个组（含 8 个地区组）精简为 13 个，统一“表情 + 短名”，按使用频率排序；组名变化后客户端里保存的选择会重置一次。

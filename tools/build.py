@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import copy
+import ipaddress
 import re
 import sys
 from pathlib import Path
@@ -17,11 +18,14 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "src" / "spec.yaml"
 TARGETS = ("meta", "stash")
-GEO = "MetaCubeX/meta-rules-dat@meta/geo"
-RAW_SELF = "https://raw.githubusercontent.com/Hei-XiaoHu/ACL4SSR/master"
+RULES_DIR = ROOT / "rules"
 
 S = yaml.safe_load(SPEC.read_text(encoding="utf-8"))
 CDN = S["cdn"]
+REPO = S["repo"]
+RAW_SELF = f"https://raw.githubusercontent.com/{REPO}/master"
+RULES_BASE = f"{CDN}/{REPO}@{S['rules_branch']}"
+OUT_DIR = {"meta": "mihomo", "stash": "stash"}  # rules 分支内的子目录
 GENERATED = "本文件由 tools/build.py 从 src/spec.yaml 生成，请勿手改；改规则请改 src/spec.yaml"
 
 
@@ -32,117 +36,138 @@ NODES_RE = f"^(?!.*({S['node_exclude']})).*"
 
 
 # ---------------------------------------------------------------- 规则集
-def _provider(name: str, spec: dict, target: str) -> dict | None:
-    if target in spec:
-        spec = spec[target]
-    elif any(t in spec for t in TARGETS):
-        return None  # 仅对其他客户端生效
-    ext_mrs = target == "meta"
-    if "geosite" in spec or "geoip" in spec:
-        kind = "geosite" if "geosite" in spec else "geoip"
-        behavior = "domain" if kind == "geosite" else "ipcidr"
-        fmt, ext = ("mrs", "mrs") if ext_mrs else ("yaml", "yaml")
-        url = f"{CDN}/{GEO}/{kind}/{spec[kind]}.{ext}"
-    elif "acl" in spec:
-        behavior, fmt, ext = "classical", "text", "list"
-        url = f"{CDN}/ACL4SSR/ACL4SSR@master/{spec['acl']}"
-    elif "self" in spec:
-        behavior, fmt, ext = spec.get("behavior", "classical"), "yaml", "yaml"
-        url = f"{CDN}/{S['self_repo']}/{spec['self']}"
-    else:
-        behavior, fmt = spec["behavior"], spec["format"]
-        ext = {"mrs": "mrs", "yaml": "yaml", "text": "list"}[fmt]
-        url = spec["url"].replace("{cdn}", CDN)
-    return {
-        "type": "http",
-        "behavior": behavior,
-        "format": fmt,
-        "interval": S["provider_interval"],
-        "path": f"./ruleset/{name}.{ext}",
-        "url": url,
-    }
+SETS = {item["name"]: item for item in S["sets"] if isinstance(item, dict) and "name" in item}
+
+
+def set_type(name: str) -> str:
+    return SETS[name].get("type", "domain")
+
+
+def local_rows(name: str) -> list[str]:
+    """rules/<name>.txt：每行一条，# 注释；domain 用 x / +.x，classical 另可 regex:，ip 为 CIDR。"""
+    path = RULES_DIR / f"{name}.txt"
+    if not path.exists():
+        return []
+    rows = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("regex:") and set_type(name) != "classical":
+            sys.exit(f"rules/{name}.txt: 只有 classical 集合允许 regex: 条目：{line}")
+        if set_type(name) == "ip":
+            ipaddress.ip_network(line, strict=False)
+        elif not line.startswith("regex:") and not re.fullmatch(r"(\+\.)?[a-z0-9*_-]+(\.[a-z0-9*_-]+)*", line):
+            sys.exit(f"rules/{name}.txt: 无法识别的条目：{line}")
+        rows.append(line)
+    return rows
+
+
+def classical_line(row: str) -> str:
+    if row.startswith("regex:"):
+        return f"DOMAIN-REGEX,{row[6:]}"
+    if row.startswith("+."):
+        return f"DOMAIN-SUFFIX,{row[2:]}"
+    return f"DOMAIN,{row}"
+
+
+def sources(name: str, target: str) -> list[str]:
+    src = SETS[name].get("from", [])
+    return list(src.get(target, [])) if isinstance(src, dict) else list(src)
+
+
+def native_rules(name: str, target: str) -> list[str]:
+    """Stash 用原生 GEOSITE/GEOIP 代替的来源。"""
+    if target != "stash":
+        return []
+    return [S["stash_native"][src] for src in sources(name, target) if src in S["stash_native"]]
+
+
+def fetched_sources(name: str, target: str) -> list[str]:
+    native = S["stash_native"] if target == "stash" else {}
+    return [src for src in sources(name, target) if src not in native]
+
+
+def has_provider(name: str, target: str) -> bool:
+    return bool(local_rows(name) or fetched_sources(name, target))
+
+
+def provider_file(name: str, target: str) -> str:
+    ext = "yaml" if target == "stash" or set_type(name) == "classical" else "mrs"
+    return f"{OUT_DIR[target]}/{name}.{ext}"
 
 
 def providers(target: str) -> dict:
     out = {}
-    for name, spec in S["providers"].items():
-        p = _provider(name, spec, target)
-        if p:
-            out[name] = p
+    for name in SETS:
+        if not has_provider(name, target):
+            continue
+        rel = provider_file(name, target)
+        behavior = {"domain": "domain", "ip": "ipcidr", "classical": "classical"}[set_type(name)]
+        out[name] = {
+            "type": "http",
+            "behavior": behavior,
+            "format": rel.rsplit(".", 1)[1],
+            "interval": S["provider_interval"],
+            "path": f"./ruleset/{rel.split('/', 1)[1]}",
+            "url": f"{RULES_BASE}/{rel}",
+        }
     return out
 
 
-def quic_rule(target: str, avail: dict) -> str:
-    def leaf(name):
-        if target == "stash" and name == "geolocation-!cn":
-            return "(GEOSITE,geolocation-!cn)"
-        if name not in avail or avail[name]["behavior"] not in ("domain", "classical"):
-            sys.exit(f"[{target}] QUIC 集合不存在或不含域名: {name}")
-        return f"(RULE-SET,{name})"
+def _logical(kind: str, *children: str) -> str:
+    return f"({kind},({','.join(children)}))"
 
-    def logical(kind, *children):
-        return f"({kind},({','.join(children)}))"
 
-    services = logical("OR", *(leaf(name) for name in S["quic_reject_sets"]))
-    ip_services = []
-    for name in S["quic_reject_ip_sets"]:
-        if name not in avail or avail[name]["behavior"] != "ipcidr":
-            sys.exit(f"[{target}] QUIC IP 集合不存在或不是 ipcidr: {name}")
-        ip_services.append(f"(RULE-SET,{name},no-resolve)")
-    if ip_services:
-        services = logical("OR", services, *ip_services)
+def _any(parts: list[str]) -> str:
+    return parts[0] if len(parts) == 1 else _logical("OR", *parts)
+
+
+def _leaf(name: str, target: str) -> str:
+    """集合在逻辑规则中的条件：RULE-SET 与 Stash 原生规则取并集；IP 集合不额外解析。"""
+    suffix = ",no-resolve" if set_type(name) == "ip" else ""
+    parts = [f"(RULE-SET,{name}{suffix})"] if has_provider(name, target) else []
+    parts += [f"({rule}{suffix})" for rule in native_rules(name, target)]
+    if not parts:
+        sys.exit(f"[{target}] 逻辑规则引用的集合没有任何来源: {name}")
+    return _any(parts)
+
+
+def quic_rule(target: str) -> str:
+    services = [_leaf(n, target) for n in S["quic_reject"]]
+    services += [_leaf(n, target) for n in S["quic_reject_ip"]]
     # 正向域名白名单是关键：未知目标和纯 IP 不会因缺少 cn 域名而被拒绝。
-    china_domain = "(RULE-SET,cn)" if target == "meta" else "(GEOSITE,cn)"
-    china_ip = "(RULE-SET,cn-ip,no-resolve)" if target == "meta" else "(GEOIP,CN,no-resolve)"
-    # cn 含“国内 DNS 更优”的国外站；与路由/DNS 一样，明确 !cn 分类优先。
-    domestic = logical("AND", china_domain, logical("NOT", leaf("geolocation-!cn")))
-    exemptions = logical("OR", *(leaf(name) for name in S["quic_exempt_sets"]))
+    # cn 含“国内 DNS 更优”的国外站；与路由一样，明确的境外归属优先。
+    domestic = _logical("AND", _leaf("cn", target), _logical("NOT", _leaf("foreign", target)))
+    exemptions = _any([_leaf(n, target) for n in S["quic_exempt"]])
     # Stash 能识别 QUIC 协议，只拦真正的 QUIC（任意端口），游戏自定义 UDP 不受影响；
     # mihomo 没有协议规则，用 UDP443 近似。
     transport = "(PROTOCOL,QUIC)" if target == "stash" else "(DST-PORT,443)"
-    expression = logical(
-        "AND", "(NETWORK,udp)", transport, services,
-        logical("NOT", domestic), logical("NOT", china_ip), logical("NOT", exemptions),
+    expression = _logical(
+        "AND", "(NETWORK,udp)", transport, _any(services),
+        _logical("NOT", domestic), _logical("NOT", _leaf("cn-ip", target)), _logical("NOT", exemptions),
     )
     return expression[1:-1] + ",REJECT"
 
 
-def render_rules(rule_list: list, target: str, avail: dict) -> list[str]:
-    out = []
-    for r in rule_list:
-        if r.get("only") and r["only"] != target:
-            continue
-        if r.get("quic"):
-            out.append(quic_rule(target, avail))
-            continue
-        if "raw" in r:
-            out.append(r["raw"])
-            continue
-        if r["set"] not in avail:
-            if r["set"] not in S["providers"]:
-                sys.exit(f"[{target}] 未定义的源规则集: {r['set']}")
-            continue
-        line = f"RULE-SET,{r['set']},{r['to']}"
-        if r.get("no_resolve"):
-            line += ",no-resolve"
-        out.append(line)
-    return out
-
-
 def rules(target: str) -> list[str]:
-    avail = providers(target)
     out = []
     if target == "stash":
         # Stash 用 follow-rule + DoH 端点 IP 规则指定出站（该 IP 的其他流量也受影响）
         for u in S["dns_remote"]:
             ip = re.match(r"https://([\d.]+)/", u).group(1)
             out.append(f"IP-CIDR,{ip}/32,{DNS_GROUP},no-resolve")
-    out += render_rules(S["rules"], target, avail)
-    # 引用的规则集必须存在
-    used = set(re.findall(r"RULE-SET,([^,)]+)", "\n".join(out)))
-    missing = used - set(avail)
-    if missing:
-        sys.exit(f"[{target}] rules 引用了未定义的规则集: {sorted(missing)}")
+    for item in S["sets"]:
+        if item == "quic":
+            out.append(quic_rule(target))
+        elif "match" in item:
+            out.append(f"MATCH,{item['match']}")
+        elif item.get("to"):
+            name, to = item["name"], item["to"]
+            ip_suffix = ",no-resolve" if item.get("no_resolve") and set_type(name) == "ip" else ""
+            if has_provider(name, target):
+                out.append(f"RULE-SET,{name},{to}{ip_suffix}")
+            out += [f"{rule},{to}{ip_suffix}" for rule in native_rules(name, target)]
     return out
 
 
@@ -185,24 +210,6 @@ def fake_ip_filter() -> list:
     return list(dict.fromkeys([*S["dns_system_domains"], *S["fake_ip_filter"]]))
 
 
-def local_provider_domains(name: str) -> list[str]:
-    """把本地 domain / classical DOMAIN 条目复用为 Stash DNS policy。"""
-    spec = S["providers"][name]
-    rows = yaml.safe_load((ROOT / spec["self"]).read_text(encoding="utf-8"))["payload"]
-    if spec.get("behavior") == "domain":
-        return rows
-    domains = []
-    for row in rows:
-        kind, value = row.split(",", 1)
-        if kind == "DOMAIN":
-            domains.append(value)
-        elif kind == "DOMAIN-SUFFIX":
-            domains.append(f"+.{value}")
-        else:
-            sys.exit(f"{name}: DNS policy 无法表达 {row}，请使用精确域名/后缀")
-    return domains
-
-
 def dns_policy(target: str, *, overseas: bool = False) -> dict:
     """只含“内网 → system”与“已知国内 → 国内 DoH”；未命中的域名走主 nameserver（境外）。
 
@@ -219,18 +226,16 @@ def dns_policy(target: str, *, overseas: bool = False) -> dict:
     china = S["dns_china"]
     if target == "stash":
         # Stash 没有 direct-nameserver：默认直连但不在 cn 里的下载集合单独指定国内 DNS
-        for name in S["stash_dns_china_sets"]:
-            spec = S["providers"][name]
-            if "self" in spec:
-                for domain in local_provider_domains(name):
-                    if domain in policy and policy[domain] != china:
-                        sys.exit(f"DNS policy 冲突: {domain}")
-                    policy[domain] = china
-            else:
-                geo = spec.get("stash", spec)["geosite"]
-                if "@" in geo:
-                    sys.exit(f"Stash DNS 未确认支持 geosite 属性标签: {geo}")
-                policy[f"geosite:{geo}"] = china
+        for item in S["stash_dns_china"]:
+            if item.startswith("geosite:"):
+                if "@" in item:
+                    sys.exit(f"Stash DNS 未确认支持 geosite 属性标签: {item}")
+                policy[item] = china
+                continue
+            for domain in local_rows(item):
+                if domain in policy and policy[domain] != china:
+                    sys.exit(f"DNS policy 冲突: {domain}")
+                policy[domain] = china
     policy["rule-set:cn" if target == "meta" else "geosite:cn"] = china
     return policy
 
@@ -319,19 +324,19 @@ def full_config(target: str, *, with_groups: bool, final: bool) -> list[tuple[st
 
 
 HDR_META = [
-    "规则：MetaCubeX/meta-rules-dat（v2fly 社区，每日同步）mrs 二进制规则集，匹配快、内存小",
-    "去广告：AdRules + anti-AD（mrs）；默认走代理的境外 UDP443 回落 TCP，默认直连/国内/游戏/下载/未知 IP 保留",
+    f"规则：本仓库 rules 分支（每日合并本地 rules/*.txt 与 MetaCubeX 等上游）mrs 二进制规则集，匹配快、内存小",
+    "去广告：AdRules + anti-AD 合并去重；默认走代理的境外 UDP443 回落 TCP，默认直连/国内/游戏/下载/未知 IP 保留",
     "DNS：已知国内走国内 DoH，其余经 🛰️ DNS 查境外 DoH，内网用系统 DNS；DIRECT 出站用国内 direct-nameserver",
     "安全：allow-lan 关闭，DNS 仅监听 127.0.0.1；find-process-mode always（仅用于连接列表显示应用名）",
-    f"规则 CDN 为 {CDN}，失效时全局替换为 https://fastly.jsdelivr.net/gh",
+    f"规则 CDN 为 {CDN}，失效时全局替换为 https://cdn.jsdelivr.net/gh",
 ]
 HDR_STASH = [
-    "规则：MetaCubeX/meta-rules-dat 的 domain/ipcidr yaml；国内外兜底复用 Stash 原生 GEOSITE + GEOIP,CN",
-    "  （与 geosite DNS policy 顺序对齐，不额外下载全量 cn/geolocation-!cn 文本）",
+    "规则：本仓库 rules 分支的 domain/ipcidr yaml；国内外兜底复用 Stash 原生 GEOSITE + GEOIP,CN",
+    "  （不额外下载全量 cn/geolocation-!cn 文本）",
     "去广告：AWAvenue 秋风规则（约 900 条，含广告+隐私跟踪+流氓推广）",
     "DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS；内网系统 DNS，已知国内与游戏下载走国内 DoH，其余境外 DoH",
     "geosite DNS policy 需 Stash iOS 3.4.0+；GEOSITE 数据首次从 GitHub 按需加载，请确保 GitHub 可达",
-    f"规则 CDN 为 {CDN}，失效时全局替换为 https://fastly.jsdelivr.net/gh",
+    f"规则 CDN 为 {CDN}，失效时全局替换为 https://cdn.jsdelivr.net/gh",
 ]
 
 
@@ -391,7 +396,7 @@ def overseas() -> str:
         "效果：分流规则与策略组完全不变；DNS 中所有国内服务器换成 Cloudflare / Google 的 DoH + DoT",
         "  主 DNS 仍经 🛰️ DNS 组发出（想更快可在面板把该组切到 DIRECT）；内网仍走 system",
         "用法：Clash Party → 覆写 → 导入远程链接：",
-        f"  {CDN}/{S['self_repo']}/Clash/override/overseas.yaml",
+        f"  {CDN}/{REPO}@master/Clash/override/overseas.yaml",
         "  然后在订阅的「编辑信息」里勾选此覆写",
         "前提：设置里关闭「控制 DNS 设置」，否则软件自身 DNS 设置优先级更高，本文件的 dns! 不生效",
         "dns! 强制整段替换",

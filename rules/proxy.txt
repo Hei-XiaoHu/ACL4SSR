@@ -1,0 +1,7 @@
+# 格式：每行一条；example.com 精确匹配，+.example.com 含子域名；# 开头为注释。
+
+# 🚀 节点选择补充：与上游 GitHub、Telegram 合并，排在微软/苹果等默认直连组之前。
+# 放被墙但会被默认直连的组或 cn（含整个 .cn 后缀）截走的域名。
+# OneDrive 网页版/分享页/API：被墙，但会被 Ⓜ️ 微软（默认直连）先截走；同步与文件传输域名不受影响，仍直连
+onedrive.live.com
++.onedrive.com

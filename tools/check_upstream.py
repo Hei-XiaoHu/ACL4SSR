@@ -6,9 +6,9 @@
 失败条件：
   1. Claude / AI 相关域名被 geosite:cn 收录：本地解析（UDP、fake-ip-filter、IP 规则）会改用国内 DNS，
      且 Stash 的 GEOSITE,cn 兜底可能把它判为直连。
-  2. 排在广告规则之后的 AI 域名（claude / extra-ai / shared-auth）被广告源整域拦截：
-     会被 REJECT 而不是走 AI。需要的端点应挪进 claude-essential。
-  3. 游戏下载补充直连条目被广告源拦截（下载会失败）。
+  2. 排在广告规则之后的本地 AI 域名（rules/ai.txt）被广告源整域拦截：
+     会被 REJECT 而不是走 AI。需要的端点应挪进 rules/ai-essential.txt。
+  3. 本地直连/游戏/代理补充条目（rules/direct.txt、game-proxy.txt、proxy.txt）被广告源拦截。
 广告源只拦截某个子域（如 Intercom 的分析上报）属预期，不算失败。
 """
 from __future__ import annotations
@@ -69,22 +69,20 @@ def covers(lists: tuple[set[str], set[str]], domain: str) -> str | None:
 
 
 def local(name: str) -> list[str]:
-    return [d.lower() for d in build.local_provider_domains(name)]
+    return [d.lower() for d in build.local_rows(name)]
 
 
 def main() -> int:
     with concurrent.futures.ThreadPoolExecutor(len(SOURCES)) as pool:
         data = dict(zip(SOURCES, pool.map(fetch, SOURCES)))
     problems = []
-    ai_like = {n: local(n) for n in ("claude-essential", "claude", "extra-ai", "shared-auth", "claude-telemetry")}
+    ai_like = {n: local(n) for n in ("ai-essential", "ai", "auth", "telemetry")}
     for name, domains in ai_like.items():
         for domain in domains:
             hit = covers(data["geosite:cn"], domain)
             if hit:
                 problems.append(f"[cn] {name}: {domain} 被 geosite:cn 的 {hit} 收录")
-    after_ads = {n: ai_like[n] for n in ("claude", "extra-ai", "shared-auth")}
-    after_ads["game-download-extra"] = local("game-download-extra")
-    after_ads["game-proxy-extra"] = local("game-proxy-extra")
+    after_ads = {n: local(n) for n in ("ai", "direct", "game-proxy", "proxy")}
     for source in ("AdRules", "anti-AD", "AWAvenue"):
         for name, domains in after_ads.items():
             for domain in domains:
@@ -93,10 +91,10 @@ def main() -> int:
                     problems.append(f"[广告] {name}: {domain} 被 {source} 的 {hit} 拦截")
     # 仅提示：essential 被广告源收录是预期（它排在广告前），列出来便于了解覆盖关系
     for source in ("AdRules", "anti-AD", "AWAvenue"):
-        for domain in ai_like["claude-essential"]:
+        for domain in ai_like["ai-essential"]:
             hit = covers(data[source], domain)
             if hit:
-                print(f"i {domain} 也在 {source}（{hit}），由排在广告前的 claude-essential 放行到 AI")
+                print(f"i {domain} 也在 {source}（{hit}），由排在广告前的 ai-essential 放行到 AI")
     if problems:
         print("\n".join(problems))
         return 1

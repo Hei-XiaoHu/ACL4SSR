@@ -1,0 +1,21 @@
+# 强制直连 → 🎯 直连（最前面，先于广告与一切分流）。classical 集合，唯一允许 regex: 的文件。
+# 格式：每行一条；example.com 精确，+.example.com 含子域名，regex:<正则> 为完整域名正则；# 开头为注释。
+
+# Epic 的下载域名；按仍在维护的 v2fly epicgames 源匹配，不能放行任意同名站点。
+# https://github.com/v2fly/domain-list-community/blob/master/data/epicgames
+# 上游 MRS/domain YAML 不包含这些 regexp，故在本地 classical 集合补齐。
+regex:^epicgames-download[0-9]\.akamaized\.net$
+regex:^epicgames-download[0-9]-[0-9]+\.file\.myqcloud\.com$
+regex:^cdn[0-9]-epicgames-[0-9]+\.file\.myqcloud\.com$
+
+# 功能例外：只保留原 UnBan 中的反跟踪资源、地震通知和视频播放接口。
+# 不放行 tracking.miui.com、app.adjust.com、友盟统计等跟踪域名。
+# 每条必须有明确功能用途；不要把统计服务的整个后缀加进来。
+# Firefox 的反跟踪规则资源
+tracking-protection.cdn.mozilla.net
+# 地震通知
+dizhensubao.getui.com
+# QQ 视频播放/版权接口，限定精确域名
+fairplay.l.qq.com
+livew.l.qq.com
+vd.l.qq.com

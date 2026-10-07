@@ -1,0 +1,7 @@
+# 格式：每行一条；example.com 精确匹配，+.example.com 含子域名；# 开头为注释。
+
+# 🚀 节点选择 · 共享人机验证（排在广告之前）：仅匹配明确主机，不泛化整个 Cloudflare / Arkose。
+# 走低延迟的通用节点而非 AI 出口，验证更快。
+# 域名规则不能识别“是哪一个网站调用了同一验证码主机”。
+challenges.cloudflare.com
+client-api.arkoselabs.com

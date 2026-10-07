@@ -1,6 +1,8 @@
 # ============================================================================
-# 配置与规则源头 —— 改完运行：python3 tools/build.py
-# 生成（请勿手改，CI 会校验一致性）：
+# 配置与规则源头
+#   python3 tools/build.py         生成下面七份配置（请勿手改，CI 会校验一致性）
+#   python3 tools/build_rules.py   合并本地 rules/*.txt 与上游列表 → rules 分支（Action 每日 04:00 自动跑）
+# 生成：
 #   Clash/config/ACL4SSR_Online_Full_AdblockPlus.ini          subconverter · mihomo
 #   Clash/config/ACL4SSR_Online_Full_AdblockPlus_Stash.ini    subconverter · Stash
 #   Clash/customBaseConfigs/dns_enhanced.yml                  上面 ini 的底包 · mihomo
@@ -10,9 +12,11 @@
 #   Clash/override/overseas.yaml                              Clash Party 远程覆写 · 国外模式
 # ============================================================================
 
-# 规则下载 CDN（jsDelivr 失效时可换 https://fastly.jsdelivr.net/gh 或 https://cdn.jsdelivr.net/gh）
-cdn: https://testingcf.jsdelivr.net/gh
-self_repo: Hei-XiaoHu/ACL4SSR@master
+# 合并后的规则集发布在本仓库 rules 分支，经 jsDelivr 下载。
+# fastly 节点在推送后调用 purge 立即生效；失效时可换 https://cdn.jsdelivr.net/gh 或 https://testingcf.jsdelivr.net/gh
+cdn: https://fastly.jsdelivr.net/gh
+repo: Hei-XiaoHu/ACL4SSR
+rules_branch: rules
 provider_interval: 86400
 
 test_url: https://cp.cloudflare.com/generate_204
@@ -94,148 +98,72 @@ groups:
   - {name: 🛰️ DNS, proxies: *P}             # 境外 DoH 的出口
   - {name: 🛑 广告, proxies: [REJECT, DIRECT]}
 
-# 规则集。简写：
-#   geosite: X / geoip: X   MetaCubeX/meta-rules-dat（mihomo 用 mrs，Stash 用 yaml）
-#   acl: 路径               ACL4SSR/ACL4SSR 的 classical 文本
-#   self: 路径              本仓库的 classical yaml
-#   meta: / stash:          仅对该客户端生效，或为该客户端单独指定来源
-providers:
-  extra-direct: {self: Clash/rule/extra-direct.txt}
-  extra-ai: {self: Clash/rule/extra-ai.txt}
-  extra-proxy: {self: Clash/rule/extra-proxy.txt}
-  claude: {self: Clash/rule/claude.txt, behavior: domain}
-  claude-essential: {self: Clash/rule/claude-essential.txt, behavior: domain}
-  claude-telemetry: {self: Clash/rule/claude-telemetry.txt, behavior: domain}
-  claude-ip: {self: Clash/rule/claude-ip.txt, behavior: ipcidr}
-  shared-auth: {self: Clash/rule/shared-auth.txt, behavior: domain}
-  quic-exempt: {self: Clash/rule/quic-exempt.txt, behavior: domain}
-  private: {geosite: private}
-  private-ip: {geoip: private}
-  functional-direct: {self: Clash/rule/functional-direct.txt, behavior: domain}
-  adrules:
-    meta: {behavior: domain, format: mrs, url: '{cdn}/Cats-Team/AdRules@main/adrules-mihomo.mrs'}
-  anti-ad:
-    meta: {behavior: domain, format: mrs, url: https://anti-ad.net/mihomo.mrs}
-  awavenue:   # 移动端用轻量集合；不能仅凭文本条数断言实际峰值内存
-    stash: {behavior: domain, format: yaml, url: '{cdn}/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.yaml'}
-  ai: {geosite: category-ai-!cn}
-  googlefcm: {geosite: googlefcm}
-  google-cn: {geosite: google-cn}
-  google: {geosite: google}
-  # Steam CM 长连接（登录/好友/库同步信令）流量小，跟随 🎮 游戏；上游 games@cn 含 steamserver.net，需提前截走
-  game-proxy-extra: {self: Clash/rule/game-proxy-extra.txt, behavior: domain}
-  games-cn: {geosite: category-games@cn}   # 含原 steam@cn 全部条目与国内主机/游戏平台
-  game-download-cn: {geosite: category-game-platforms-download@cn}
-  game-download: {geosite: category-game-platforms-download}
-  # 上游下载集合只逐个列主机名；补 Steam 整个内容 CDN、EA/GOG 下载 CDN 与旧 SteamCN 直连条目
-  game-download-extra: {self: Clash/rule/game-download-extra.txt, behavior: domain}
-  github: {geosite: github}
-  bing: {geosite: bing}
-  onedrive: {geosite: onedrive}
-  microsoft: {geosite: microsoft}
-  apple: {geosite: apple}
-  telegram: {geosite: telegram}
-  communication: {geosite: category-communication}
-  telegram-ip: {geoip: telegram}
-  netease: {geosite: netease}
-  epicgames: {geosite: epicgames}
-  ea: {geosite: ea}
-  sony: {geosite: sony}
-  steam: {geosite: steam}
-  nintendo: {geosite: nintendo}
-  games: {geosite: category-games-!cn}   # 补齐 Battle.net / Ubisoft / GOG / Riot / Rockstar 等
-  youtube: {geosite: youtube}
-  netflix: {geosite: netflix}
-  netflix-ip: {geoip: netflix}
-  bahamut: {geosite: bahamut}
-  bilibili: {geosite: bilibili}
-  entertainment-cn: {geosite: category-entertainment-cn}
-  entertainment-cn-attr: {geosite: category-entertainment@cn}
-  # v2fly 明确的境外娱乐分类，避免旧 ProxyMedia 的 anthropic/openai 等宽泛关键词
-  proxymedia: {geosite: category-entertainment}
-  gfw: {geosite: gfw}
-  cn:
-    meta: {geosite: cn}
-    # Stash 复用原生 GEOSITE,cn；不再下载混有历史 IP 的 ChinaDomain
-  geolocation-!cn:
-    meta: {geosite: geolocation-!cn}
-  cn-ip:
-    meta: {geoip: cn}
+# 规则集与分流顺序（自上而下匹配，顺序即规则顺序）。
+#   每个集合 = rules/<name>.txt（若存在）+ from 中的上游，构建时合并去重，发布为 <name>.mrs / <name>.yaml。
+#   from 简写：geosite:X / geoip:X = MetaCubeX/meta-rules-dat；其他名字见下面 upstream。
+#   from 可写成 {meta: [...], stash: [...]} 为两个客户端分别指定来源。
+#   type: domain（默认）/ ip / classical（仅 local-direct，含正则）
+#   no_resolve: IP 集合不为匹配而额外解析域名
+#   to 省略：只供 QUIC 豁免引用，不生成分流规则
+#   - quic 标记定向 QUIC 拒绝规则的位置；最后一条 match 为兜底
+upstream:
+  adrules: {url: 'https://raw.githubusercontent.com/Cats-Team/AdRules/main/adrules_domainset.txt'}
+  anti-ad: {url: 'https://anti-ad.net/domains.txt', plain: suffix}   # 纯域名按后缀生效
+  awavenue: {url: 'https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/Filters/AWAvenue-Ads-Rule-Clash.yaml'}
 
-# 分流规则，自上而下匹配。
-#   set: 规则集名（该客户端没有此规则集时自动跳过）  raw: 原样规则
-#   no_resolve: 不为此规则额外解析域名；已有真实 IP 的连接仍可匹配
-#   only: 仅对该客户端生效
-rules:
-  - {set: extra-direct, to: 🎯 直连}
-  - {set: private, to: DIRECT}
-  - {set: private-ip, to: DIRECT, no_resolve: true}
-  - {set: functional-direct, to: 🎯 直连}
-  - {set: claude-telemetry, to: 🛑 广告}
+# Stash 直接使用原生 GEOSITE/GEOIP 的来源（不下载对应的大列表）
+stash_native:
+  geosite:geolocation-!cn: GEOSITE,geolocation-!cn
+  geosite:cn: GEOSITE,cn
+  geoip:cn: GEOIP,CN
+
+sets:
+  - {name: local-direct, to: 🎯 直连, type: classical}
+  - {name: private, to: DIRECT, from: [geosite:private]}
+  - {name: private-ip, to: DIRECT, type: ip, from: [geoip:private], no_resolve: true}
+  - {name: telemetry, to: 🛑 广告}
   # 默认走代理的境外 QUIC；默认直连的服务、国内、游戏、下载、通信、自定义豁免和未知 IP 不拦
-  # mihomo 无协议规则，按 UDP443 判断；Stash 用 PROTOCOL,QUIC 只拦真正的 QUIC
-  - {quic: true}
+  - quic
   # 只给明确的功能端点必要例外，不能把整个 Claude / AI 家族放到广告规则前
-  - {set: claude-essential, to: 🤖 AI}
-  # 验证码服务被很多网站共用，走通用节点而非 AI 专用出口
-  - {set: shared-auth, to: 🚀 节点选择}
-  - {set: adrules, to: 🛑 广告}
-  - {set: anti-ad, to: 🛑 广告}
-  - {set: awavenue, to: 🛑 广告}
-  - {set: claude, to: 🤖 AI}
-  - {set: extra-ai, to: 🤖 AI}
+  - {name: ai-essential, to: 🤖 AI}
+  # 验证码服务被很多网站共用，走通用节点（低延迟）而非 AI 出口
+  - {name: auth, to: 🚀 节点选择}
+  # mihomo 用 AdRules + anti-AD（两者有独有规则）；iOS 用轻量 AWAvenue
+  - {name: ads, to: 🛑 广告, from: {meta: [adrules, anti-ad], stash: [awavenue]}}
   # AI 放在微软/谷歌之前，否则 copilot.microsoft.com 等会被微软组截走
-  - {set: ai, to: 🤖 AI}
+  - {name: ai, to: 🤖 AI, from: ['geosite:category-ai-!cn']}
   # 已核实的 Anthropic 自有网段兜底；不把共享 Cloudflare/CDN IP 全部送进 AI
-  - {set: claude-ip, to: 🤖 AI, no_resolve: true}
-  - {set: googlefcm, to: 🔍 谷歌}
-  # 大流量下载直连在所有游戏代理规则之前；CM 信令走游戏平台，须在 games-cn 之前
-  - {set: game-proxy-extra, to: 🎮 游戏}
-  - {set: games-cn, to: 🎯 直连}
-  - {set: game-download-cn, to: 🎯 直连}
-  - {set: game-download, to: 🎯 直连}
-  - {set: game-download-extra, to: 🎯 直连}
+  - {name: ai-ip, to: 🤖 AI, type: ip, no_resolve: true}
+  # Steam CM 信令走游戏：上游 games@cn 含 steamserver.net，必须先于 direct
+  - {name: game-proxy, to: 🎮 游戏}
+  # B 站先于国内娱乐集合，切到港台节点时整站跟随
+  - {name: bilibili, to: 📺 B站, from: [geosite:bilibili]}
+  # 苹果先于 direct：category-entertainment@cn 收录了 Apple Music / iTunes
+  - {name: apple, to: 🍎 苹果, from: [geosite:apple]}
+  # 大流量下载与国内服务：先于游戏平台、微软等，保证下载 CDN 直连
+  - name: direct
+    to: 🎯 直连
+    from: ['geosite:category-games@cn', 'geosite:category-game-platforms-download', geosite:netease,
+           geosite:category-entertainment-cn, 'geosite:category-entertainment@cn']
   # geosite:microsoft 含 GitHub，而微软组默认直连；GitHub 在国内直连很慢，先行截走
-  - {set: github, to: 🚀 节点选择}
-  # 被墙但默认服务分组走直连的域名补充
-  - {set: extra-proxy, to: 🚀 节点选择}
-  - {set: bing, to: Ⓜ️ 微软}
-  - {set: onedrive, to: Ⓜ️ 微软}
-  - {set: microsoft, to: Ⓜ️ 微软}
-  - {set: apple, to: 🍎 苹果}
-  - {set: telegram, to: 🚀 节点选择}
-  - {set: telegram-ip, to: 🚀 节点选择, no_resolve: true}
-  - {set: netease, to: 🎯 直连}
-  - {set: epicgames, to: 🎮 游戏}
-  - {set: ea, to: 🎮 游戏}
-  - {set: sony, to: 🎮 游戏}
-  - {set: steam, to: 🎮 游戏}
-  - {set: nintendo, to: 🎮 游戏}
-  - {set: youtube, to: 🎬 流媒体}
-  # 专用 AI / FCM / YouTube 策略优先，其他 Google 服务统一到谷歌组
-  - {set: google-cn, to: 🔍 谷歌}
-  - {set: google, to: 🔍 谷歌}
-  - {set: netflix, to: 🎬 流媒体}
-  - {set: netflix-ip, to: 🎬 流媒体, no_resolve: true}
-  - {set: bahamut, to: 🎬 流媒体}
-  - {set: bilibili, to: 📺 B站}
-  # 专用策略在前；国内娱乐/国行标签优先于通用境外游戏、娱乐分类
-  - {set: entertainment-cn, to: 🎯 直连}
-  - {set: entertainment-cn-attr, to: 🎯 直连}
-  - {set: games, to: 🎮 游戏}
-  - {set: proxymedia, to: 🎬 流媒体}
-  - {set: gfw, to: 🚀 节点选择}
-  # 已知国外域名直接走 🚀 节点选择（🐟 只留给真正未命中的流量），免去下面 IP 规则触发的 DNS 解析。
+  - {name: proxy, to: 🚀 节点选择, from: [geosite:github, geosite:telegram]}
+  - {name: proxy-ip, to: 🚀 节点选择, type: ip, from: [geoip:telegram], no_resolve: true}
+  - {name: microsoft, to: Ⓜ️ 微软, from: [geosite:bing, geosite:onedrive, geosite:microsoft]}
+  # 游戏平台先于流媒体：category-entertainment 收录了大量 Steam/EA/任天堂域名
+  - {name: games, to: 🎮 游戏, from: [geosite:epicgames, geosite:ea, geosite:sony, geosite:steam, geosite:nintendo, 'geosite:category-games-!cn']}
+  # YouTube 先于谷歌集合（googlevideo 也在 geosite:google 中）
+  - {name: media, to: 🎬 流媒体, from: [geosite:youtube, geosite:netflix, geosite:bahamut, geosite:category-entertainment]}
+  - {name: media-ip, to: 🎬 流媒体, type: ip, from: [geoip:netflix], no_resolve: true}
+  - {name: google, to: 🔍 谷歌, from: [geosite:googlefcm, geosite:google-cn, geosite:google]}
+  # 已知国外域名直接走节点选择（🐟 只留给真正未命中的流量），免去下面 IP 规则触发的 DNS 解析。
   # 必须在 cn 之前：MetaCubeX 的 cn 合并了 felixonmars dnsmasq-china-list（“国内 DNS 解析更优”的域名），
   # 含 browserleaks.com、acm.org、cambridge.org 等约 150 个国外站，放后面会被 cn 截走直连
-  - {set: geolocation-!cn, to: 🚀 节点选择}
-  - {raw: 'GEOSITE,geolocation-!cn,🚀 节点选择', only: stash}
-  - {set: cn, to: 🎯 直连, no_resolve: true}
-  - {raw: 'GEOSITE,cn,🎯 直连', only: stash}
-  # 以下两条需要解析域名得到 IP，放在最后，只有前面都没命中的域名才会解析
-  - {set: cn-ip, to: 🎯 直连}
-  - {raw: 'GEOIP,CN,🎯 直连', only: stash}
-  - {raw: 'MATCH,🐟 漏网之鱼'}
+  - {name: foreign, to: 🚀 节点选择, from: [geosite:gfw, 'geosite:geolocation-!cn']}
+  - {name: cn, to: 🎯 直连, from: [geosite:cn], no_resolve: true}
+  # 需要解析域名得到 IP，放在最后，只有前面都没命中的域名才会解析
+  - {name: cn-ip, to: 🎯 直连, type: ip, from: [geoip:cn]}
+  - {name: quic-exempt, from: [geosite:category-communication, geosite:google-cn]}
+  - {match: 🐟 漏网之鱼}
 
 # 国外模式（Clash Party 远程覆写，仅海外电脑）：分流规则与策略组完全不变，
 # 只把 DNS 中所有国内服务器换成 Cloudflare / Google 的 DoH + DoT；内网仍走 system。
@@ -243,14 +171,13 @@ overseas:
   dns_bootstrap: [1.1.1.1, 8.8.8.8]
   dns: [https://1.1.1.1/dns-query, https://8.8.8.8/dns-query, tls://1.1.1.1, tls://8.8.8.8]
 
-# 已识别境外域名与明确自有 IP 尝试让 UDP443 回落 TCP，不把未知 IP 当境外。
+# 定向 QUIC 拒绝：已识别境外域名与明确自有 IP 让 UDP443 回落 TCP，不把未知 IP 当境外。
 # 已有国内真实 IP 豁免；cn/!cn 域名交集采用明确境外归属优先。
-quic_reject_sets: [claude, extra-ai, ai, youtube, netflix, shared-auth, extra-proxy, proxymedia, gfw, geolocation-!cn]
-quic_reject_ip_sets: [claude-ip]
-# 豁免：自定义列表、保留 google-cn 的 QUIC 兼容例外；默认直连的服务；
-# UDP443 也可能是游戏/语音协议，保护游戏、下载、通信与国内娱乐。
+quic_reject: [ai, auth, proxy, media, foreign]
+quic_reject_ip: [ai-ip]
+# 豁免：自定义列表与通信语音、google-cn；默认直连的服务；游戏与下载（UDP443 也可能是游戏/语音协议）。
 # 只按默认分组判断；手动切换策略组后规则无法感知。
-quic_exempt_sets: [quic-exempt, google-cn, bing, onedrive, microsoft, apple, netease, bilibili, games-cn, game-download-cn, game-download, game-download-extra, games, epicgames, ea, sony, steam, nintendo, entertainment-cn, entertainment-cn-attr, communication]
+quic_exempt: [quic-exempt, direct, bilibili, microsoft, apple, games, game-proxy]
 
 # DNS 模型：已知国内 → 国内 DoH；其余 → 经 🛰️ DNS 查境外 DoH；内网 → system。
 # fake-ip / 系统代理下，走代理的连接把域名交给节点远端解析，本地不查询；
@@ -259,7 +186,7 @@ quic_exempt_sets: [quic-exempt, google-cn, bing, onedrive, microsoft, apple, net
 #         policy 中不放任何“境外”条目，DIRECT 未命中 policy 时一律回到国内 direct-nameserver。
 # Stash：没有 direct-nameserver，DIRECT 也用主 DNS，所以额外给“默认直连但不在 cn 里”的
 #        游戏下载集合指定国内 DNS（下载 CDN 需要就近节点）。geosite policy 需 iOS 3.4.0+。
-stash_dns_china_sets: [game-download, game-download-extra]
+stash_dns_china: ['geosite:category-game-platforms-download', direct]   # direct = rules/direct.txt 的条目
 dns_system_domains:
   - +.lan
   - +.local

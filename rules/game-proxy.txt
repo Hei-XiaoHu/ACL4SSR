@@ -1,7 +1,8 @@
-# 游戏平台补充代理（domain 集合）→ 🎮 游戏，排在 games-cn 之前。
+# 格式：每行一条；example.com 精确匹配，+.example.com 含子域名；# 开头为注释。
+
+# 🎮 游戏补充：排在 direct 集合（含上游国内游戏 games@cn）之前。
 # Steam CM（Connection Manager）：客户端长连接，负责登录、好友/聊天、库同步、下载调度等信令，流量很小。
 # 上游 category-games@cn 含 +.steamserver.net，不提前截走会被判为直连。
 # 下载内容本身（steamcontent / steamusercontent / 国内 CDN）仍由下载集合直连。
-payload:
-  - +.steamserver.net
-  - +.cm.steampowered.com
++.steamserver.net
++.cm.steampowered.com

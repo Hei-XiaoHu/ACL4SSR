@@ -3,7 +3,7 @@
 # 效果：分流规则与策略组完全不变；DNS 中所有国内服务器换成 Cloudflare / Google 的 DoH + DoT
 #   主 DNS 仍经 🛰️ DNS 组发出（想更快可在面板把该组切到 DIRECT）；内网仍走 system
 # 用法：Clash Party → 覆写 → 导入远程链接：
-#   https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/override/overseas.yaml
+#   https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/override/overseas.yaml
 #   然后在订阅的「编辑信息」里勾选此覆写
 # 前提：设置里关闭「控制 DNS 设置」，否则软件自身 DNS 设置优先级更高，本文件的 dns! 不生效
 # dns! 强制整段替换

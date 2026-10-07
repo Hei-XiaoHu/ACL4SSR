@@ -1,0 +1,42 @@
+# 格式：每行一条；example.com 精确匹配，+.example.com 含子域名；# 开头为注释。
+
+# 🤖 AI：与上游 geosite:category-ai-!cn 合并。排在广告之后，接受广告/遥测检查；
+# 必须先于广告放行的端点放 ai-essential.txt。
+
+# ---- Claude 域名家族
+# 精确匹配第三方 CDN，不泛化 b-cdn.net。
+# 核对依据：
+# https://code.claude.com/docs/en/network-config
+# https://code.claude.com/docs/en/desktop
+# https://github.com/v2fly/domain-list-community/blob/master/data/anthropic
+# https://ip.net.coffee/claude/site.html
+# 原则：会把你的 IP 交给 Anthropic 账户/风控的服务走 AI；通用验证码（auth.txt）走 🚀。
++.anthropic.com
++.clau.de
++.claude.ai
++.claude.com
++.claude.app
++.claude.dev
++.claudemcpclient.com
++.claudemcpcontent.com
++.claudeusercontent.com
+servd-anthropic-website.b-cdn.net
+# Anthropic 专属的 Cloudflare CDN 别名；不泛化整个 cloudflare.net
+anthropic.com.cdn.cloudflare.net
+# OAuth 登录（记录登录 IP）
+anthropic.auth0.com
+# 博客 / CMS 内容
+anthropic-com.ghost.io
+# Intercom 客服：会话绑定账户与 IP。全局生效，其他网站的 Intercom 也会走 AI。
+# 其分析上报（api-visitor-analytics.intercom.com）仍由前置广告规则拦截
++.intercom.io
++.intercomcdn.com
+
+# ---- 其他 AI：geosite:category-ai-!cn 未收录的补充
+# Together AI
++.together.ai
++.together.xyz
+# Azure AI Foundry
+ai.azure.com
+# Bing Copilot 旧接口（否则会被 bing 规则分到 Ⓜ️ 微软，默认直连）
+sydney.bing.com
