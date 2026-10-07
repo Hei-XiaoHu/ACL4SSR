@@ -1,8 +1,8 @@
 # 游戏下载补充直连（domain 集合；Stash 同时用于国内 DNS policy）。
-# 原则：国外游戏平台的大流量下载 CDN 一律直连；商店/登录/社区/CM 等小流量走 🎮 游戏平台。
+# 原则：国外游戏平台的大流量下载 CDN 一律直连；商店/登录/社区/CM 等小流量走 🎮 游戏。
 # 上游 category-game-platforms-download 只逐个列主机名，以下是核对后发现的漏网条目。
 payload:
-  # Steam 内容/下载 CDN：上游只列 cacheN-xxx，新编号（如 cache10-hkg1）会漏到 🎮 游戏平台
+  # Steam 内容/下载 CDN：上游只列 cacheN-xxx，新编号（如 cache10-hkg1）会漏到 🎮 游戏
   - +.steamcontent.com
   # Steam 创意工坊/用户内容，以及 Steam 中国（蒸汽平台）下载；上游 games@cn 有，但不在 geosite:cn
   - +.steamusercontent.com

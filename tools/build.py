@@ -25,16 +25,10 @@ CDN = S["cdn"]
 GENERATED = "本文件由 tools/build.py 从 src/spec.yaml 生成，请勿手改；改规则请改 src/spec.yaml"
 
 
+DNS_GROUP = S["dns_group"]
+
 # ---------------------------------------------------------------- 节点筛选正则
-def _expand(match: str) -> str:
-    # {XX} -> 前后不挨英文字母的 XX
-    return re.sub(r"\{([A-Za-z]+)\}", r"(?<![A-Za-z])\1(?![A-Za-z])", match)
-
-
-EXCL = f"^(?!.*({S['node_exclude']}))"
-NODES_RE = EXCL + ".*"
-REGION_RE = {r["name"]: f"{EXCL}.*({_expand(r['match'])})" for r in S["regions"]}
-REGIONS = [r["name"] for r in S["regions"]]
+NODES_RE = f"^(?!.*({S['node_exclude']})).*"
 
 
 # ---------------------------------------------------------------- 规则集
@@ -142,7 +136,7 @@ def rules(target: str) -> list[str]:
         # Stash 用 follow-rule + DoH 端点 IP 规则指定出站（该 IP 的其他流量也受影响）
         for u in S["dns_remote"]:
             ip = re.match(r"https://([\d.]+)/", u).group(1)
-            out.append(f"IP-CIDR,{ip}/32,🛰️ DNS-Proxy,no-resolve")
+            out.append(f"IP-CIDR,{ip}/32,{DNS_GROUP},no-resolve")
     out += render_rules(S["rules"], target, avail)
     # 引用的规则集必须存在
     used = set(re.findall(r"RULE-SET,([^,)]+)", "\n".join(out)))
@@ -154,41 +148,18 @@ def rules(target: str) -> list[str]:
 
 # ---------------------------------------------------------------- 策略组
 def _members(g: dict) -> list:
-    items = []
-    for p in g["proxies"]:
-        if p == "$regions":
-            items += [("name", n) for n in REGIONS]
-        elif p == "$nodes":
-            items.append(("regex", NODES_RE))
-        else:
-            items.append(("name", p))
-    return items
-
-
-def _all_groups() -> list[dict]:
-    out = []
-    for g in S["groups"]:
-        if g == "$regions":
-            for r in S["regions"]:
-                out.append({"name": r["name"], "type": "url-test", "region": True, "tolerance": r["tolerance"]})
-        else:
-            out.append(g)
-    return out
+    return [("regex", NODES_RE) if p == "$nodes" else ("name", p) for p in g["proxies"]]
 
 
 def xboard_groups() -> list[dict]:
     """Xboard：/正则/i 为节点筛选；不含正则的组 Xboard 会自动追加全部节点，用 /^$/ 阻止。"""
     out = []
-    for g in _all_groups():
+    for g in S["groups"]:
         typ = g.get("type", "select")
-        if g.get("region"):
-            proxies = [f"/{REGION_RE[g['name']]}/i", "REJECT"]  # REJECT 保活：无匹配节点时组不被删除
-        else:
-            proxies = []
-            for kind, v in _members(g):
-                proxies.append(f"/{v}/i" if kind == "regex" else v)
-            if not any(k == "regex" for k, _ in _members(g)):
-                proxies.append("/^$/")  # 不匹配任何节点
+        # REJECT 保活：无匹配节点时自动选择组不被删除
+        proxies = [f"/{v}/i" if kind == "regex" else v for kind, v in _members(g)]
+        if not any(k == "regex" for k, _ in _members(g)):
+            proxies.append("/^$/")  # 不匹配任何节点
         d = {"name": g["name"], "type": typ}
         if typ == "url-test":
             d |= {"url": S["test_url"], "interval": S["test_interval"], "tolerance": g.get("tolerance", 50), "lazy": True}
@@ -199,12 +170,9 @@ def xboard_groups() -> list[dict]:
 
 def ini_groups() -> list[str]:
     out = []
-    for g in _all_groups():
+    for g in S["groups"]:
         typ = g.get("type", "select")
-        if g.get("region"):
-            parts = [f"(?i){REGION_RE[g['name']]}", "[]REJECT"]
-        else:
-            parts = [f"(?i){v}" if k == "regex" else f"[]{v}" for k, v in _members(g)]
+        parts = [f"(?i){v}" if k == "regex" else f"[]{v}" for k, v in _members(g)]
         line = f"custom_proxy_group={g['name']}`{typ}`" + "`".join(parts)
         if typ == "url-test":
             line += f"`{S['test_url']}`{S['test_interval']},,{g.get('tolerance', 50)}"
@@ -281,7 +249,7 @@ def meta_dns() -> dict:
     dns.update({
         "fake-ip-filter": fake_ip_filter(),
         "default-nameserver": S["dns_bootstrap"],
-        "nameserver": [f"{u}#🛰️ DNS-Proxy" for u in S["dns_remote"]],
+        "nameserver": [f"{u}#{DNS_GROUP}" for u in S["dns_remote"]],
         "proxy-server-nameserver": china,
         "direct-nameserver": china,
         "nameserver-policy": dns_policy("meta"),
@@ -353,7 +321,7 @@ def full_config(target: str, *, with_groups: bool, final: bool) -> list[tuple[st
 HDR_META = [
     "规则：MetaCubeX/meta-rules-dat（v2fly 社区，每日同步）mrs 二进制规则集，匹配快、内存小",
     "去广告：AdRules + anti-AD（mrs）；默认走代理的境外 UDP443 回落 TCP，默认直连/国内/游戏/下载/未知 IP 保留",
-    "DNS：已知国内走国内 DoH，其余经 🛰️ DNS-Proxy 查境外 DoH，内网用系统 DNS；DIRECT 出站用国内 direct-nameserver",
+    "DNS：已知国内走国内 DoH，其余经 🛰️ DNS 查境外 DoH，内网用系统 DNS；DIRECT 出站用国内 direct-nameserver",
     "安全：allow-lan 关闭，DNS 仅监听 127.0.0.1；find-process-mode always（仅用于连接列表显示应用名）",
     f"规则 CDN 为 {CDN}，失效时全局替换为 https://fastly.jsdelivr.net/gh",
 ]
@@ -361,7 +329,7 @@ HDR_STASH = [
     "规则：MetaCubeX/meta-rules-dat 的 domain/ipcidr yaml；国内外兜底复用 Stash 原生 GEOSITE + GEOIP,CN",
     "  （与 geosite DNS policy 顺序对齐，不额外下载全量 cn/geolocation-!cn 文本）",
     "去广告：AWAvenue 秋风规则（约 900 条，含广告+隐私跟踪+流氓推广）",
-    "DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS-Proxy；内网系统 DNS，已知国内与游戏下载走国内 DoH，其余境外 DoH",
+    "DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS；内网系统 DNS，已知国内与游戏下载走国内 DoH，其余境外 DoH",
     "geosite DNS policy 需 Stash iOS 3.4.0+；GEOSITE 数据首次从 GitHub 按需加载，请确保 GitHub 可达",
     f"规则 CDN 为 {CDN}，失效时全局替换为 https://fastly.jsdelivr.net/gh",
 ]
@@ -409,7 +377,7 @@ def overseas_dns() -> dict:
     dns = meta_dns()["dns"]
     dns.update({
         "default-nameserver": o["dns_bootstrap"],
-        "nameserver": [f"{u}#🛰️ DNS-Proxy" for u in o["dns"]],
+        "nameserver": [f"{u}#{DNS_GROUP}" for u in o["dns"]],
         "proxy-server-nameserver": o["dns"],
         "direct-nameserver": o["dns"],
         "nameserver-policy": dns_policy("meta", overseas=True),
@@ -421,7 +389,7 @@ def overseas() -> str:
     hdr = [
         "Clash Party 远程覆写 · 国外模式（仅海外电脑）", GENERATED,
         "效果：分流规则与策略组完全不变；DNS 中所有国内服务器换成 Cloudflare / Google 的 DoH + DoT",
-        "  主 DNS 仍经 🛰️ DNS-Proxy 组发出（想更快可在面板把该组切到 DIRECT）；内网仍走 system",
+        "  主 DNS 仍经 🛰️ DNS 组发出（想更快可在面板把该组切到 DIRECT）；内网仍走 system",
         "用法：Clash Party → 覆写 → 导入远程链接：",
         f"  {CDN}/{S['self_repo']}/Clash/override/overseas.yaml",
         "  然后在订阅的「编辑信息」里勾选此覆写",

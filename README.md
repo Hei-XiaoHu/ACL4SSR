@@ -17,7 +17,7 @@
 pip install pyyaml
 python3 tools/build.py                 # 生成全部配置
 python3 tools/build.py --check         # 检查七份输出一致
-python3 tools/check.py /path/to/mihomo  # 渲染与真实内核校验，含缺地区/全过滤场景
+python3 tools/check.py /path/to/mihomo  # 渲染与真实内核校验，含节点全过滤/零节点场景
 python3 tools/check_routing.py /path/to/mihomo # 离线连接、DNS 泄露、QUIC 与广告回归
 python3 tools/check_upstream.py        # 联网：Claude 域名不在 cn、AI/下载补充未被广告源拦截
 ```
@@ -38,15 +38,33 @@ python3 tools/check_upstream.py        # 联网：Claude 域名不在 cn、AI/�
 
 ## 方案要点
 
+**策略组**（面板顺序；不设地区组，节点固定手选）：
+
+| 组 | 默认 | 内容 |
+|---|---|---|
+| 🚀 节点选择 | ♻️ 自动选择 | 通用代理出口；已知国外域名、GitHub、Telegram、共享验证码 |
+| ♻️ 自动选择 | 测速 | 全部节点（已排除信息/倍率节点） |
+| 🤖 AI | 🚀 | Claude（含 Sift/Intercom/auth0）、OpenAI、Gemini 等 |
+| 🎬 流媒体 | 🚀 | YouTube、Netflix、巴哈姆特、其他境外娱乐 |
+| 📺 B站 | DIRECT | 看港澳台番剧时切到港台节点 |
+| 🎮 游戏 | 🚀 | 游戏平台商店/登录/社区、Steam CM；下载 CDN 不在这里 |
+| 🔍 谷歌 | 🚀 | 谷歌服务 + FCM 推送 |
+| Ⓜ️ 微软 | DIRECT | Bing、OneDrive、微软服务 |
+| 🍎 苹果 | DIRECT | 苹果服务 |
+| 🎯 直连 | DIRECT | 国内、游戏下载、网易云、功能白名单 |
+| 🐟 漏网之鱼 | 🚀 | 只接所有规则都未命中、IP 也不在国内的流量 |
+| 🛰️ DNS | 🚀 | 境外 DoH 的出口 |
+| 🛑 广告 | REJECT | 广告与遥测 |
+
 - **规则来源**：MetaCubeX/meta-rules-dat（v2fly 社区，每日同步）。mihomo 用 mrs 二进制格式，匹配快、内存小；Stash 用 yaml 版。
 - **去广告**：mihomo 保留 AdRules + anti-AD（mrs），两者有独有规则；Stash 用轻量 AWAvenue。规则条数不能直接证明 iOS 峰值内存。
 - **性能**：已有 IP 的直接分类使用 `no-resolve`，需要额外解析的 `cn-ip` / `GEOIP,CN` 放末尾；已知国外域名提前分流。
-- **测速**：600 秒；Xboard 显式 `lazy:true`，INI 的 mihomo 依赖内核默认 true，其他转换器/客户端以实际输出为准。空地区与全过滤的自动组保留 REJECT。测速不验证 AI/媒体解锁，AI 支持地区应手动选择，固定出口可直接选单个节点。
-- **DNS**：已知国内（`cn`）→ 国内 DoH；其余 → 经 `🛰️ DNS-Proxy` 查境外 DoH；内网 → system。走代理的连接把域名交给节点远端解析，本地不查询；本地解析只发生在 IP 规则、DIRECT、fake-ip-filter 与节点域名上。mihomo 的 DIRECT 用国内 `direct-nameserver`（follow-policy 只为让内网名走 system）；Stash 没有该字段，另给游戏下载集合指定国内 DNS。Stash follow-rule 加 DoH 端点 IP 绑定指定组；绑定也影响这些 IP 的其他流量。
+- **测速**：600 秒；Xboard 显式 `lazy:true`，INI 的 mihomo 依赖内核默认 true，其他转换器/客户端以实际输出为准。节点全被过滤时自动选择组保留 REJECT。测速不验证 AI/媒体解锁，AI 应手动选支持地区的节点。
+- **DNS**：已知国内（`cn`）→ 国内 DoH；其余 → 经 `🛰️ DNS` 查境外 DoH；内网 → system。走代理的连接把域名交给节点远端解析，本地不查询；本地解析只发生在 IP 规则、DIRECT、fake-ip-filter 与节点域名上。mihomo 的 DIRECT 用国内 `direct-nameserver`（follow-policy 只为让内网名走 system）；Stash 没有该字段，另给游戏下载集合指定国内 DNS。Stash follow-rule 加 DoH 端点 IP 绑定指定组；绑定也影响这些 IP 的其他流量。
 - **防泄露（电脑系统代理模式）**：系统代理只接管 TCP，浏览器 WebRTC 会用 UDP 暴露真实 IP，需用插件或策略限制（Chrome `WebRtcIPHandling: disable_non_proxied_udp`，Firefox `media.peerconnection.ice.proxy_only=true`）；终端里的 Claude Code 需设置 `HTTPS_PROXY`；系统时区应与 AI 节点所在地一致（时区来自系统设置，与 NTP 分流无关）。手机 B 站 App 自带 HTTPDNS，可能绕过域名规则。
 - **安全**：mihomo `allow-lan:false`，代理控制器与 DNS 监听本机；DNS `ipv6:false` 只控制解析，不能代替系统 IPv6 设置。Bootstrap 仍用明文引导 DNS。
 - **QUIC**：默认走代理的境外域名（AI、媒体、gfw、geolocation-!cn、共享验证码等）及 Anthropic 自有 IP 的 QUIC 被拒绝，回落 TCP（VLESS 等 TCP 传输承载 QUIC 效果差）。默认直连的苹果/微软/Bing/OneDrive/网易云/B站、国内、游戏、游戏下载、通信语音、`quic-exempt.txt` 和未知裸 IP 不拦；保留 `google-cn` 的 QUIC 豁免。mihomo 按 UDP443 判断；Stash 用 `PROTOCOL,QUIC` 只拦真正的 QUIC。规则按默认分组判断，手动切换策略组后不会跟着变。
-- **谷歌服务**：`google-cn` 与完整 `google` 集合走 `🌐 谷歌服务`，默认选择 `🚀 节点选择`，使用境外 DNS；Chrome 商店、Google 资源与 `dl.google.com` 下载统一分流。AI、谷歌 FCM 和 YouTube 保留各自专用策略。
+- **谷歌服务**：`google-cn` 与完整 `google` 集合走 `🔍 谷歌`，默认选择 `🚀 节点选择`，使用境外 DNS；Chrome 商店、Google 资源与 `dl.google.com` 下载统一分流。AI、谷歌 FCM 和 YouTube 保留各自专用策略。
 - **分类**：游戏下载使用完整的 `category-game-platforms-download`（约 490 条，含 Steam/PSN/Epic 等全球 CDN），默认直连；上游只逐个列 Steam `cacheN-xxx` 主机，新节点由 `game-download-extra.txt` 兜底直连；国内下载/娱乐子集优先；Battle.net、Ubisoft、GOG 等补入游戏平台。通用媒体改用社区娱乐集合。
 - **iOS**：Stash 规则与 mihomo 基本一致，差异仅在广告源（AWAvenue 轻量版）及用 Stash 原生 GEOSITE/GEOIP 替代 cn、geolocation-!cn、cn-ip 规则集。若希望与电脑完全一致，可用内置 mihomo 内核的 Clash Mi（KaringX/clashmi，App Store 上架，iOS 15+），直接使用 mihomo 模板；本仓库未做 Clash Mi 实机测试。
 - **Stash**：DNS geosite policy 需 iOS3.4.0+。原生 GEOSITE 数据首次从 GitHub 按需加载，需 GitHub 可达；未加入需要3.6+的独立节点 DNS 字段。
@@ -55,7 +73,7 @@ python3 tools/check_upstream.py        # 联网：Claude 域名不在 cn、AI/�
 
 ## 国外模式（Clash Party，仅海外电脑）
 
-只替换 DNS：所有国内 DNS 换成 Cloudflare / Google 的 DoH + DoT，分流规则与策略组完全不变。主 DNS 仍经 `🛰️ DNS-Proxy` 组发出，想更快可在面板把该组切到 DIRECT；内网仍走 system。
+只替换 DNS：所有国内 DNS 换成 Cloudflare / Google 的 DoH + DoT，分流规则与策略组完全不变。主 DNS 仍经 `🛰️ DNS` 组发出，想更快可在面板把该组切到 DIRECT；内网仍走 system。
 
 1. 设置里**关闭「控制 DNS 设置」**（否则软件自身 DNS 优先级更高，覆写里的 DNS 不生效）；建议同时关闭「控制域名嗅探」，统一使用配置内的嗅探设置。
 2. 覆写 → 导入远程链接：`https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/override/overseas.yaml`

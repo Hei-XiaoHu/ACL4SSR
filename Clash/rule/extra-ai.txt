@@ -1,4 +1,4 @@
-# 补充 geosite:category-ai-!cn 未收录的 AI 域名 → 💬 Ai平台
+# 补充 geosite:category-ai-!cn 未收录的 AI 域名 → 🤖 AI
 # 发现新的漏网 AI 服务，加在这里即可（mihomo 与 Stash 共用）
 payload:
   # Together AI
@@ -6,5 +6,5 @@ payload:
   - DOMAIN-SUFFIX,together.xyz
   # Azure AI Foundry
   - DOMAIN,ai.azure.com
-  # Bing Copilot 旧接口（否则会被 bing 规则分到 Ⓜ️ 微软Bing，默认直连）
+  # Bing Copilot 旧接口（否则会被 bing 规则分到 Ⓜ️ 微软，默认直连）
   - DOMAIN,sydney.bing.com

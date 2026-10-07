@@ -4,7 +4,7 @@
 # 规则：MetaCubeX/meta-rules-dat 的 domain/ipcidr yaml；国内外兜底复用 Stash 原生 GEOSITE + GEOIP,CN
 #   （与 geosite DNS policy 顺序对齐，不额外下载全量 cn/geolocation-!cn 文本）
 # 去广告：AWAvenue 秋风规则（约 900 条，含广告+隐私跟踪+流氓推广）
-# DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS-Proxy；内网系统 DNS，已知国内与游戏下载走国内 DoH，其余境外 DoH
+# DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS；内网系统 DNS，已知国内与游戏下载走国内 DoH，其余境外 DoH
 # geosite DNS policy 需 Stash iOS 3.4.0+；GEOSITE 数据首次从 GitHub 按需加载，请确保 GitHub 可达
 # 规则 CDN 为 https://testingcf.jsdelivr.net/gh，失效时全局替换为 https://fastly.jsdelivr.net/gh
 
@@ -142,56 +142,10 @@ dns:
 proxies: []
 
 proxy-groups:
-- name: 🎓 上网走 🚀 节点选择 · AI走 💬 Ai平台
-  type: select
-  proxies:
-  - DIRECT
-  - REJECT
-  - /^$/
 - name: 🚀 节点选择
   type: select
   proxies:
   - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
-  - 🔯 自选
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
-  - DIRECT
-  - REJECT
-- name: 🛰️ DNS-Proxy
-  type: select
-  proxies:
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
-  - DIRECT
-  - REJECT
-- name: 🔯 自选
-  type: select
-  proxies:
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
@@ -204,356 +158,92 @@ proxy-groups:
   proxies:
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - REJECT
-- name: 📲 电报消息
+- name: 🤖 AI
   type: select
   proxies:
   - 🚀 节点选择
   - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
-- name: 💬 Ai平台
+- name: 🎬 流媒体
   type: select
   proxies:
   - 🚀 节点选择
   - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
-- name: 📹 油管视频
-  type: select
-  proxies:
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
-  - DIRECT
-  - REJECT
-- name: 🎥 奈飞视频
-  type: select
-  proxies:
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
-  - DIRECT
-  - REJECT
-- name: 📺 巴哈姆特
-  type: select
-  proxies:
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
-  - DIRECT
-  - REJECT
-- name: 📺 哔哩哔哩
+- name: 📺 B站
   type: select
   proxies:
   - DIRECT
   - 🚀 节点选择
   - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - REJECT
-- name: 🌍 国外媒体
+- name: 🎮 游戏
   type: select
   proxies:
   - 🚀 节点选择
   - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
-- name: 📢 谷歌FCM
+- name: 🔍 谷歌
   type: select
   proxies:
   - 🚀 节点选择
   - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
-- name: 🌐 谷歌服务
-  type: select
-  proxies:
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
-  - DIRECT
-  - REJECT
-- name: Ⓜ️ 微软Bing
+- name: Ⓜ️ 微软
   type: select
   proxies:
   - DIRECT
   - 🚀 节点选择
   - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - REJECT
-- name: Ⓜ️ 微软云盘
+- name: 🍎 苹果
   type: select
   proxies:
   - DIRECT
   - 🚀 节点选择
   - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - REJECT
-- name: Ⓜ️ 微软服务
+- name: 🎯 直连
   type: select
   proxies:
   - DIRECT
   - 🚀 节点选择
   - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - REJECT
-- name: 🍎 苹果服务
-  type: select
-  proxies:
-  - DIRECT
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
-  - REJECT
-- name: 🎮 游戏平台
-  type: select
-  proxies:
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
-  - DIRECT
-  - REJECT
-- name: 🎶 网易音乐
-  type: select
-  proxies:
-  - DIRECT
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
-  - REJECT
-- name: 🎯 全球直连
-  type: select
-  proxies:
-  - DIRECT
-  - 🚀 节点选择
-  - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
-  - REJECT
-- name: 🛑 广告拦截
-  type: select
-  proxies:
-  - REJECT
-  - DIRECT
-  - /^$/
 - name: 🐟 漏网之鱼
   type: select
   proxies:
   - 🚀 节点选择
   - ♻️ 自动选择
-  - 🇭🇰 香港节点
-  - 🇹🇼 台湾节点
-  - 🇸🇬 狮城节点
-  - 🇯🇵 日本节点
-  - 🇺🇸 美国节点
-  - 🇰🇷 韩国节点
-  - 🇩🇪 德国节点
-  - 🇫🇷 法国节点
   - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
   - DIRECT
   - REJECT
-- name: 🇭🇰 香港节点
-  type: url-test
-  url: https://cp.cloudflare.com/generate_204
-  interval: 600
-  tolerance: 50
-  lazy: true
+- name: 🛰️ DNS
+  type: select
   proxies:
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(港|(?<![A-Za-z])HK(?![A-Za-z])|Hong ?Kong)/i
+  - 🚀 节点选择
+  - ♻️ 自动选择
+  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*/i
+  - DIRECT
   - REJECT
-- name: 🇹🇼 台湾节点
-  type: url-test
-  url: https://cp.cloudflare.com/generate_204
-  interval: 600
-  tolerance: 50
-  lazy: true
+- name: 🛑 广告
+  type: select
   proxies:
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(台|新北|彰化|(?<![A-Za-z])TW(?![A-Za-z])|Taiwan)/i
   - REJECT
-- name: 🇸🇬 狮城节点
-  type: url-test
-  url: https://cp.cloudflare.com/generate_204
-  interval: 600
-  tolerance: 50
-  lazy: true
-  proxies:
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(新加坡|坡|狮城|(?<![A-Za-z])SG(?![A-Za-z])|Singapore)/i
-  - REJECT
-- name: 🇯🇵 日本节点
-  type: url-test
-  url: https://cp.cloudflare.com/generate_204
-  interval: 600
-  tolerance: 50
-  lazy: true
-  proxies:
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(日本|川日|东京|大阪|泉日|埼玉|沪日|深日|(?<![A-Za-z])JP(?![A-Za-z])|Japan)/i
-  - REJECT
-- name: 🇺🇸 美国节点
-  type: url-test
-  url: https://cp.cloudflare.com/generate_204
-  interval: 600
-  tolerance: 150
-  lazy: true
-  proxies:
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|(?<![A-Za-z])US(?![A-Za-z])|United ?States)/i
-  - REJECT
-- name: 🇰🇷 韩国节点
-  type: url-test
-  url: https://cp.cloudflare.com/generate_204
-  interval: 600
-  tolerance: 50
-  lazy: true
-  proxies:
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(韩|韓|首尔|(?<![A-Za-z])KR(?![A-Za-z])|(?<![A-Za-z])KOR(?![A-Za-z])|Korea)/i
-  - REJECT
-- name: 🇩🇪 德国节点
-  type: url-test
-  url: https://cp.cloudflare.com/generate_204
-  interval: 600
-  tolerance: 50
-  lazy: true
-  proxies:
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(德国|法兰克福|柏林|(?<![A-Za-z])DE(?![A-Za-z])|Germany)/i
-  - REJECT
-- name: 🇫🇷 法国节点
-  type: url-test
-  url: https://cp.cloudflare.com/generate_204
-  interval: 600
-  tolerance: 50
-  lazy: true
-  proxies:
-  - /^(?!.*(剩余|到期|过期|官网|套餐|流量|重置|倍率)).*(法国|巴黎|马赛|(?<![A-Za-z])FR(?![A-Za-z])|France)/i
-  - REJECT
+  - DIRECT
+  - /^$/
 
 rule-providers:
   extra-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/extra-direct.yaml, url: 'https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/rule/extra-direct.txt'}
@@ -604,54 +294,54 @@ rule-providers:
   gfw: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/gfw.yaml, url: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/gfw.yaml'}
 
 rules:
-- IP-CIDR,1.1.1.1/32,🛰️ DNS-Proxy,no-resolve
-- IP-CIDR,8.8.8.8/32,🛰️ DNS-Proxy,no-resolve
-- RULE-SET,extra-direct,🎯 全球直连
+- IP-CIDR,1.1.1.1/32,🛰️ DNS,no-resolve
+- IP-CIDR,8.8.8.8/32,🛰️ DNS,no-resolve
+- RULE-SET,extra-direct,🎯 直连
 - RULE-SET,private,DIRECT
 - RULE-SET,private-ip,DIRECT,no-resolve
-- RULE-SET,functional-direct,🎯 全球直连
-- RULE-SET,claude-telemetry,🛑 广告拦截
+- RULE-SET,functional-direct,🎯 直连
+- RULE-SET,claude-telemetry,🛑 广告
 - AND,((NETWORK,udp),(PROTOCOL,QUIC),(OR,((OR,((RULE-SET,claude),(RULE-SET,extra-ai),(RULE-SET,ai),(RULE-SET,youtube),(RULE-SET,netflix),(RULE-SET,shared-auth),(RULE-SET,extra-proxy),(RULE-SET,proxymedia),(RULE-SET,gfw),(GEOSITE,geolocation-!cn))),(RULE-SET,claude-ip,no-resolve))),(NOT,((AND,((GEOSITE,cn),(NOT,((GEOSITE,geolocation-!cn))))))),(NOT,((GEOIP,CN,no-resolve))),(NOT,((OR,((RULE-SET,quic-exempt),(RULE-SET,google-cn),(RULE-SET,bing),(RULE-SET,onedrive),(RULE-SET,microsoft),(RULE-SET,apple),(RULE-SET,netease),(RULE-SET,bilibili),(RULE-SET,games-cn),(RULE-SET,game-download-cn),(RULE-SET,game-download),(RULE-SET,game-download-extra),(RULE-SET,games),(RULE-SET,epicgames),(RULE-SET,ea),(RULE-SET,sony),(RULE-SET,steam),(RULE-SET,nintendo),(RULE-SET,entertainment-cn),(RULE-SET,entertainment-cn-attr),(RULE-SET,communication)))))),REJECT
-- RULE-SET,claude-essential,💬 Ai平台
+- RULE-SET,claude-essential,🤖 AI
 - RULE-SET,shared-auth,🚀 节点选择
-- RULE-SET,awavenue,🛑 广告拦截
-- RULE-SET,claude,💬 Ai平台
-- RULE-SET,extra-ai,💬 Ai平台
-- RULE-SET,ai,💬 Ai平台
-- RULE-SET,claude-ip,💬 Ai平台,no-resolve
-- RULE-SET,googlefcm,📢 谷歌FCM
-- RULE-SET,game-proxy-extra,🎮 游戏平台
-- RULE-SET,games-cn,🎯 全球直连
-- RULE-SET,game-download-cn,🎯 全球直连
-- RULE-SET,game-download,🎯 全球直连
-- RULE-SET,game-download-extra,🎯 全球直连
+- RULE-SET,awavenue,🛑 广告
+- RULE-SET,claude,🤖 AI
+- RULE-SET,extra-ai,🤖 AI
+- RULE-SET,ai,🤖 AI
+- RULE-SET,claude-ip,🤖 AI,no-resolve
+- RULE-SET,googlefcm,🔍 谷歌
+- RULE-SET,game-proxy-extra,🎮 游戏
+- RULE-SET,games-cn,🎯 直连
+- RULE-SET,game-download-cn,🎯 直连
+- RULE-SET,game-download,🎯 直连
+- RULE-SET,game-download-extra,🎯 直连
 - RULE-SET,github,🚀 节点选择
 - RULE-SET,extra-proxy,🚀 节点选择
-- RULE-SET,bing,Ⓜ️ 微软Bing
-- RULE-SET,onedrive,Ⓜ️ 微软云盘
-- RULE-SET,microsoft,Ⓜ️ 微软服务
-- RULE-SET,apple,🍎 苹果服务
-- RULE-SET,telegram,📲 电报消息
-- RULE-SET,telegram-ip,📲 电报消息,no-resolve
-- RULE-SET,netease,🎶 网易音乐
-- RULE-SET,epicgames,🎮 游戏平台
-- RULE-SET,ea,🎮 游戏平台
-- RULE-SET,sony,🎮 游戏平台
-- RULE-SET,steam,🎮 游戏平台
-- RULE-SET,nintendo,🎮 游戏平台
-- RULE-SET,youtube,📹 油管视频
-- RULE-SET,google-cn,🌐 谷歌服务
-- RULE-SET,google,🌐 谷歌服务
-- RULE-SET,netflix,🎥 奈飞视频
-- RULE-SET,netflix-ip,🎥 奈飞视频,no-resolve
-- RULE-SET,bahamut,📺 巴哈姆特
-- RULE-SET,bilibili,📺 哔哩哔哩
-- RULE-SET,entertainment-cn,🎯 全球直连
-- RULE-SET,entertainment-cn-attr,🎯 全球直连
-- RULE-SET,games,🎮 游戏平台
-- RULE-SET,proxymedia,🌍 国外媒体
+- RULE-SET,bing,Ⓜ️ 微软
+- RULE-SET,onedrive,Ⓜ️ 微软
+- RULE-SET,microsoft,Ⓜ️ 微软
+- RULE-SET,apple,🍎 苹果
+- RULE-SET,telegram,🚀 节点选择
+- RULE-SET,telegram-ip,🚀 节点选择,no-resolve
+- RULE-SET,netease,🎯 直连
+- RULE-SET,epicgames,🎮 游戏
+- RULE-SET,ea,🎮 游戏
+- RULE-SET,sony,🎮 游戏
+- RULE-SET,steam,🎮 游戏
+- RULE-SET,nintendo,🎮 游戏
+- RULE-SET,youtube,🎬 流媒体
+- RULE-SET,google-cn,🔍 谷歌
+- RULE-SET,google,🔍 谷歌
+- RULE-SET,netflix,🎬 流媒体
+- RULE-SET,netflix-ip,🎬 流媒体,no-resolve
+- RULE-SET,bahamut,🎬 流媒体
+- RULE-SET,bilibili,📺 B站
+- RULE-SET,entertainment-cn,🎯 直连
+- RULE-SET,entertainment-cn-attr,🎯 直连
+- RULE-SET,games,🎮 游戏
+- RULE-SET,proxymedia,🎬 流媒体
 - RULE-SET,gfw,🚀 节点选择
-- GEOSITE,geolocation-!cn,🐟 漏网之鱼
-- GEOSITE,cn,🎯 全球直连
-- GEOIP,CN,🎯 全球直连
+- GEOSITE,geolocation-!cn,🚀 节点选择
+- GEOSITE,cn,🎯 直连
+- GEOIP,CN,🎯 直连
 - MATCH,🐟 漏网之鱼

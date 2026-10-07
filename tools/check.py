@@ -2,7 +2,7 @@
 """用真实 mihomo 内核校验生成的配置。
 
 模拟 Xboard / subconverter / Clash Party 覆写的渲染过程，把节点注入模板后执行 `mihomo -t`，
-并断言地区组正则的匹配结果。
+并断言节点筛选（排除信息/倍率节点）与空组保活。
 
 用法：python3 tools/check.py [mihomo 可执行文件路径]
       （默认读环境变量 MIHOMO，再默认 PATH 中的 mihomo）
@@ -23,25 +23,15 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build  # noqa: E402
 
-# 节点名样本：真实格式 + 用来验证正则边界的干扰项
+# 节点名样本：真实格式 + 信息/倍率干扰项
 NODES = [
     "🇭🇰 香港【华东】 S+ ⚡200M", "🇭🇰 香港 A+ ⚡500M", "🇩🇪 德国 S+ ⚡2.5G", "🇫🇷 法国 A ⚡1G",
-    "🇺🇸 RN | 美东 | 水牛😐", "🇺🇸 DMIT | 美西 | 三网优化😀", "🇩🇪 NSC | 德国 | 三网优化😀",
-    "🇯🇵 Zouter | JP | 地😀", "🇰🇷 阿里 | 韩国😀", "🇸🇬 SG-01", "🇹🇼 TW 01",
-    "🇦🇺 Australia 01", "🇷🇺 Russia", "🇸🇪 Sweden", "🇺🇸 US-02",
+    "🇺🇸 RN | 美东 | 水牛😐", "🇺🇸 DMIT | 美西 | 三网优化😀", "🇯🇵 Zouter | JP | 地😀", "🇸🇬 SG-01",
     "剩余流量：100 GB", "套餐到期：2027-01-01", "🇭🇰 香港 IPLC 倍率3",
 ]
-EXPECT = {
-    "🇭🇰 香港节点": {"🇭🇰 香港【华东】 S+ ⚡200M", "🇭🇰 香港 A+ ⚡500M"},
-    "🇩🇪 德国节点": {"🇩🇪 德国 S+ ⚡2.5G", "🇩🇪 NSC | 德国 | 三网优化😀"},
-    "🇫🇷 法国节点": {"🇫🇷 法国 A ⚡1G"},
-    "🇺🇸 美国节点": {"🇺🇸 RN | 美东 | 水牛😐", "🇺🇸 DMIT | 美西 | 三网优化😀", "🇺🇸 US-02"},
-    "🇯🇵 日本节点": {"🇯🇵 Zouter | JP | 地😀"},
-    "🇰🇷 韩国节点": {"🇰🇷 阿里 | 韩国😀"},
-    "🇸🇬 狮城节点": {"🇸🇬 SG-01"},
-    "🇹🇼 台湾节点": {"🇹🇼 TW 01"},
-}
 JUNK = {"剩余流量：100 GB", "套餐到期：2027-01-01", "🇭🇰 香港 IPLC 倍率3"}
+NODE_GROUPS = [g["name"] for g in build.S["groups"] if "$nodes" in g["proxies"]]
+NO_NODE_GROUPS = [g["name"] for g in build.S["groups"] if "$nodes" not in g["proxies"]]
 
 
 def proxies():
@@ -115,17 +105,16 @@ def party_override(cfg: dict, ov: dict) -> dict:
     return cfg
 
 
-def assert_regions(cfg: dict, label: str):
+def assert_groups(cfg: dict, label: str):
     groups = {g["name"]: g["proxies"] for g in cfg["proxy-groups"]}
-    for name, want in EXPECT.items():
-        got = {p for p in groups[name] if p in NODES}
-        if got != want:
-            sys.exit(f"[{label}] {name} 匹配错误\n  期望 {sorted(want)}\n  实际 {sorted(got)}")
-    for name, members in groups.items():
-        bad = JUNK & set(members)
-        if bad:
-            sys.exit(f"[{label}] {name} 混入了信息/倍率节点 {bad}")
-    for name in ("🛑 广告拦截", "🎓 上网走 🚀 节点选择 · AI走 💬 Ai平台"):
+    if list(groups) != [g["name"] for g in build.S["groups"]]:
+        sys.exit(f"[{label}] 策略组顺序/名称与 spec 不一致: {list(groups)}")
+    want = [n for n in NODES if n not in JUNK]
+    for name in NODE_GROUPS:
+        got = [p for p in groups[name] if p in NODES]
+        if set(got) != set(want):
+            sys.exit(f"[{label}] {name} 节点筛选错误\n  期望 {want}\n  实际 {got}")
+    for name in NO_NODE_GROUPS:
         if set(groups[name]) & set(NODES):
             sys.exit(f"[{label}] {name} 不应包含节点")
 
@@ -155,12 +144,12 @@ def main():
     ov = yaml.safe_load(build.overseas())
 
     xb = xboard_render(meta_tpl)
-    assert_regions(xb, "xboard-meta")
-    assert_regions(xboard_render(stash_tpl), "xboard-stash")
+    assert_groups(xb, "xboard-meta")
+    assert_groups(xboard_render(stash_tpl), "xboard-stash")
     sub = subconverter_render(base, ini)
-    assert_regions(sub, "subconverter-meta")
-    assert_regions(subconverter_render(yaml.safe_load(build.base("stash")), build.ini("stash")), "subconverter-stash")
-    print("✓ 地区组 / 节点筛选正则")
+    assert_groups(sub, "subconverter-meta")
+    assert_groups(subconverter_render(yaml.safe_load(build.base("stash")), build.ini("stash")), "subconverter-stash")
+    print("✓ 策略组顺序 / 节点筛选")
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
@@ -168,25 +157,18 @@ def main():
         mihomo_test(exe, sub, "subconverter-meta", tmp)
         mihomo_test(exe, party_override(sub, ov), "subconverter-meta+overseas", tmp)
         mihomo_test(exe, party_override(xb, ov), "xboard-meta+overseas", tmp)
-        # 只有香港节点，以及全部为信息/倍率节点：地区组和自动组均不得补 DIRECT。
+        # 全部为信息/倍率节点：自动选择组只剩 REJECT 保活，不得补 DIRECT。
         global NODES
         original_nodes = NODES
         try:
-            for label, sample in (
-                ("only-hk", [original_nodes[0]]),
-                ("all-filtered", sorted(JUNK)),
+            NODES = sorted(JUNK)
+            for renderer, cfg in (
+                ("xboard", xboard_render(meta_tpl)),
+                ("subconverter", subconverter_render(base, ini)),
             ):
-                NODES = sample
-                for renderer, cfg in (
-                    ("xboard", xboard_render(meta_tpl)),
-                    ("subconverter", subconverter_render(base, ini)),
-                ):
-                    empty = [*build.REGIONS, "♻️ 自动选择"] if label == "all-filtered" else [
-                        name for name in build.REGIONS if name != "🇭🇰 香港节点"
-                    ]
-                    groups = {g["name"]: g["proxies"] for g in cfg["proxy-groups"]}
-                    assert all(groups[name] == ["REJECT"] for name in empty), (renderer, label, groups)
-                    mihomo_test(exe, cfg, f"{renderer}-{label}", tmp)
+                groups = {g["name"]: g["proxies"] for g in cfg["proxy-groups"]}
+                assert groups["♻️ 自动选择"] == ["REJECT"], (renderer, groups["♻️ 自动选择"])
+                mihomo_test(exe, cfg, f"{renderer}-all-filtered", tmp)
             NODES = []
             zero_sub = subconverter_render(base, ini)
             mihomo_test(exe, zero_sub, "subconverter-zero-nodes", tmp)

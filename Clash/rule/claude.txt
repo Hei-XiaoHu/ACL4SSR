@@ -1,4 +1,4 @@
-# Claude 域名家族（domain YAML）→ 💬 Ai平台；接受前置广告/遥测规则检查。
+# Claude 域名家族（domain YAML）→ 🤖 AI；接受前置广告/遥测规则检查。
 # 精确匹配第三方 CDN，不泛化 b-cdn.net。
 # 核对依据：
 # https://code.claude.com/docs/en/network-config

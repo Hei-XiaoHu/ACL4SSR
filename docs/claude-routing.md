@@ -6,11 +6,11 @@
 
 | 类别 | 范围 | 策略 |
 |---|---|---|
-| 明确的核心功能端点 | 官方 API、OAuth、安装更新、CDN、桌面预览、用户内容与 MCP 内容；Sift 反欺诈 | `claude-essential` → 💬 Ai平台；排在广告集合之前。Sift 被 AdRules / anti-AD 收录，只有放在这里才不会被拦 |
-| Claude 域名家族 | anthropic.com、claude.ai/com/app/dev、clau.de、MCP/content 父域、两个专属第三方 CDN 主机、anthropic.auth0.com、anthropic-com.ghost.io、Intercom | `claude` → 💬 Ai平台；位于广告集合之后，不给整个 Claude 家族广告豁免（Intercom 分析上报仍被广告源拦截） |
-| 明确的可选遥测 | Datadog 各区域 RUM / 日志摄取端点，Sentry 摄取端（含 us/de），Statsig 事件上报，Fathom 统计 | `claude-telemetry` → 🛑 广告拦截 |
+| 明确的核心功能端点 | 官方 API、OAuth、安装更新、CDN、桌面预览、用户内容与 MCP 内容；Sift 反欺诈 | `claude-essential` → 🤖 AI；排在广告集合之前。Sift 被 AdRules / anti-AD 收录，只有放在这里才不会被拦 |
+| Claude 域名家族 | anthropic.com、claude.ai/com/app/dev、clau.de、MCP/content 父域、两个专属第三方 CDN 主机、anthropic.auth0.com、anthropic-com.ghost.io、Intercom | `claude` → 🤖 AI；位于广告集合之后，不给整个 Claude 家族广告豁免（Intercom 分析上报仍被广告源拦截） |
+| 明确的可选遥测 | Datadog 各区域 RUM / 日志摄取端点，Sentry 摄取端（含 us/de），Statsig 事件上报，Fathom 统计 | `claude-telemetry` → 🛑 广告 |
 | 共享人机验证 | challenges.cloudflare.com、client-api.arkoselabs.com | `shared-auth` → 🚀 节点选择（低延迟节点，验证更快） |
-| 已核实的自有 IP | 160.79.104.0/21、2607:6bc0::/32 | 域名规则之后使用 `claude-ip` → 💬 Ai平台，no-resolve |
+| 已核实的自有 IP | 160.79.104.0/21、2607:6bc0::/32 | 域名规则之后使用 `claude-ip` → 🤖 AI，no-resolve |
 | 其他共享服务 | GitHub、npm、Google Storage、通用 JS/font CDN、Auth0 其他租户、WorkOS 等 | 按原有通用/平台分流；不把整个供应商后缀塞入 AI |
 
 Claude、共享验证码和广告规则的顺序为：明确遥测拦截 → 定向 QUIC → 必要功能例外 → 通用广告集合 → Claude 家族/其他 AI → 自有 IP 兜底。

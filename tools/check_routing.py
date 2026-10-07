@@ -214,7 +214,7 @@ def assert_outputs():
     stash = build.stash_dns()["dns"]
     # mihomo：主 DNS 全部境外且经 DNS 组；DIRECT 走国内；policy 只有内网与 cn 两类
     assert meta["direct-nameserver-follow-policy"]
-    assert all("#🛰️ DNS-Proxy" in server for server in meta["nameserver"])
+    assert all(f"#{build.DNS_GROUP}" in server for server in meta["nameserver"])
     assert not _has_china(meta["nameserver"])
     assert meta["direct-nameserver"] == china
     policy = meta["nameserver-policy"]
@@ -242,7 +242,7 @@ def assert_outputs():
         assert not _has_china(od[key]), (key, od[key])
     assert all(v == system for v in od["nameserver-policy"].values())
     assert any(s.startswith("tls://") for s in od["nameserver"]) and any(s.startswith("https://") for s in od["nameserver"])
-    assert all("#🛰️ DNS-Proxy" in s for s in od["nameserver"])
+    assert all(f"#{build.DNS_GROUP}" in s for s in od["nameserver"])
     assert not any("#" in s for s in od["direct-nameserver"] + od["proxy-server-nameserver"])
 
     for target, dns in (("meta", meta), ("stash", stash)):
@@ -251,11 +251,11 @@ def assert_outputs():
         assert all("RULE-SET,unban," not in rule for rule in rules), target
         ad_index = next(i for i, rule in enumerate(rules) if
                         rule.startswith(("RULE-SET,adrules,", "RULE-SET,awavenue,")))
-        assert rules.index("RULE-SET,claude-essential,💬 Ai平台") < ad_index, target
-        assert rules.index("RULE-SET,claude,💬 Ai平台") > ad_index, target
-        assert rules.index("RULE-SET,claude-telemetry,🛑 广告拦截") < ad_index, target
-        assert rules.index("RULE-SET,game-proxy-extra,🎮 游戏平台") < rules.index("RULE-SET,games-cn,🎯 全球直连")
-        assert rules.index("RULE-SET,game-download-extra,🎯 全球直连") < rules.index("RULE-SET,steam,🎮 游戏平台")
+        assert rules.index("RULE-SET,claude-essential,🤖 AI") < ad_index, target
+        assert rules.index("RULE-SET,claude,🤖 AI") > ad_index, target
+        assert rules.index("RULE-SET,claude-telemetry,🛑 广告") < ad_index, target
+        assert rules.index("RULE-SET,game-proxy-extra,🎮 游戏") < rules.index("RULE-SET,games-cn,🎯 直连")
+        assert rules.index("RULE-SET,game-download-extra,🎯 直连") < rules.index("RULE-SET,steam,🎮 游戏")
         quic = next(rule for rule in rules if rule.startswith("AND,"))
         assert "(RULE-SET,claude)" in quic and "(RULE-SET,gfw)" in quic, target
         assert "(RULE-SET,claude-ip,no-resolve)" in quic, target
@@ -265,18 +265,17 @@ def assert_outputs():
             assert "(PROTOCOL,QUIC)" in quic and "DST-PORT" not in quic
             assert "cn" not in build.providers("stash")
             assert "GEOSITE,cn" in quic
-            assert rules.index("GEOSITE,geolocation-!cn,🐟 漏网之鱼") < rules.index("GEOSITE,cn,🎯 全球直连")
+            assert rules.index("GEOSITE,geolocation-!cn,🚀 节点选择") < rules.index("GEOSITE,cn,🎯 直连")
     essential = build.local_provider_domains("claude-essential")
     assert "+.sift.com" in essential and "+.siftscience.com" in essential
     assert "claude.app" in "".join(build.local_provider_domains("claude"))
     assert "RULE-SET,shared-auth,🚀 节点选择" in build.rules("meta")
     assert "RULE-SET,shared-auth,🚀 节点选择" in build.rules("stash")
-    for line in build.ini("meta").splitlines():
-        if line.startswith("custom_proxy_group=") and any(
-            line.startswith(f"custom_proxy_group={region}") for region in build.REGIONS
-        ):
-            assert "`[]REJECT`" in line
-    print("✓ mihomo / Stash / 国外覆写 DNS、STUN、白名单、Claude 与游戏优先级、空地区组", flush=True)
+    for target in ("meta", "stash"):
+        rules = build.rules(target)
+        # 🐟 只接真正未命中的流量：已知国外直接走节点选择，兜底 MATCH 才到漏网之鱼
+        assert [r for r in rules if r.endswith(",🐟 漏网之鱼")] == ["MATCH,🐟 漏网之鱼"], target
+    print("✓ mihomo / Stash / 国外覆写 DNS、STUN、白名单、Claude 与游戏优先级、漏网之鱼仅兜底", flush=True)
 
 
 def dns_query(port: int, host: str) -> str:
@@ -427,38 +426,38 @@ def native_regressions(exe: str):
             await_line(ready)
             essentials = set(build.local_provider_domains("claude-essential"))
             cases = [
-                ("tcp", "chromewebstore.google.com", 443, "google", "🌐 谷歌服务"),
-                ("tcp", "dl.google.com", 443, "google", "🌐 谷歌服务"),
-                ("tcp", "services.googleapis.cn", 443, "google", "🌐 谷歌服务"),
-                ("tcp", "www.gstatic.com", 443, "google", "🌐 谷歌服务"),
-                ("tcp", "lh3.googleusercontent.com", 443, "google", "🌐 谷歌服务"),
-                ("tcp", "www.gstatic.cn", 443, "google-cn", "🌐 谷歌服务"),
-                ("tcp", "mtalk.google.com", 443, "googlefcm", "📢 谷歌FCM"),
-                ("tcp", "video.googlevideo.com", 443, "youtube", "📹 油管视频"),
+                ("tcp", "chromewebstore.google.com", 443, "google", "🔍 谷歌"),
+                ("tcp", "dl.google.com", 443, "google", "🔍 谷歌"),
+                ("tcp", "services.googleapis.cn", 443, "google", "🔍 谷歌"),
+                ("tcp", "www.gstatic.com", 443, "google", "🔍 谷歌"),
+                ("tcp", "lh3.googleusercontent.com", 443, "google", "🔍 谷歌"),
+                ("tcp", "www.gstatic.cn", 443, "google-cn", "🔍 谷歌"),
+                ("tcp", "mtalk.google.com", 443, "googlefcm", "🔍 谷歌"),
+                ("tcp", "video.googlevideo.com", 443, "youtube", "🎬 流媒体"),
                 # 截图中的 QQ 纯 IP，以及国内域名/未知 IP，绝不能被 QUIC blanket rule 拒绝。
-                ("udp", "116.131.56.103", 443, "cn-ip", "🎯 全球直连"),
-                ("udp", "223.5.5.5", 443, "cn-ip", "🎯 全球直连"),
-                ("udp", "gchat.qpic.qq.com", 443, "cn", "🎯 全球直连"),
+                ("udp", "116.131.56.103", 443, "cn-ip", "🎯 直连"),
+                ("udp", "223.5.5.5", 443, "cn-ip", "🎯 直连"),
+                ("udp", "gchat.qpic.qq.com", 443, "cn", "🎯 直连"),
                 ("udp", "203.0.113.9", 443, "Match", "🐟 漏网之鱼"),
                 ("udp", "router.lan", 443, "private", "_audit_direct"),
                 ("udp", "160.79.104.10", 443, "AND", "REJECT"),
                 ("udp", "claude.ai", 443, "AND", "REJECT"),
                 ("udp", "video.googlevideo.com", 443, "AND", "REJECT"),
                 ("udp", "www.netflix.com", 443, "AND", "REJECT"),
-                ("udp", "claude.ai", 8443, "claude-essential", "💬 Ai平台"),
+                ("udp", "claude.ai", 8443, "claude-essential", "🤖 AI"),
                 ("udp", "www.wikipedia.org", 443, "AND", "REJECT"),
                 ("udp", "www.acm.org", 443, "AND", "REJECT"),
                 ("udp", "www.twitch.tv", 443, "AND", "REJECT"),
                 ("udp", "challenges.cloudflare.com", 443, "AND", "REJECT"),
-                ("udp", "api.battle.net", 443, "games", "🎮 游戏平台"),
-                ("udp", "a.dl.playstation.net", 443, "game-download", "🎯 全球直连"),
-                ("udp", "steampipe.akamaized.net", 443, "game-download", "🎯 全球直连"),
-                ("udp", "cache10-hkg1.steamcontent.com", 443, "game-download-extra", "🎯 全球直连"),
-                ("udp", "call.discord.media", 443, "geolocation-!cn", "🐟 漏网之鱼"),
+                ("udp", "api.battle.net", 443, "games", "🎮 游戏"),
+                ("udp", "a.dl.playstation.net", 443, "game-download", "🎯 直连"),
+                ("udp", "steampipe.akamaized.net", 443, "game-download", "🎯 直连"),
+                ("udp", "cache10-hkg1.steamcontent.com", 443, "game-download-extra", "🎯 直连"),
+                ("udp", "call.discord.media", 443, "geolocation-!cn", "🚀 节点选择"),
                 # 默认直连的境外服务与自定义豁免：QUIC 不拦
-                ("udp", "www.apple.com", 443, "apple", "🍎 苹果服务"),
-                ("udp", "update.microsoft.com", 443, "microsoft", "Ⓜ️ 微软服务"),
-                ("udp", "play.examplegame.com", 443, "geolocation-!cn", "🐟 漏网之鱼"),
+                ("udp", "www.apple.com", 443, "apple", "🍎 苹果"),
+                ("udp", "update.microsoft.com", 443, "microsoft", "Ⓜ️ 微软"),
+                ("udp", "play.examplegame.com", 443, "geolocation-!cn", "🚀 节点选择"),
             ]
             for host in [
                 "claude.ai", "www.claude.ai", "audit-subdomain.claude.ai", "downloads.claude.ai",
@@ -481,69 +480,69 @@ def native_regressions(exe: str):
                     host == domain[2:] or host.endswith(domain[1:])
                     for domain in essentials if domain.startswith("+.")
                 )
-                cases.append(("tcp", host, 443, "claude-essential" if essential else "claude", "💬 Ai平台"))
+                cases.append(("tcp", host, 443, "claude-essential" if essential else "claude", "🤖 AI"))
             cases += [
                 ("tcp", "challenges.cloudflare.com", 443, "shared-auth", "🚀 节点选择"),
                 ("tcp", "client-api.arkoselabs.com", 443, "shared-auth", "🚀 节点选择"),
-                ("tcp", "160.79.104.10", 443, "claude-ip", "💬 Ai平台"),
-                ("tcp", "2607:6bc0::10", 443, "claude-ip", "💬 Ai平台"),
-                ("tcp", "http-intake.logs.us5.datadoghq.com", 443, "claude-telemetry", "🛑 广告拦截"),
-                ("tcp", "http-intake.logs.ap1.datadoghq.com", 443, "claude-telemetry", "🛑 广告拦截"),
-                ("tcp", "browser-intake-us5-datadoghq.com", 443, "claude-telemetry", "🛑 广告拦截"),
-                ("tcp", "browser-intake-datadoghq.eu", 443, "claude-telemetry", "🛑 广告拦截"),
-                ("tcp", "o1.ingest.sentry.io", 443, "claude-telemetry", "🛑 广告拦截"),
-                ("tcp", "o1.ingest.us.sentry.io", 443, "claude-telemetry", "🛑 广告拦截"),
-                ("tcp", "o1.ingest.de.sentry.io", 443, "claude-telemetry", "🛑 广告拦截"),
-                ("tcp", "events.statsigapi.net", 443, "claude-telemetry", "🛑 广告拦截"),
-                ("tcp", "cdn.usefathom.com", 443, "claude-telemetry", "🛑 广告拦截"),
-                ("tcp", "api-visitor-analytics.intercom.com", 443, "adrules", "🛑 广告拦截"),
-                ("tcp", "audit-telemetry.anthropic.com", 443, "adrules", "🛑 广告拦截"),
-                ("tcp", "audit-telemetry.claude.ai", 443, "adrules", "🛑 广告拦截"),
-                ("tcp", "audit-telemetry.together.ai", 443, "adrules", "🛑 广告拦截"),
-                ("tcp", "tracking.miui.com", 443, "adrules", "🛑 广告拦截"),
-                ("tcp", "app.adjust.com", 443, "adrules", "🛑 广告拦截"),
-                ("tcp", "errlog.umeng.com", 443, "adrules", "🛑 广告拦截"),
-                ("tcp", "msg.umengcloud.com", 443, "adrules", "🛑 广告拦截"),
-                ("tcp", "googletraveladservices.com", 443, "adrules", "🛑 广告拦截"),
-                ("tcp", "tracking-protection.cdn.mozilla.net", 443, "functional-direct", "🎯 全球直连"),
+                ("tcp", "160.79.104.10", 443, "claude-ip", "🤖 AI"),
+                ("tcp", "2607:6bc0::10", 443, "claude-ip", "🤖 AI"),
+                ("tcp", "http-intake.logs.us5.datadoghq.com", 443, "claude-telemetry", "🛑 广告"),
+                ("tcp", "http-intake.logs.ap1.datadoghq.com", 443, "claude-telemetry", "🛑 广告"),
+                ("tcp", "browser-intake-us5-datadoghq.com", 443, "claude-telemetry", "🛑 广告"),
+                ("tcp", "browser-intake-datadoghq.eu", 443, "claude-telemetry", "🛑 广告"),
+                ("tcp", "o1.ingest.sentry.io", 443, "claude-telemetry", "🛑 广告"),
+                ("tcp", "o1.ingest.us.sentry.io", 443, "claude-telemetry", "🛑 广告"),
+                ("tcp", "o1.ingest.de.sentry.io", 443, "claude-telemetry", "🛑 广告"),
+                ("tcp", "events.statsigapi.net", 443, "claude-telemetry", "🛑 广告"),
+                ("tcp", "cdn.usefathom.com", 443, "claude-telemetry", "🛑 广告"),
+                ("tcp", "api-visitor-analytics.intercom.com", 443, "adrules", "🛑 广告"),
+                ("tcp", "audit-telemetry.anthropic.com", 443, "adrules", "🛑 广告"),
+                ("tcp", "audit-telemetry.claude.ai", 443, "adrules", "🛑 广告"),
+                ("tcp", "audit-telemetry.together.ai", 443, "adrules", "🛑 广告"),
+                ("tcp", "tracking.miui.com", 443, "adrules", "🛑 广告"),
+                ("tcp", "app.adjust.com", 443, "adrules", "🛑 广告"),
+                ("tcp", "errlog.umeng.com", 443, "adrules", "🛑 广告"),
+                ("tcp", "msg.umengcloud.com", 443, "adrules", "🛑 广告"),
+                ("tcp", "googletraveladservices.com", 443, "adrules", "🛑 广告"),
+                ("tcp", "tracking-protection.cdn.mozilla.net", 443, "functional-direct", "🎯 直连"),
                 ("tcp", "claude.ai.evil.example", 443, "Match", "🐟 漏网之鱼"),
                 ("tcp", "notanthropic.com", 443, "Match", "🐟 漏网之鱼"),
                 ("tcp", "other.b-cdn.net", 443, "Match", "🐟 漏网之鱼"),
-                ("tcp", "epicgames-download1.akamaized.net", 443, "extra-direct", "🎯 全球直连"),
-                ("tcp", "epicgames-download1-123.file.myqcloud.com", 443, "extra-direct", "🎯 全球直连"),
-                ("tcp", "cdn2-epicgames-123.file.myqcloud.com", 443, "extra-direct", "🎯 全球直连"),
+                ("tcp", "epicgames-download1.akamaized.net", 443, "extra-direct", "🎯 直连"),
+                ("tcp", "epicgames-download1-123.file.myqcloud.com", 443, "extra-direct", "🎯 直连"),
+                ("tcp", "cdn2-epicgames-123.file.myqcloud.com", 443, "extra-direct", "🎯 直连"),
                 ("tcp", "epicgames-download.evil.example", 443, "Match", "🐟 漏网之鱼"),
                 ("tcp", "epicgames-download1.akamaized.net.evil.example", 443, "Match", "🐟 漏网之鱼"),
-                ("tcp", "api.battle.net", 443, "games", "🎮 游戏平台"),
-                ("tcp", "www.ubisoft.com", 443, "games", "🎮 游戏平台"),
-                ("tcp", "www.gog.com", 443, "games", "🎮 游戏平台"),
-                ("tcp", "www.nintendoswitch.cn", 443, "games-cn", "🎯 全球直连"),
-                ("tcp", "gog.qtlglb.com", 443, "games-cn", "🎯 全球直连"),
-                ("tcp", "www.disneyplus.com", 443, "proxymedia", "🌍 国外媒体"),
-                ("tcp", "www.twitch.tv", 443, "proxymedia", "🌍 国外媒体"),
-                ("tcp", "api.spotify.com", 443, "proxymedia", "🌍 国外媒体"),
+                ("tcp", "api.battle.net", 443, "games", "🎮 游戏"),
+                ("tcp", "www.ubisoft.com", 443, "games", "🎮 游戏"),
+                ("tcp", "www.gog.com", 443, "games", "🎮 游戏"),
+                ("tcp", "www.nintendoswitch.cn", 443, "games-cn", "🎯 直连"),
+                ("tcp", "gog.qtlglb.com", 443, "games-cn", "🎯 直连"),
+                ("tcp", "www.disneyplus.com", 443, "proxymedia", "🎬 流媒体"),
+                ("tcp", "www.twitch.tv", 443, "proxymedia", "🎬 流媒体"),
+                ("tcp", "api.spotify.com", 443, "proxymedia", "🎬 流媒体"),
                 ("tcp", "my-claude-proxy.example", 443, "Match", "🐟 漏网之鱼"),
-                ("tcp", "dl.delivery.mp.microsoft.com", 443, "game-download-cn", "🎯 全球直连"),
-                ("tcp", "blzdist-wow.necdn.leihuo.netease.com", 443, "game-download-cn", "🎯 全球直连"),
-                ("tcp", "www.iqiyi.com", 443, "entertainment-cn", "🎯 全球直连"),
-                ("tcp", "www.youku.com", 443, "entertainment-cn", "🎯 全球直连"),
-                ("tcp", "www.shanghaidisneyresort.com", 443, "entertainment-cn-attr", "🎯 全球直连"),
-                ("tcp", "a.dl.playstation.net", 443, "game-download", "🎯 全球直连"),
-                ("tcp", "steampipe.akamaized.net", 443, "game-download", "🎯 全球直连"),
+                ("tcp", "dl.delivery.mp.microsoft.com", 443, "game-download-cn", "🎯 直连"),
+                ("tcp", "blzdist-wow.necdn.leihuo.netease.com", 443, "game-download-cn", "🎯 直连"),
+                ("tcp", "www.iqiyi.com", 443, "entertainment-cn", "🎯 直连"),
+                ("tcp", "www.youku.com", 443, "entertainment-cn", "🎯 直连"),
+                ("tcp", "www.shanghaidisneyresort.com", 443, "entertainment-cn-attr", "🎯 直连"),
+                ("tcp", "a.dl.playstation.net", 443, "game-download", "🎯 直连"),
+                ("tcp", "steampipe.akamaized.net", 443, "game-download", "🎯 直连"),
                 # 上游只逐个列 cacheN-xxx；新节点仍应直连
-                ("tcp", "cache10-hkg1.steamcontent.com", 443, "game-download-extra", "🎯 全球直连"),
+                ("tcp", "cache10-hkg1.steamcontent.com", 443, "game-download-extra", "🎯 直连"),
                 # 创意工坊下载：上游 games@cn 已直连
-                ("tcp", "images.steamusercontent.com", 443, "games-cn", "🎯 全球直连"),
+                ("tcp", "images.steamusercontent.com", 443, "games-cn", "🎯 直连"),
                 # EA / GOG 下载 CDN 直连；商店/登录走游戏平台
-                ("tcp", "lvlt.cdn.ea.com", 443, "game-download-extra", "🎯 全球直连"),
-                ("tcp", "ssl-lvlt.cdn.ea.com", 443, "game-download-extra", "🎯 全球直连"),
-                ("tcp", "download.dm.origin.com", 443, "game-download-extra", "🎯 全球直连"),
-                ("tcp", "cdn.gog.com", 443, "game-download-extra", "🎯 全球直连"),
-                ("tcp", "www.ea.com", 443, "ea", "🎮 游戏平台"),
+                ("tcp", "lvlt.cdn.ea.com", 443, "game-download-extra", "🎯 直连"),
+                ("tcp", "ssl-lvlt.cdn.ea.com", 443, "game-download-extra", "🎯 直连"),
+                ("tcp", "download.dm.origin.com", 443, "game-download-extra", "🎯 直连"),
+                ("tcp", "cdn.gog.com", 443, "game-download-extra", "🎯 直连"),
+                ("tcp", "www.ea.com", 443, "ea", "🎮 游戏"),
                 # Steam CM 信令走游戏平台，即使上游 games@cn 收录了 steamserver.net
-                ("tcp", "cm1-hkg1.cm.steampowered.com", 27017, "game-proxy-extra", "🎮 游戏平台"),
-                ("tcp", "cmp1-hkg1.steamserver.net", 443, "game-proxy-extra", "🎮 游戏平台"),
-                ("tcp", "store.steampowered.com", 443, "steam", "🎮 游戏平台"),
+                ("tcp", "cm1-hkg1.cm.steampowered.com", 27017, "game-proxy-extra", "🎮 游戏"),
+                ("tcp", "cmp1-hkg1.steamserver.net", 443, "game-proxy-extra", "🎮 游戏"),
+                ("tcp", "store.steampowered.com", 443, "steam", "🎮 游戏"),
             ]
             for network, host, port, expected_rule, expected_policy in cases:
                 tcp = socket.create_connection(("127.0.0.1", socks_port), timeout=3)

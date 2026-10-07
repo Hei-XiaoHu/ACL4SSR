@@ -1,4 +1,4 @@
-# Claude 可选遥测/错误报告 → 🛑 广告拦截（排在所有放行规则之前）。
+# Claude 可选遥测/错误报告 → 🛑 广告（排在所有放行规则之前）。
 # 主机为供应商共用：其他应用向这些端点的上报也会被拦，属预期（隐私收益）。
 # https://code.claude.com/docs/en/network-config
 # https://code.claude.com/docs/en/data-usage

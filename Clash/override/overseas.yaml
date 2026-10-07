@@ -1,7 +1,7 @@
 # Clash Party 远程覆写 · 国外模式（仅海外电脑）
 # 本文件由 tools/build.py 从 src/spec.yaml 生成，请勿手改；改规则请改 src/spec.yaml
 # 效果：分流规则与策略组完全不变；DNS 中所有国内服务器换成 Cloudflare / Google 的 DoH + DoT
-#   主 DNS 仍经 🛰️ DNS-Proxy 组发出（想更快可在面板把该组切到 DIRECT）；内网仍走 system
+#   主 DNS 仍经 🛰️ DNS 组发出（想更快可在面板把该组切到 DIRECT）；内网仍走 system
 # 用法：Clash Party → 覆写 → 导入远程链接：
 #   https://testingcf.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@master/Clash/override/overseas.yaml
 #   然后在订阅的「编辑信息」里勾选此覆写
@@ -57,10 +57,10 @@ dns!:
   - 1.1.1.1
   - 8.8.8.8
   nameserver:
-  - https://1.1.1.1/dns-query#🛰️ DNS-Proxy
-  - https://8.8.8.8/dns-query#🛰️ DNS-Proxy
-  - tls://1.1.1.1#🛰️ DNS-Proxy
-  - tls://8.8.8.8#🛰️ DNS-Proxy
+  - https://1.1.1.1/dns-query#🛰️ DNS
+  - https://8.8.8.8/dns-query#🛰️ DNS
+  - tls://1.1.1.1#🛰️ DNS
+  - tls://8.8.8.8#🛰️ DNS
   proxy-server-nameserver:
   - https://1.1.1.1/dns-query
   - https://8.8.8.8/dns-query
