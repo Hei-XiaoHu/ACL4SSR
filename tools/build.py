@@ -236,6 +236,11 @@ def local_provider_domains(name: str) -> list[str]:
 
 
 def dns_policy(target: str, *, overseas: bool = False) -> dict:
+    """只含“内网 → system”与“已知国内 → 国内 DoH”；未命中的域名走主 nameserver（境外）。
+
+    不放任何境外条目：mihomo 的 DIRECT 出站共享本 policy（follow-policy），
+    未命中时回到国内 direct-nameserver，直连下载不会被送去境外 DNS。
+    """
     policy = {domain: ["system"] for domain in S["dns_system_domains"]}
     if target == "meta":
         policy = {"rule-set:private": ["system"], **policy}
@@ -243,36 +248,22 @@ def dns_policy(target: str, *, overseas: bool = False) -> dict:
         policy["geosite:private"] = ["system"]
     if overseas:
         return policy
-    remote = [f"{u}#🛰️ DNS-Proxy" for u in S["dns_remote"]] if target == "meta" else S["dns_remote"]
-    local_names = [name for name in S["dns_remote_sets"] if "self" in S["providers"][name]]
-    geo_names = [name for name in S["dns_remote_sets"] if name not in local_names]
-    tagged = [name for name in S["dns_china_sets"] if "@" in S["providers"][name].get("geosite", "")]
-    tag_cache = None
-    if target == "stash" and tagged:
-        tag_cache = yaml.safe_load((ROOT / S["stash_dns_cn_cache"]).read_text(encoding="utf-8"))
-        if tag_cache["providers"] != tagged:
-            sys.exit("Stash 国内 DNS 标签缓存源已改变，请运行 tools/update_stash_dns.py")
-        for domain in tag_cache["payload"]:
-            if domain in policy and policy[domain] != S["dns_china"]:
-                sys.exit(f"DNS policy 冲突: {domain}")
-            policy[domain] = S["dns_china"]
-    # 明确代理例外 > 国内游戏标签 > 境外公司/娱乐集合 > cn。
-    for name in [*local_names, *S["dns_china_sets"], *geo_names]:
-        if target == "stash" and name in tagged:
-            continue
-        spec = S["providers"][name]
-        servers = S["dns_china"] if name in S["dns_china_sets"] else remote
-        if target == "meta":
-            policy[f"rule-set:{name}"] = servers
-        elif "self" in spec:
-            for domain in local_provider_domains(name):
-                if domain in policy and policy[domain] != servers:
-                    sys.exit(f"DNS policy 冲突: {domain}")
-                policy[domain] = servers
-        else:
-            geo = spec.get("meta", spec)["geosite"]
-            policy[f"geosite:{geo}"] = servers
-    policy["rule-set:cn" if target == "meta" else "geosite:cn"] = S["dns_china"]
+    china = S["dns_china"]
+    if target == "stash":
+        # Stash 没有 direct-nameserver：默认直连但不在 cn 里的下载集合单独指定国内 DNS
+        for name in S["stash_dns_china_sets"]:
+            spec = S["providers"][name]
+            if "self" in spec:
+                for domain in local_provider_domains(name):
+                    if domain in policy and policy[domain] != china:
+                        sys.exit(f"DNS policy 冲突: {domain}")
+                    policy[domain] = china
+            else:
+                geo = spec.get("stash", spec)["geosite"]
+                if "@" in geo:
+                    sys.exit(f"Stash DNS 未确认支持 geosite 属性标签: {geo}")
+                policy[f"geosite:{geo}"] = china
+    policy["rule-set:cn" if target == "meta" else "geosite:cn"] = china
     return policy
 
 
@@ -362,7 +353,7 @@ def full_config(target: str, *, with_groups: bool, final: bool) -> list[tuple[st
 HDR_META = [
     "规则：MetaCubeX/meta-rules-dat（v2fly 社区，每日同步）mrs 二进制规则集，匹配快、内存小",
     "去广告：AdRules + anti-AD（mrs）；默认走代理的境外 UDP443 回落 TCP，默认直连/国内/游戏/下载/未知 IP 保留",
-    "DNS：AI/代理补充/已知国外域名优先走境外 DoH；国内用国内 DoH，内网用系统 DNS",
+    "DNS：已知国内走国内 DoH，其余经 🛰️ DNS-Proxy 查境外 DoH，内网用系统 DNS；DIRECT 出站用国内 direct-nameserver",
     "安全：allow-lan 关闭，DNS 仅监听 127.0.0.1；find-process-mode always（仅用于连接列表显示应用名）",
     f"规则 CDN 为 {CDN}，失效时全局替换为 https://fastly.jsdelivr.net/gh",
 ]
@@ -370,8 +361,8 @@ HDR_STASH = [
     "规则：MetaCubeX/meta-rules-dat 的 domain/ipcidr yaml；国内外兜底复用 Stash 原生 GEOSITE + GEOIP,CN",
     "  （与 geosite DNS policy 顺序对齐，不额外下载全量 cn/geolocation-!cn 文本）",
     "去广告：AWAvenue 秋风规则（约 900 条，含广告+隐私跟踪+流氓推广）",
-    "DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS-Proxy；内网系统 DNS、国外优先境外 DoH；geosite policy 需 Stash iOS 3.4.0+",
-    "GEOSITE 数据首次从 GitHub 按需加载，请确保 GitHub 可达；少量国内属性标签已展开为 DNS 字面域名",
+    "DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS-Proxy；内网系统 DNS，已知国内与游戏下载走国内 DoH，其余境外 DoH",
+    "geosite DNS policy 需 Stash iOS 3.4.0+；GEOSITE 数据首次从 GitHub 按需加载，请确保 GitHub 可达",
     f"规则 CDN 为 {CDN}，失效时全局替换为 https://fastly.jsdelivr.net/gh",
 ]
 
@@ -412,22 +403,32 @@ def ini(target: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def overseas() -> str:
+def overseas_dns() -> dict:
+    """国外模式：与主配置同一份 DNS，只把国内服务器全部换成境外 DoH/DoT。"""
     o = S["overseas"]
-    dns = dict(o["dns"])
-    dns["fake-ip-filter"] = fake_ip_filter()
-    dns["nameserver-policy"] = dns_policy("meta", overseas=True)
-    r = render_rules(o["rules"], "meta", providers("meta"))
+    dns = meta_dns()["dns"]
+    dns.update({
+        "default-nameserver": o["dns_bootstrap"],
+        "nameserver": [f"{u}#🛰️ DNS-Proxy" for u in o["dns"]],
+        "proxy-server-nameserver": o["dns"],
+        "direct-nameserver": o["dns"],
+        "nameserver-policy": dns_policy("meta", overseas=True),
+    })
+    return dns
+
+
+def overseas() -> str:
     hdr = [
-        "Clash Party 远程覆写 · 国外模式", GENERATED,
-        "效果：AI 走 💬 Ai平台（自己选节点），广告拦截，其余全部直连；DNS 整段换成国外 DoH，不含任何国内 DNS",
+        "Clash Party 远程覆写 · 国外模式（仅海外电脑）", GENERATED,
+        "效果：分流规则与策略组完全不变；DNS 中所有国内服务器换成 Cloudflare / Google 的 DoH + DoT",
+        "  主 DNS 仍经 🛰️ DNS-Proxy 组发出（想更快可在面板把该组切到 DIRECT）；内网仍走 system",
         "用法：Clash Party → 覆写 → 导入远程链接：",
         f"  {CDN}/{S['self_repo']}/Clash/override/overseas.yaml",
-        "  然后在订阅的「编辑信息」里勾选此覆写；回国后取消勾选即可",
+        "  然后在订阅的「编辑信息」里勾选此覆写",
         "前提：设置里关闭「控制 DNS 设置」，否则软件自身 DNS 设置优先级更高，本文件的 dns! 不生效",
-        "+rules 插在原规则最前面；dns! 强制整段替换",
+        "dns! 强制整段替换",
     ]
-    return yaml_doc(hdr, ("", _dump({"+rules": r})), ("", _dump({"dns!": dns})))
+    return yaml_doc(hdr, ("", _dump({"dns!": overseas_dns()})))
 
 
 OUTPUTS = {

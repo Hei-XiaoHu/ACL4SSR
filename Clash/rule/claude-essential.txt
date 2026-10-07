@@ -25,3 +25,8 @@ payload:
   # 官方 Desktop 清单明确的用户内容和 MCP 内容，不是第三方通用 CDN
   - +.claudeusercontent.com
   - +.claudemcpcontent.com
+  # Sift 反欺诈：把设备指纹与 IP 交给 Anthropic 风控，必须与 Claude 同出口。
+  # AdRules / anti-AD 都收录了 sift.com / siftscience.com，必须排在广告规则之前，否则会被拦截。
+  # 全局生效：其他网站的 Sift 也会走 AI。
+  - +.sift.com
+  - +.siftscience.com

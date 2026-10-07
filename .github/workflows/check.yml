@@ -37,3 +37,6 @@ jobs:
 
       - name: QQ / Claude / DNS / 广告分流行为回归（本地夹具）
         run: python3 tools/check_routing.py ./mihomo
+
+      - name: 当日上游核对（Claude 不在 cn、AI/下载补充未被广告源拦截）
+        run: cd tools && python3 check_upstream.py

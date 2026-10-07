@@ -2,7 +2,22 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
-## 已实施的修复
+## 2026-10-07 DNS 简化与 Claude / 游戏补充（重构第 1 步）
+
+| 项目 | 最终行为 |
+|---|---|
+| DNS 模型 | 回到“已知国内 → 国内 DoH，其余 → 经 🛰️ DNS-Proxy 查境外 DoH，内网 → system”。删除 `dns_remote_sets` / `dns_china_sets`：fake-ip 与系统代理下，走代理的连接由节点远端解析，本地 policy 中的境外条目从不被用到 |
+| mihomo DIRECT | `direct-nameserver` 国内 + follow-policy（保留内网 system）。policy 中不含任何境外条目，DIRECT 未命中 policy 时一律回到国内 direct-nameserver，直连下载自然拿到国内 CDN |
+| Stash | 无 direct-nameserver，DIRECT 也用主 DNS：额外只给游戏下载集合（`category-game-platforms-download` + `game-download-extra`）指定国内 DNS。删除 `src/stash-dns-cn.yaml` 与 `update_stash_dns.py` |
+| 国外覆写 | 只替换 DNS：所有国内服务器换成 Cloudflare / Google 的 DoH + DoT，主 DNS 仍经 🛰️ DNS-Proxy；分流规则与策略组不变。只给海外电脑使用 |
+| Claude | Sift 进 `claude-essential`（广告源收录了它，之前实际被拦）；auth0 租户、博客、Intercom 进 `claude`；Datadog 补全各区域摄取端点。详见 [claude-routing](claude-routing.md) |
+| Steam CM | 新增 `game-proxy-extra`：`steamserver.net`、`cm.steampowered.com` 走 🎮 游戏平台（上游 games@cn 含 steamserver.net，必须提前截走） |
+| 游戏下载补漏 | `game-download-extra` 增加 EA（`+.cdn.ea.com`、`download.dm.origin.com`）、GOG（`cdn.gog.com`、`cdn-hw.gog.com`）、创意工坊与蒸汽平台；删除 CM 条目 |
+| 测试 | `check_routing.py` 四台假 DNS 记录查询并断言泄露（见文件头 L1–L4）；新增联网的 `check_upstream.py` 核对当日上游 |
+
+已知限制：mihomo 对 UDP 的域名目标固定先在本地解析一次（按主解析器 policy，Claude 等只会发往境外 DNS）；靠 IP 规则判为直连后由 direct-nameserver 重新解析，上游 issue #3244 报告过个别情况下未使用重解析结果，需实机留意。
+
+## 早先已实施的修复（2026-10-04，DNS / 国外覆写 / 遥测 / Steam 行已被上一节取代）
 
 | 项目 | 最终行为 |
 |---|---|
@@ -48,7 +63,6 @@ Stash GEOSITE 数据并非随应用一起分发；官方说明首次从 GitHub �
 - Stash 普通 geosite 取官方 community 数据，mihomo cn 含额外上游融合；两个客户端不保证每个边缘域名完全一致。规则/DNS动态数据也不是物理地理位置的绝对判定。
 - 内网 system 解析仍依赖操作系统实际 DNS；`.local` 的 mDNS发现、企业 SSO、本地 MCP 和任意自定义网关需实机验证。
 - 全球游戏下载 CDN 直连在国内通常可用，但个别节点直连可能较慢；可临时把 🎯 全球直连 切到代理测试，或在 extra-proxy 中覆盖个别域名。
-- Stash DNS 的 121 条字面域名只替代 3 个 `@cn` 属性标签；`geosite:cn` 本身仍原生使用。上游标签变化后需运行 update_stash_dns.py。
 
 ## 验证
 
@@ -59,10 +73,10 @@ Stash GEOSITE 数据并非随应用一起分发；官方说明首次从 GitHub �
 两客户端84个 provider 定义已逐个核对：本地源读取实际 payload，上游源实际下载；domain/ipcidr 的 MRS 或 YAML 通过真实内核转换解析，classical YAML 检查非空 payload 并在行为测试中加载。Stash DNS121条缓存另与当前上游核对一致。
 
 ```bash
-python3 tools/update_stash_dns.py --check
 python3 tools/build.py --check
 python3 tools/check.py /path/to/mihomo
 python3 tools/check_routing.py /path/to/mihomo
+python3 tools/check_upstream.py   # 联网
 git diff --check
 ```
 

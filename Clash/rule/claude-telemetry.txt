@@ -1,13 +1,27 @@
-# Claude 官方与参考页中的可选遥测/错误报告；主机共用时其他应用上报也会被拦。
+# Claude 可选遥测/错误报告 → 🛑 广告拦截（排在所有放行规则之前）。
+# 主机为供应商共用：其他应用向这些端点的上报也会被拦，属预期（隐私收益）。
 # https://code.claude.com/docs/en/network-config
 # https://code.claude.com/docs/en/data-usage
-# 不泛化整个 Datadog/Sentry/Statsig 供应商；不含核心 api.anthropic.com。
-# Statsig events 是事件上报，initialize/config API 不在此新增封禁。
+# 不含核心 api.anthropic.com；Statsig 只拦 events 上报，initialize/config（功能开关）不拦。
 # https://docs.statsig.com/client/Next
-# https://sentry.io/changelog/ingestion-ip-addresses-are-changing/
+# Datadog 各区域摄取端点：https://docs.datadoghq.com/getting_started/site/
+# 浏览器 RUM 用连字符域名（不是 datadoghq.com 的子域），必须逐个列出
 payload:
-  - http-intake.logs.us5.datadoghq.com
+  - browser-intake-datadoghq.com
+  - browser-intake-us3-datadoghq.com
   - browser-intake-us5-datadoghq.com
+  - browser-intake-ap1-datadoghq.com
+  - browser-intake-ap2-datadoghq.com
+  - browser-intake-datadoghq.eu
+  - browser-intake-ddog-gov.com
+  - http-intake.logs.datadoghq.com
+  - http-intake.logs.us3.datadoghq.com
+  - http-intake.logs.us5.datadoghq.com
+  - http-intake.logs.ap1.datadoghq.com
+  - http-intake.logs.ap2.datadoghq.com
+  - http-intake.logs.datadoghq.eu
+  - http-intake.logs.ddog-gov.com
+  # Sentry 摄取端点（区域端点是 ingest.<区域>.sentry.io，不是 ingest.sentry.io 的子域，需分别列出）
   - +.ingest.sentry.io
   - +.ingest.us.sentry.io
   - +.ingest.de.sentry.io
