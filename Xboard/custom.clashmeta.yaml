@@ -251,30 +251,30 @@ proxy-groups:
   - /^$/
 
 rule-providers:
-  local-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/local-direct.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/local-direct.yaml'}
-  private: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/private.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/private.mrs'}
-  private-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/private-ip.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/private-ip.mrs'}
-  telemetry: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/telemetry.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/telemetry.mrs'}
-  ai-essential: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/ai-essential.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/ai-essential.mrs'}
-  auth: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/auth.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/auth.mrs'}
-  ads: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/ads.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/ads.mrs'}
-  ai: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/ai.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/ai.mrs'}
-  ai-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/ai-ip.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/ai-ip.mrs'}
-  game-proxy: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/game-proxy.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/game-proxy.mrs'}
-  bilibili: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/bilibili.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/bilibili.mrs'}
-  apple: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/apple.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/apple.mrs'}
-  direct: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/direct.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/direct.mrs'}
-  proxy: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/proxy.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/proxy.mrs'}
-  proxy-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/proxy-ip.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/proxy-ip.mrs'}
-  microsoft: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/microsoft.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/microsoft.mrs'}
-  games: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/games.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/games.mrs'}
-  media: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/media.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/media.mrs'}
-  media-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/media-ip.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/media-ip.mrs'}
-  google: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/google.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/google.mrs'}
-  foreign: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/foreign.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/foreign.mrs'}
-  cn: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/cn.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/cn.mrs'}
-  cn-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/cn-ip.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/cn-ip.mrs'}
-  quic-exempt: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/quic-exempt.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/quic-exempt.mrs'}
+  local-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/local-direct.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/local-direct.yaml'}
+  private: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/private.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/private.mrs'}
+  private-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/private-ip.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/private-ip.mrs'}
+  telemetry: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/telemetry.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/telemetry.mrs'}
+  ai-essential: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/ai-essential.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/ai-essential.mrs'}
+  auth: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/auth.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/auth.mrs'}
+  ads: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/ads.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/ads.mrs'}
+  ai: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/ai.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/ai.mrs'}
+  ai-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/ai-ip.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/ai-ip.mrs'}
+  game-proxy: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/game-proxy.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/game-proxy.mrs'}
+  bilibili: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/bilibili.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/bilibili.mrs'}
+  apple: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/apple.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/apple.mrs'}
+  direct: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/direct.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/direct.mrs'}
+  proxy: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/proxy.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/proxy.mrs'}
+  proxy-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/proxy-ip.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/proxy-ip.mrs'}
+  microsoft: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/microsoft.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/microsoft.mrs'}
+  games: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/games.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/games.mrs'}
+  media: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/media.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/media.mrs'}
+  media-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/media-ip.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/media-ip.mrs'}
+  google: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/google.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/google.mrs'}
+  foreign: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/foreign.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/foreign.mrs'}
+  cn: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/cn.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/cn.mrs'}
+  cn-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/cn-ip.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/cn-ip.mrs'}
+  quic-exempt: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/quic-exempt.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/quic-exempt.mrs'}
 
 rules:
 - RULE-SET,local-direct,🎯 直连

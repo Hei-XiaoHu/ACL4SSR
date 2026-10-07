@@ -109,7 +109,8 @@ def providers(target: str) -> dict:
             "behavior": behavior,
             "format": rel.rsplit(".", 1)[1],
             "interval": S["provider_interval"],
-            "path": f"./ruleset/{rel.split('/', 1)[1]}",
+            # 独立子目录：与旧配置的 ./ruleset/<同名>.mrs 缓存隔离，换配置时必定重新下载
+            "path": f"./ruleset/acl4ssr/{rel.split('/', 1)[1]}",
             "url": f"{RULES_BASE}/{rel}",
         }
     return out

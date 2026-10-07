@@ -13,7 +13,8 @@
 # ============================================================================
 
 # 合并后的规则集发布在本仓库 rules 分支，经 jsDelivr 下载。
-# fastly 节点在推送后调用 purge 立即生效；失效时可换 https://cdn.jsdelivr.net/gh 或 https://testingcf.jsdelivr.net/gh
+# 分支地址在 jsDelivr 各层最多缓存约 12 小时，purge 清不干净，规则改动最长约 12 小时后到客户端。
+# fastly 失效时可换 https://cdn.jsdelivr.net/gh 或 https://testingcf.jsdelivr.net/gh
 cdn: https://fastly.jsdelivr.net/gh
 repo: Hei-XiaoHu/ACL4SSR
 rules_branch: rules

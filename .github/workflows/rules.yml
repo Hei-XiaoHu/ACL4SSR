@@ -81,7 +81,7 @@ jobs:
           git commit -qm "rules: $(date -u +%Y-%m-%dT%H:%MZ) from ${GITHUB_SHA::7}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" rules
 
-      - name: 刷新 jsDelivr 缓存
+      - name: 尝试刷新 jsDelivr 缓存（不保证：分支地址最多约 12 小时后到客户端）
         if: steps.diff.outputs.changed == 'true'
         run: |
           cd dist

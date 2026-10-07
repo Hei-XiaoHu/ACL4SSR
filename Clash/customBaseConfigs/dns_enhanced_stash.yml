@@ -187,28 +187,28 @@ dns:
     - https://doh.pub/dns-query
 
 rule-providers:
-  local-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/local-direct.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/local-direct.yaml'}
-  private: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/private.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/private.yaml'}
-  private-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/private-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/private-ip.yaml'}
-  telemetry: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/telemetry.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/telemetry.yaml'}
-  ai-essential: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ai-essential.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ai-essential.yaml'}
-  auth: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/auth.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/auth.yaml'}
-  ads: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ads.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ads.yaml'}
-  ai: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/ai.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ai.yaml'}
-  ai-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/ai-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ai-ip.yaml'}
-  game-proxy: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/game-proxy.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/game-proxy.yaml'}
-  bilibili: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/bilibili.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/bilibili.yaml'}
-  apple: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/apple.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/apple.yaml'}
-  direct: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/direct.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/direct.yaml'}
-  proxy: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/proxy.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/proxy.yaml'}
-  proxy-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/proxy-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/proxy-ip.yaml'}
-  microsoft: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/microsoft.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/microsoft.yaml'}
-  games: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/games.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/games.yaml'}
-  media: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/media.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/media.yaml'}
-  media-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/media-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/media-ip.yaml'}
-  google: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/google.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/google.yaml'}
-  foreign: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/foreign.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/foreign.yaml'}
-  quic-exempt: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/quic-exempt.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/quic-exempt.yaml'}
+  local-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/local-direct.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/local-direct.yaml'}
+  private: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/private.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/private.yaml'}
+  private-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/private-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/private-ip.yaml'}
+  telemetry: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/telemetry.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/telemetry.yaml'}
+  ai-essential: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/ai-essential.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ai-essential.yaml'}
+  auth: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/auth.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/auth.yaml'}
+  ads: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/ads.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ads.yaml'}
+  ai: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/ai.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ai.yaml'}
+  ai-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/ai-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/ai-ip.yaml'}
+  game-proxy: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/game-proxy.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/game-proxy.yaml'}
+  bilibili: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/bilibili.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/bilibili.yaml'}
+  apple: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/apple.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/apple.yaml'}
+  direct: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/direct.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/direct.yaml'}
+  proxy: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/proxy.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/proxy.yaml'}
+  proxy-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/proxy-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/proxy-ip.yaml'}
+  microsoft: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/microsoft.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/microsoft.yaml'}
+  games: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/games.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/games.yaml'}
+  media: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/media.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/media.yaml'}
+  media-ip: {type: http, behavior: ipcidr, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/media-ip.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/media-ip.yaml'}
+  google: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/google.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/google.yaml'}
+  foreign: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/foreign.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/foreign.yaml'}
+  quic-exempt: {type: http, behavior: domain, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/quic-exempt.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/stash/quic-exempt.yaml'}
 
 rules:
 - IP-CIDR,1.1.1.1/32,🛰️ DNS,no-resolve

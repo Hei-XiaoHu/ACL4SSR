@@ -21,7 +21,8 @@
 - `tools/build_rules.py` 合并去重（同集合内被 `+.父域` 覆盖的条目删除）并转换 mrs；`.github/workflows/rules.yml` 每日 04:00 及本地规则改动时构建，发布到 `rules` 分支并刷新 fastly jsDelivr 缓存；内容指纹不变则不发布。
 - 失败保护：上游下载失败、集合条目骤减 30% 以上、mrs 转换失败或 `tools/check_rules.py`（真实规则集 46 个关键域名）不通过时不发布，记录到“规则集构建失败” issue，成功后自动关闭。
 - 顺序核对（`build_rules.py --conflicts`）：`category-entertainment` 收录约 870 个游戏平台域名，游戏集合必须先于流媒体；`category-entertainment@cn` 收录 Apple Music / iTunes，苹果先于 direct。与重构前相比，唯一的去向变化是 `ggpht.cn`（本已被广告源拦截）。
-- 规则 CDN 由 testingcf 改为 fastly（推送后 purge 即时生效）。
+- 规则 CDN 由 testingcf 改为 fastly。实测 jsDelivr 对分支地址的缓存刷新不可靠：fastly 按 Accept-Encoding 分别缓存，purge 后带 gzip 的请求（mihomo）仍拿到旧版；cdn/testingcf 的源站层也继续返回旧内容。规则改动最多约 12 小时后到客户端（用户选择接受，不改为经节点从 GitHub 原地址下载）。
+- 规则集本地缓存路径改到 `./ruleset/acl4ssr/`：旧配置同名文件（如 `./ruleset/bilibili.mrs`）在 24 小时间隔内会被新配置直接复用，换配置时出现旧条数。
 
 ## 2026-10-07 策略组精简（重构第 2 步）
 

@@ -11,7 +11,7 @@
 
 ## 修改规则
 
-**加一条规则**：先想它该走哪个组，然后在 `rules/` 下同名文件里加一行（`example.com` 精确，`+.example.com` 含子域名），推送即可。Action 会在几分钟内重新合并并发布。
+**加一条规则**：先想它该走哪个组，然后在 `rules/` 下同名文件里加一行（`example.com` 精确，`+.example.com` 含子域名），推送即可。Action 几分钟内重新合并并发布到 `rules` 分支，但客户端经 jsDelivr 下载，**最多约 12 小时后才拿到新版**（见下方说明）。
 
 | 文件 | 去向 | 放什么 |
 |---|---|---|
@@ -26,7 +26,9 @@
 | `rules/proxy.txt` | 🚀 节点选择 | 被墙但会被默认直连组或 cn 截走的域名 |
 | `rules/quic-exempt.txt` | 不改去向 | 因 QUIC 拦截连不上的游戏/应用 |
 
-**发布流程**：`src/spec.yaml` 的 `sets` 定义每个集合 = 同名本地文件 + 上游列表，顺序即分流顺序。`.github/workflows/rules.yml` 每天北京时间 04:00（以及本地规则改动时）运行 `tools/build_rules.py` 合并去重，经 `tools/check_rules.py` 用真实规则集验证关键域名后，发布到 `rules` 分支（单提交、不留历史）并刷新 jsDelivr 缓存。上游下载失败或某集合条目数骤减 30% 以上时不发布，在“规则集构建失败” issue 里记录。客户端只从 `rules` 分支下载：`https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/{mihomo,stash}/<集合>`。
+**发布流程**：`src/spec.yaml` 的 `sets` 定义每个集合 = 同名本地文件 + 上游列表，顺序即分流顺序。`.github/workflows/rules.yml` 每天北京时间 04:00（以及本地规则改动时）运行 `tools/build_rules.py` 合并去重，经 `tools/check_rules.py` 用真实规则集验证关键域名后，发布到 `rules` 分支（单提交、不留历史）并尝试刷新 jsDelivr 缓存。上游下载失败或某集合条目数骤减 30% 以上时不发布，在“规则集构建失败” issue 里记录。客户端只从 `rules` 分支下载：`https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/{mihomo,stash}/<集合>`。
+
+**生效延迟**：jsDelivr 对分支地址的缓存最长 12 小时，刷新接口清不干净（实测 fastly 按是否压缩分别缓存，mihomo 带 gzip 拿到的是未被清掉的旧版；cdn/testingcf 源站层也会继续给旧内容）。因此规则改动最多约 12 小时后才到客户端，期间手动更新规则集也可能拿到旧版。判断客户端能拿到哪一版：浏览器打开 `https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/manifest.json`（浏览器同样带压缩），看 `generated`（UTC）与 `counts`。
 
 改了 `src/spec.yaml`（组、DNS、集合顺序）后需重新生成配置：
 
