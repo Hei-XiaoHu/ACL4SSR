@@ -1,11 +1,12 @@
-# 每周规则报告（2026-10-07 21:44 北京时间）
+# 每周规则报告（2026-10-12 08:08 北京时间）
 
-**本周需要关注：** 无
+**本周需要关注：** geosite:category-ai-!cn +1 -0
 
 ## 关注的上游集合（相比上周）
 
-- `geosite:category-game-platforms-download`：首次建立基准（491 条）
-- `geosite:category-ai-!cn`：首次建立基准（188 条）
+- `geosite:category-game-platforms-download`：无变化（491 条）
+- `geosite:category-ai-!cn`：新增 1、删除 0（现 189 条）
+  - 新增：`+.syntx.ai`
 
 下载集合新增的主机已自动直连；若删除了仍在使用的下载主机，请把它加进 `rules/direct.txt`。
 
