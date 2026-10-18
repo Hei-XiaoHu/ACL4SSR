@@ -1,18 +1,18 @@
-# 每周规则报告（2026-10-12 08:08 北京时间）
+# 每周规则报告（2026-10-19 06:42 北京时间）
 
-**本周需要关注：** geosite:category-ai-!cn +1 -0
+**本周需要关注：** geosite:category-ai-!cn +3 -0
 
 ## 关注的上游集合（相比上周）
 
 - `geosite:category-game-platforms-download`：无变化（491 条）
-- `geosite:category-ai-!cn`：新增 1、删除 0（现 189 条）
-  - 新增：`+.syntx.ai`
+- `geosite:category-ai-!cn`：新增 3、删除 0（现 192 条）
+  - 新增：`+.cursorvm.com`, `+.openai.org`, `+.typesafe.ai`
 
 下载集合新增的主机已自动直连；若删除了仍在使用的下载主机，请把它加进 `rules/direct.txt`。
 
 ## 旧 ACL4SSR 与当前规则的默认去向差异
 
-未审阅差异 **0** 条（已审阅忽略 2805 条）。只比较 DOMAIN/DOMAIN-SUFFIX；“按IP”表示新版域名规则都未命中，取决于 IP 是否在国内。
+未审阅差异 **0** 条（已审阅忽略 2804 条）。只比较 DOMAIN/DOMAIN-SUFFIX；“按IP”表示新版域名规则都未命中，取决于 IP 是否在国内。
 
 旧列表共 9821 条域名规则；另有 596 条关键词/IP/其他规则未比较。
 
