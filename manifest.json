@@ -1,0 +1,300 @@
+{
+ "generated": "2026-10-24T22:13:36Z",
+ "counts": {
+  "meta": {
+   "local-direct": 18,
+   "private": 132,
+   "private-ip": 28,
+   "telemetry": 19,
+   "ai-essential": 24,
+   "auth": 2,
+   "ads": 223855,
+   "ai": 213,
+   "ai-ip": 2,
+   "game-proxy": 2,
+   "bilibili": 56,
+   "apple": 1585,
+   "direct": 981,
+   "proxy": 82,
+   "proxy-ip": 12,
+   "microsoft": 635,
+   "games": 977,
+   "media": 2073,
+   "media-ip": 122,
+   "google": 847,
+   "foreign": 26617,
+   "cn": 110448,
+   "cn-ip": 10011,
+   "quic-exempt": 273
+  },
+  "stash": {
+   "local-direct": 18,
+   "private": 132,
+   "private-ip": 28,
+   "telemetry": 19,
+   "ai-essential": 24,
+   "auth": 2,
+   "ads": 950,
+   "ai": 213,
+   "ai-ip": 2,
+   "game-proxy": 2,
+   "bilibili": 56,
+   "apple": 1585,
+   "direct": 981,
+   "proxy": 82,
+   "proxy-ip": 12,
+   "microsoft": 635,
+   "games": 977,
+   "media": 2073,
+   "media-ip": 122,
+   "google": 847,
+   "foreign": 4415,
+   "quic-exempt": 273
+  }
+ },
+ "sources": {
+  "local-direct": {
+   "meta": [],
+   "stash": []
+  },
+  "private": {
+   "meta": [
+    "geosite:private"
+   ],
+   "stash": [
+    "geosite:private"
+   ]
+  },
+  "private-ip": {
+   "meta": [
+    "geoip:private"
+   ],
+   "stash": [
+    "geoip:private"
+   ]
+  },
+  "telemetry": {
+   "meta": [],
+   "stash": []
+  },
+  "ai-essential": {
+   "meta": [],
+   "stash": []
+  },
+  "auth": {
+   "meta": [],
+   "stash": []
+  },
+  "ads": {
+   "meta": [
+    "adrules",
+    "anti-ad"
+   ],
+   "stash": [
+    "awavenue"
+   ]
+  },
+  "ai": {
+   "meta": [
+    "geosite:category-ai-!cn"
+   ],
+   "stash": [
+    "geosite:category-ai-!cn"
+   ]
+  },
+  "ai-ip": {
+   "meta": [],
+   "stash": []
+  },
+  "game-proxy": {
+   "meta": [],
+   "stash": []
+  },
+  "bilibili": {
+   "meta": [
+    "geosite:bilibili"
+   ],
+   "stash": [
+    "geosite:bilibili"
+   ]
+  },
+  "apple": {
+   "meta": [
+    "geosite:apple"
+   ],
+   "stash": [
+    "geosite:apple"
+   ]
+  },
+  "direct": {
+   "meta": [
+    "geosite:category-games@cn",
+    "geosite:category-game-platforms-download",
+    "geosite:netease",
+    "geosite:category-entertainment-cn",
+    "geosite:category-entertainment@cn"
+   ],
+   "stash": [
+    "geosite:category-games@cn",
+    "geosite:category-game-platforms-download",
+    "geosite:netease",
+    "geosite:category-entertainment-cn",
+    "geosite:category-entertainment@cn"
+   ]
+  },
+  "proxy": {
+   "meta": [
+    "geosite:github",
+    "geosite:telegram"
+   ],
+   "stash": [
+    "geosite:github",
+    "geosite:telegram"
+   ]
+  },
+  "proxy-ip": {
+   "meta": [
+    "geoip:telegram"
+   ],
+   "stash": [
+    "geoip:telegram"
+   ]
+  },
+  "microsoft": {
+   "meta": [
+    "geosite:bing",
+    "geosite:onedrive",
+    "geosite:microsoft"
+   ],
+   "stash": [
+    "geosite:bing",
+    "geosite:onedrive",
+    "geosite:microsoft"
+   ]
+  },
+  "games": {
+   "meta": [
+    "geosite:epicgames",
+    "geosite:ea",
+    "geosite:sony",
+    "geosite:steam",
+    "geosite:nintendo",
+    "geosite:category-games-!cn"
+   ],
+   "stash": [
+    "geosite:epicgames",
+    "geosite:ea",
+    "geosite:sony",
+    "geosite:steam",
+    "geosite:nintendo",
+    "geosite:category-games-!cn"
+   ]
+  },
+  "media": {
+   "meta": [
+    "geosite:youtube",
+    "geosite:netflix",
+    "geosite:bahamut",
+    "geosite:category-entertainment"
+   ],
+   "stash": [
+    "geosite:youtube",
+    "geosite:netflix",
+    "geosite:bahamut",
+    "geosite:category-entertainment"
+   ]
+  },
+  "media-ip": {
+   "meta": [
+    "geoip:netflix"
+   ],
+   "stash": [
+    "geoip:netflix"
+   ]
+  },
+  "google": {
+   "meta": [
+    "geosite:googlefcm",
+    "geosite:google-cn",
+    "geosite:google"
+   ],
+   "stash": [
+    "geosite:googlefcm",
+    "geosite:google-cn",
+    "geosite:google"
+   ]
+  },
+  "foreign": {
+   "meta": [
+    "geosite:gfw",
+    "geosite:geolocation-!cn"
+   ],
+   "stash": [
+    "geosite:gfw"
+   ]
+  },
+  "cn": {
+   "meta": [
+    "geosite:cn"
+   ],
+   "stash": []
+  },
+  "cn-ip": {
+   "meta": [
+    "geoip:cn"
+   ],
+   "stash": []
+  },
+  "quic-exempt": {
+   "meta": [
+    "geosite:category-communication",
+    "geosite:google-cn"
+   ],
+   "stash": [
+    "geosite:category-communication",
+    "geosite:google-cn"
+   ]
+  }
+ },
+ "upstream_counts": {
+  "adrules": 210978,
+  "anti-ad": 112078,
+  "awavenue": 972,
+  "geoip:cn": 10011,
+  "geoip:netflix": 122,
+  "geoip:private": 28,
+  "geoip:telegram": 12,
+  "geosite:apple": 1792,
+  "geosite:bahamut": 5,
+  "geosite:bilibili": 53,
+  "geosite:bing": 40,
+  "geosite:category-ai-!cn": 204,
+  "geosite:category-communication": 160,
+  "geosite:category-entertainment": 2143,
+  "geosite:category-entertainment-cn": 796,
+  "geosite:category-entertainment@cn": 100,
+  "geosite:category-game-platforms-download": 492,
+  "geosite:category-games-!cn": 867,
+  "geosite:category-games@cn": 37,
+  "geosite:cn": 110448,
+  "geosite:ea": 165,
+  "geosite:epicgames": 30,
+  "geosite:geolocation-!cn": 27269,
+  "geosite:gfw": 4415,
+  "geosite:github": 65,
+  "geosite:google": 1075,
+  "geosite:google-cn": 112,
+  "geosite:googlefcm": 12,
+  "geosite:microsoft": 746,
+  "geosite:netease": 54,
+  "geosite:netflix": 24,
+  "geosite:nintendo": 124,
+  "geosite:onedrive": 16,
+  "geosite:private": 132,
+  "geosite:sony": 120,
+  "geosite:steam": 61,
+  "geosite:telegram": 21,
+  "geosite:youtube": 178
+ },
+ "content_sha256": "76d378e5fe9f67e0378e5c573f548ecd9b7f3907f73b0c18a4e73880dc267c31"
+}
