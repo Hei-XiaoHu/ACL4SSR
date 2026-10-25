@@ -11,7 +11,7 @@
 
 ## 修改规则
 
-> 完整流程（处理 Action 的 issue → 修改 → 校验 → 推送 → 确认发布 → 关闭 issue）见 [docs/maintenance.md](docs/maintenance.md)；pi 中可直接用 `/weekly-review`、`/add-rule <域名>`。
+> 完整流程（处理 Action 的 issue → 修改 → 校验 → 推送 → 确认发布 → 起草回复，由所有者回复并关闭 issue）见 [docs/maintenance.md](docs/maintenance.md)；pi 中可直接用 `/weekly-review`、`/add-rule <域名>`。
 
 **加一条规则**：先想它该走哪个组，然后在 `rules/` 下同名文件里加一行（`example.com` 精确，`+.example.com` 含子域名），推送即可。Action 几分钟内重新合并并发布到 `rules` 分支，但客户端经 jsDelivr 下载，**最多约 12 小时后才拿到新版**（见下方说明）。
 

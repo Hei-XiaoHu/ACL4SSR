@@ -11,7 +11,9 @@
 | issue「规则集构建失败」 | `rules.yml` 每日构建失败时记录，客户端继续用上一版；恢复后自动关闭 |
 | 自己发现某个域名走错 | 直接从第 3 步开始 |
 
-**issue 状态约定**：打开 = 有待处理条目；处理完在 issue 回复结论并关闭。下次有新条目时 Action 会自动重新打开。
+**issue 状态约定**：打开 = 有待处理条目；处理完由仓库所有者本人回复结论并关闭。下次有新条目时 Action 会自动重新打开。
+
+**GitHub 身份**：本机 gh CLI 登录的不是仓库所有者账号，只能用于只读操作（`gh issue list/view`、`gh run list/view`、`gh api` GET）。不得用它评论、关闭、编辑 issue 或做任何其他写操作；代码推送走 git 的 `github-heixiaohu` SSH 身份。
 
 ## 步骤
 
@@ -85,16 +87,15 @@ python3 tools/after_push.py    # 等本次提交的 Actions 结束，确认 rule
 
 客户端经 jsDelivr 下载，最多约 12 小时后才拿到新版（README「生效延迟」）。
 
-### 8. 回复并关闭 issue
+### 8. 起草 issue 回复（由所有者本人发布并关闭）
 
-```bash
-gh issue comment <编号> --body-file - <<'EOF'
+代理不在 GitHub 上评论或关闭 issue，只按下面的模板起草回复文本，交给所有者本人粘贴并关闭：
+
+```text
 已处理（提交 <短哈希>）：
 - <条目/情况>：<处理方式与理由>
 - 无需操作：<条目>（<原因>）
 校验：tools/verify.py 全部通过；规则集已发布（rules 分支 <时间>），客户端最多约 12 小时后生效。
-EOF
-gh issue close <编号> --reason completed
 ```
 
-「规则集构建失败」issue 在下一次构建成功时自动关闭，只需回复原因。
+「规则集构建失败」issue 在下一次构建成功时由 Action 自动关闭。

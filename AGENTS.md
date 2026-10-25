@@ -6,7 +6,7 @@ mihomo（Clash Party / CMFA）与 Stash 的分流配置和规则集。概览见 
 
 一律按 `docs/maintenance.md` 的流程执行：看 issue → `tools/weekly_report.py --preview` 用最新数据核对 →
 按判断表逐项处理 → 改 `rules/` + 补测试 + 写 `docs/config-updates.md` → `python3 tools/verify.py` 全部通过 →
-提交推送 → `python3 tools/after_push.py` 确认发布 → 在 issue 回复结论并关闭。
+提交推送 → `python3 tools/after_push.py` 确认发布 → 起草 issue 回复交给所有者（由所有者本人回复并关闭）。
 
 ## 必须遵守
 
@@ -15,8 +15,9 @@ mihomo（Clash Party / CMFA）与 Stash 的分流配置和规则集。概览见 
   `python3 tools/build.py` 生成，禁止手改。
 - 推送前 `python3 tools/verify.py` 必须全部通过（与 CI 相同）。推送 master 会立即触发规则集重新发布到 rules 分支。
 - 不要手动改 `rules` / `report` 分支，它们由 Actions 生成。
+- 本机 gh CLI 登录的不是仓库所有者账号：只允许只读操作（`gh issue list/view`、`gh run list/view`、`gh api` GET）。禁止用 gh 评论、关闭、编辑 issue、改仓库设置或做任何写操作；推送只用 git（`github-heixiaohu` SSH 身份）。
 - 依据优先：官方文档 > v2fly / MetaCubeX 社区数据 > 第三方页面。不泛化整个 CDN 或供应商后缀，不用 DOMAIN-KEYWORD。
-- 会改变现有放行/拦截行为、又缺少官方依据的判断，要在提交说明和 issue 回复里单独写明。
+- 会改变现有放行/拦截行为、又缺少官方依据的判断，要在提交说明和起草的 issue 回复里单独写明。
 - 提交说明用一句中文概括处理内容；文档与注释用中文。
 
 ## 已定的设计（不要“顺手改掉”）

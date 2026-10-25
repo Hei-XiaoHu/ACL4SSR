@@ -128,7 +128,7 @@ def report(baseline: Path, now: datetime) -> tuple[list[str], bool, list[str]]:
         legacy_diff.markdown(kept, stats, skipped),
         "---",
         "处理方式：确需调整的条目加进 `rules/` 下对应文件；有意不同的条目连同理由记入 `src/legacy-review.yaml`，下周不再出现。"
-        "完整流程见 `docs/maintenance.md`；处理完在本 issue 回复结论并关闭，下次有新条目时会自动重新打开。",
+        "完整流程见 `docs/maintenance.md`；处理完由仓库所有者回复结论并关闭，下次有新条目时会自动重新打开。",
     ]
     return body, bool(kept) or watch_changed or bool(pin_summary), summary
 
