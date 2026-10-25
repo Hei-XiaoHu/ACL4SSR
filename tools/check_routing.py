@@ -129,7 +129,7 @@ FIXTURE = {
         "+.dl.playstation.net", "steampipe.akamaized.net",
         "+.iqiyi.com", "+.youku.com", "+.shanghaidisneyresort.com",
     ],
-    "microsoft": ["+.microsoft.com"],
+    "microsoft": ["+.microsoft.com", "+.azurewebsites.net"],
     "apple": ["+.apple.com"],
     "games": ["+.steamcontent.com", "+.steampowered.com", "+.steamserver.net", "+.ea.com", "+.origin.com",
               "+.battle.net", "+.ubisoft.com", "+.gog.com", "+.nintendoswitch.cn"],
@@ -553,6 +553,9 @@ def native_regressions(exe: str):
                 ("tcp", "www.twitch.tv", 443, "media", "🎬 流媒体"),
                 ("tcp", "api.spotify.com", 443, "media", "🎬 流媒体"),
                 ("tcp", "my-claude-proxy.example", 443, "Match", "🐟 漏网之鱼"),
+                # 被墙的 Azure App Service 站点先于 Ⓜ️ 微软走代理；微软自有域名仍走微软组
+                ("tcp", "example-app.azurewebsites.net", 443, "proxy", "🚀 节点选择"),
+                ("tcp", "azure.microsoft.com", 443, "microsoft", "Ⓜ️ 微软"),
                 ("tcp", "dl.delivery.mp.microsoft.com", 443, "direct", "🎯 直连"),
                 ("tcp", "blzdist-wow.necdn.leihuo.netease.com", 443, "direct", "🎯 直连"),
                 ("tcp", "www.iqiyi.com", 443, "direct", "🎯 直连"),

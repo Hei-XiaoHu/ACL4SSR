@@ -89,6 +89,8 @@ CASES = [
     ("mynas.myds.me", 5001, "direct", "🎯 直连"),
     ("global.quickconnect.to", 443, "direct", "🎯 直连"),
     ("www.teamviewer.com", 443, "direct", "🎯 直连"),
+    # 被墙的 Azure App Service 第三方站点：先于 Ⓜ️ 微软（默认直连）走代理
+    ("example-app.azurewebsites.net", 443, "proxy", "🚀 节点选择"),
     ("upos-bstar1-mirrorakam.akamaized.net", 443, "bilibili", "📺 B站"),
     ("160.79.104.10", 443, "ai-ip", "🤖 AI"),
     ("router.lan", 80, "private", "DIRECT"),

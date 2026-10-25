@@ -5,3 +5,6 @@
 # OneDrive 网页版/分享页/API：被墙，但会被 Ⓜ️ 微软（默认直连）先截走；同步与文件传输域名不受影响，仍直连
 onedrive.live.com
 +.onedrive.com
+# Azure App Service 第三方网站（*.azurewebsites.net）：geosite:gfw 收录（2026-10-26 核对 MetaCubeX），
+# 但 geosite:microsoft 也收录，原先被 Ⓜ️ 微软（默认直连）截走，国内直连常打不开。中国区 Azure 是 azurewebsites.cn，不受影响
++.azurewebsites.net

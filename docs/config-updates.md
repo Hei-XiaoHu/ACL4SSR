@@ -2,6 +2,14 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-10-26 被墙的 Azure 网站改走代理
+
+- 按当日上游核对“被墙域名落入默认直连组”的情况：`geosite:gfw` 中只有 6 条走了直连组。
+- `+.azurewebsites.net`（Azure App Service 上的第三方网站）同时在 geosite:gfw 与 geosite:microsoft，原先被 Ⓜ️ 微软（默认直连）截走，国内直连常打不开；
+  加入 `rules/proxy.txt`，先于微软组走 🚀 节点选择。微软自有站点（azure.microsoft.com 等）仍走 Ⓜ️ 微软；中国区 `azurewebsites.cn` 不受影响。
+- 其余不处理：`www.bing.com`、`global.bing.com`（直连会跳转国内版，属预期）、`www.msn.com`、`www.skype.com`（Skype 已停止服务）、`appsto.re`（苹果短链）、`bx.in.th`。
+- 依据：MetaCubeX geosite:gfw（社区数据）；改变了 *.azurewebsites.net 的默认去向（直连 → 代理），无官方文档依据，如需回退删除该行即可。
+
 ## 2026-10-26 BT 客户端按进程直连
 
 - 新增集合 `bt`（`rules/bt.txt`，classical，仅 mihomo），排在内网直连之后、遥测/QUIC/广告之前，固定 `DIRECT`（不随 🎯 直连组切换）。
