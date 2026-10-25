@@ -10,8 +10,12 @@ www.claude.ai
 downloads.claude.ai
 claude.com
 platform.claude.com
+# 组织单点登录（SSO）的浏览器登录流程（CLI 与 Desktop 清单均列出）
+sso.claude.com
 code.claude.com
 claude.app
+# Desktop 精简清单列出的裸域
+anthropic.com
 api.anthropic.com
 a-api.anthropic.com
 console.anthropic.com
@@ -32,5 +36,12 @@ assets.claude.ai
 # 全局生效：其他网站的 Sift 也会走 AI。
 +.sift.com
 +.siftscience.com
-# Statsig 功能开关接口（ChatGPT 等使用）：被广告源收录。原则是只拦事件上报、不拦功能开关
+# Statsig 功能开关（initialize）接口（ChatGPT 等使用）：被广告源收录。原则是只拦事件上报、不拦功能开关。
+# 官方域名表 https://docs.statsig.com/infrastructure/statsig_domains ；
+# 用途见 featureassets.org 的 DNS TXT（i=初始化，e=事件上报）：SDK 会在这些域名间自动切换。
+# 只放行 i= 主机（精确匹配）；e= 上报主机在 telemetry.txt 拦截。
 +.featuregates.org
+featureassets.org
+assetsconfigcdn.org
+api.statsig.com
+statsigapi.net

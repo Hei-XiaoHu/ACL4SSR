@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
-import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -87,41 +86,6 @@ def parse_legacy(body: str) -> tuple[list[tuple[str, str]], int]:
     return rows, other
 
 
-class Matcher:
-    def __init__(self, entries: list[str]):
-        self.exact, self.suffix, self.sub, self.regex = set(), set(), set(), []
-        for e in entries:
-            if e.startswith("DOMAIN-REGEX,"):
-                self.regex.append(re.compile(e.split(",", 1)[1]))
-            elif e.startswith("DOMAIN-SUFFIX,"):
-                self.suffix.add(e.split(",", 1)[1])
-            elif e.startswith("DOMAIN,"):
-                self.exact.add(e.split(",", 1)[1])
-            elif e.startswith("+."):
-                self.suffix.add(e[2:])
-            elif e.startswith("."):
-                self.sub.add(e[1:])
-            elif "*" not in e:
-                self.exact.add(e)
-
-    def match(self, host: str) -> bool:
-        if host in self.exact or host in self.suffix:
-            return True
-        labels = host.split(".")
-        for i in range(1, len(labels)):
-            parent = ".".join(labels[i:])
-            if parent in self.suffix or parent in self.sub:
-                return True
-        return any(r.search(host) for r in self.regex)
-
-
-def new_route(matchers: list[tuple[str, str, Matcher]], host: str) -> tuple[str | None, str | None]:
-    for name, to, m in matchers:
-        if m.match(host):
-            return name, to
-    return None, None
-
-
 def load_review() -> tuple[dict, dict]:
     if not REVIEW.exists():
         return {}, {}
@@ -129,16 +93,13 @@ def load_review() -> tuple[dict, dict]:
     return data.get("lists") or {}, data.get("domains") or {}
 
 
-def compute():
+def compute(cache: dict[str, list[str]] | None = None, table=None):
+    """cache：build_rules.fetch_all() 的结果，省略时自行下载。"""
     with concurrent.futures.ThreadPoolExecutor(8) as pool:
         bodies = dict(zip([n for n, _, _ in LEGACY],
                           pool.map(lambda item: build_rules._download(f"{ACL}/{item[1]}"), LEGACY)))
-        needed = sorted({s for n in build.SETS if build.has_provider(n, "meta") for s in build.fetched_sources(n, "meta")})
-        cache = dict(zip(needed, pool.map(build_rules.fetch, needed)))
-    sets = build_rules.collect("meta", cache)
-    matchers = [(item["name"], item["to"], Matcher(sets[item["name"]])) for item in build.S["sets"]
-                if isinstance(item, dict) and item.get("to") and item["name"] in sets
-                and build.set_type(item["name"]) != "ip"]
+    cache = cache if cache is not None else build_rules.fetch_all()
+    table = table or build_rules.route_table(build_rules.collect("meta", cache))
     legacy = []
     stats = {}
     for name, _, group in LEGACY:
@@ -153,7 +114,7 @@ def compute():
             if key in seen:
                 continue
             seen.add(key)
-            new_set, new_group = new_route(matchers, host)
+            new_set, new_group = build_rules.route(table, host)
             old_o, new_o = outcome(group), outcome(new_group)
             if old_o != new_o:
                 diffs.append({"list": name, "entry": ("+." if kind == "suffix" else "") + host,

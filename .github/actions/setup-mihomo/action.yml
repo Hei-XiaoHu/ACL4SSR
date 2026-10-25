@@ -1,0 +1,21 @@
+name: 安装 mihomo
+description: 下载 MetaCubeX/mihomo 最新正式版（linux-amd64）到工作目录 ./mihomo
+runs:
+  using: composite
+  steps:
+    - name: 下载 mihomo
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        url=$(gh api repos/MetaCubeX/mihomo/releases/latest -q '.assets[].browser_download_url' \
+              | grep -m1 -E '/mihomo-linux-amd64-v[0-9.]+\.gz$' || true)
+        if [ -z "$url" ]; then
+          echo "::error::未在 mihomo 最新发布中找到 linux-amd64 文件（API 限流或命名变化）"
+          exit 1
+        fi
+        echo "$url"
+        curl -fsSL --retry 3 "$url" | gunzip > mihomo
+        chmod +x mihomo
+        ./mihomo -v

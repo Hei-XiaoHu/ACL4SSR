@@ -11,14 +11,24 @@
 # https://github.com/v2fly/domain-list-community/blob/master/data/anthropic
 # https://ip.net.coffee/claude/site.html
 # 原则：会把你的 IP 交给 Anthropic 账户/风控的服务走 AI；通用验证码（auth.txt）走 🚀。
+# 与 v2fly data/anthropic 保持一致（2026-10-25 同步至 #4116），上游删减时本地仍固定走 AI。
 +.anthropic.com
++.anthropic.team
++.ant.dev
++.antspace.dev
++.chatbotclaude.com
 +.clau.de
 +.claude.ai
 +.claude.com
 +.claude.app
 +.claude.dev
++.claude.new
++.claude.site
++.claudeacademy.com
 +.claudemcpclient.com
 +.claudemcpcontent.com
++.claudepages.dev
++.claudestudio.com
 +.claudeusercontent.com
 servd-anthropic-website.b-cdn.net
 # Anthropic 专属的 Cloudflare CDN 别名；不泛化整个 cloudflare.net

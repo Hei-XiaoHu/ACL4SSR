@@ -11,6 +11,9 @@ on:
       - tools/build.py
       - tools/build_rules.py
       - tools/check_rules.py
+      - tools/check_routing.py
+      - tools/check_upstream.py
+      - .github/actions/setup-mihomo/**
       - .github/workflows/rules.yml
   workflow_dispatch:
 
@@ -29,24 +32,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
       - name: 安装依赖
         run: pip install pyyaml
 
-      - name: 下载 mihomo
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          url=$(curl -s -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/repos/MetaCubeX/mihomo/releases/latest \
-            | grep -oE 'https://[^"]+/mihomo-linux-amd64-v[0-9.]+\.gz' | head -1)
-          curl -sL "$url" | gunzip > mihomo
-          chmod +x mihomo
-          ./mihomo -v
+      - uses: ./.github/actions/setup-mihomo
 
       - name: 读取上一版清单
         run: |
@@ -56,7 +51,7 @@ jobs:
             : > prev.json
           fi
 
-      - name: 合并规则（上游失败或条目数骤减即中止）
+      - name: 合并规则（spec 自检失败、上游失败、条目数骤减或本地条目被上游截走即中止）
         run: python3 tools/build_rules.py --out dist --mihomo ./mihomo --previous prev.json
 
       - name: 发布前把关：真实规则集关键域名分流

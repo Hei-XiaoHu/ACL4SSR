@@ -416,8 +416,81 @@ OUTPUTS = {
 }
 
 
+def validate_spec() -> list[str]:
+    """spec 与 rules/ 的一致性自检（离线）。返回问题列表，空表示通过。
+
+    重点防止“静默失效”：rules/ 下文件名拼错不会被任何集合读取；
+    quic/DNS/watch 列表引用了不存在的集合或来源；去向写错组名。
+    """
+    problems = []
+    names = [item["name"] for item in S["sets"] if isinstance(item, dict) and "name" in item]
+    dupes = sorted({n for n in names if names.count(n) > 1})
+    if dupes:
+        problems.append(f"sets 中集合重名: {dupes}")
+    for path in sorted(RULES_DIR.glob("*")):
+        if path.suffix != ".txt" or path.stem not in SETS:
+            problems.append(f"rules/{path.name} 没有同名集合，不会被使用（检查文件名或 src/spec.yaml 的 sets）")
+    groups = [g["name"] for g in S["groups"]]
+    targets = set(groups) | {"DIRECT", "REJECT"}
+    for g in S["groups"]:
+        for p in g["proxies"]:
+            if p != "$nodes" and p not in targets:
+                problems.append(f"策略组 {g['name']} 引用了不存在的成员: {p}")
+    if S["dns_group"] not in groups:
+        problems.append(f"dns_group 不是已定义的策略组: {S['dns_group']}")
+    markers = [item for item in S["sets"] if not isinstance(item, dict)]
+    if markers != ["quic"]:
+        problems.append(f"sets 中必须恰好有一个 quic 标记: {markers}")
+    if not (isinstance(S["sets"][-1], dict) and "match" in S["sets"][-1]):
+        problems.append("sets 最后一项必须是 {match: 组名} 兜底")
+    for item in S["sets"]:
+        if not isinstance(item, dict):
+            continue
+        to = item.get("match") or item.get("to")
+        if to and to not in targets:
+            problems.append(f"{item.get('name', 'match')}: 去向 {to} 不是已定义的策略组")
+        if "name" in item:
+            if item.get("type", "domain") not in ("domain", "ip", "classical"):
+                problems.append(f"{item['name']}: 未知 type {item['type']}")
+            for target in TARGETS:
+                for src in sources(item["name"], target):
+                    kind = src.partition(":")[0]
+                    if kind not in ("geosite", "geoip") and src not in S["upstream"]:
+                        problems.append(f"{item['name']}: 未定义的上游 {src}")
+            if not any(has_provider(item["name"], t) or native_rules(item["name"], t) for t in TARGETS):
+                problems.append(f"{item['name']}: 既没有 rules/{item['name']}.txt 也没有上游来源")
+    for key in ("quic_reject", "quic_reject_ip", "quic_exempt"):
+        for name in S[key]:
+            if name not in SETS:
+                problems.append(f"{key} 引用了不存在的集合: {name}")
+    for name in ("cn", "foreign", "cn-ip"):
+        if name not in SETS:
+            problems.append(f"QUIC 规则依赖的集合缺失: {name}")
+    all_sources = {src for n in SETS for t in TARGETS for src in sources(n, t)}
+    for src in S["watch"]:
+        if src not in all_sources:
+            problems.append(f"watch 中的 {src} 不是任何集合的来源")
+    for item in S["stash_dns_china"]:
+        if not item.startswith("geosite:") and item not in SETS:
+            problems.append(f"stash_dns_china 引用了不存在的集合: {item}")
+    # 同一条目出现在两个去向不同的本地文件里：后面那条永远不会生效
+    seen: dict[str, tuple[str, str]] = {}
+    for item in S["sets"]:
+        if not isinstance(item, dict) or "name" not in item or not item.get("to"):
+            continue
+        for row in local_rows(item["name"]):
+            first = seen.setdefault(row, (item["name"], item["to"]))
+            if first[1] != item["to"]:
+                problems.append(f"rules/{item['name']}.txt: {row} 已在 rules/{first[0]}.txt（{first[1]}）中，不会生效")
+    return problems
+
+
 def main() -> int:
     check = "--check" in sys.argv
+    problems = validate_spec()
+    if problems:
+        print("src/spec.yaml / rules/ 自检失败：\n" + "\n".join(f"  {x}" for x in problems))
+        return 1
     stale = []
     for rel, fn in OUTPUTS.items():
         path = ROOT / rel

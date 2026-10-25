@@ -16,7 +16,7 @@
 | 文件 | 去向 | 放什么 |
 |---|---|---|
 | `rules/local-direct.txt` | 🎯 直连（最前） | 必须先于广告与一切分流的直连（功能白名单、运营商一键登录、易盾）；唯一允许 `regex:` |
-| `rules/telemetry.txt` | 🛑 广告 | Claude 相关遥测上报 |
+| `rules/telemetry.txt` | 🛑 广告 | Claude 相关遥测上报、Statsig 事件上报 |
 | `rules/ai-essential.txt` | 🤖 AI | 必须先于广告放行的 AI 端点（Claude 核心、Sift、Statsig 功能开关） |
 | `rules/auth.txt` | 🚀 节点选择 | 共享验证码（CF / Arkose），先于广告 |
 | `rules/ai.txt` / `ai-ip.txt` | 🤖 AI | Claude 家族、其他 AI 补充；Anthropic 自有 IP |
@@ -26,7 +26,7 @@
 | `rules/proxy.txt` | 🚀 节点选择 | 被墙但会被默认直连组或 cn 截走的域名 |
 | `rules/quic-exempt.txt` | 不改去向 | 因 QUIC 拦截连不上的游戏/应用 |
 
-**发布流程**：`src/spec.yaml` 的 `sets` 定义每个集合 = 同名本地文件 + 上游列表，顺序即分流顺序。`.github/workflows/rules.yml` 每天北京时间 04:00（以及本地规则改动时）运行 `tools/build_rules.py` 合并去重，经 `tools/check_rules.py` 用真实规则集验证关键域名后，发布到 `rules` 分支（单提交、不留历史）并尝试刷新 jsDelivr 缓存。上游下载失败或某集合条目数骤减 30% 以上时不发布，在“规则集构建失败” issue 里记录。客户端只从 `rules` 分支下载：`https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/{mihomo,stash}/<集合>`。
+**发布流程**：`src/spec.yaml` 的 `sets` 定义每个集合 = 同名本地文件 + 上游列表，顺序即分流顺序。`.github/workflows/rules.yml` 每天北京时间 04:00（以及本地规则改动时）运行 `tools/build_rules.py` 合并去重，经 `tools/check_rules.py` 用真实规则集验证关键域名后，发布到 `rules` 分支（单提交、不留历史）并尝试刷新 jsDelivr 缓存。spec 自检失败、上游下载失败、某集合或某上游条目数骤减 30% 以上、本地条目被前面去向不同的集合整体截走（如广告源收录了 `direct.txt` 的条目）或 Claude 域名进入 geosite:cn 时不发布，在“规则集构建失败” issue 里记录。客户端只从 `rules` 分支下载：`https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/{mihomo,stash}/<集合>`。
 
 **生效延迟**：jsDelivr 对分支地址的缓存最长 12 小时，刷新接口清不干净（实测 fastly 按是否压缩分别缓存，mihomo 带 gzip 拿到的是未被清掉的旧版；cdn/testingcf 源站层也会继续给旧内容）。因此规则改动最多约 12 小时后才到客户端，期间手动更新规则集也可能拿到旧版。判断客户端能拿到哪一版：浏览器打开 `https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/manifest.json`（浏览器同样带压缩），看 `generated`（UTC）与 `counts`。
 
@@ -35,10 +35,10 @@
 ```bash
 pip install pyyaml
 python3 tools/build.py                 # 生成全部配置
-python3 tools/build.py --check         # 检查七份输出一致
+python3 tools/build.py --check         # spec 自检（孤儿 rules 文件、组名/集合引用、跨文件冲突）+ 七份输出一致
 python3 tools/check.py /path/to/mihomo  # 渲染与真实内核校验，含节点全过滤/零节点场景
 python3 tools/check_routing.py /path/to/mihomo # 离线连接、DNS 泄露、QUIC 与广告回归
-python3 tools/check_upstream.py        # 联网：Claude 域名不在 cn、AI/下载补充未被广告源拦截
+python3 tools/check_upstream.py        # 联网：Claude 域名不在 cn、本地条目未被前面的集合截走（mihomo/Stash 分别查）
 python3 tools/build_rules.py --out dist --mihomo /path/to/mihomo   # 本地试构建规则集
 python3 tools/check_rules.py --dist dist --mihomo /path/to/mihomo  # 真实规则集关键域名分流
 python3 tools/build_rules.py --conflicts   # 报告集合间的覆盖关系（调整顺序前看一眼）
@@ -46,7 +46,7 @@ python3 tools/build_rules.py --conflicts   # 报告集合间的覆盖关系（�
 
 **每周报告**：`.github/workflows/weekly.yml` 每周一北京时间 05:00 运行 `tools/weekly_report.py`，更新 issue“每周规则报告”：
 旧 ACL4SSR 列表中新出现、未审阅的去向差异（`tools/legacy_diff.py`，审阅结论记在 `src/legacy-review.yaml`），
-以及 spec `watch` 中上游集合（游戏下载、AI）相比上周的增删。基准与历次报告存于 `report` 分支；只有出现新条目时才追加评论。
+以及 spec `watch` 中上游集合（游戏下载、AI）相比上周的增删；每条增删都按当日规则算出实际去向，与该集合预期去向不同的标 ⚠️（新增被前面的集合截走、删除后不再直连等）。基准与历次报告存于 `report` 分支；只有出现新条目时才追加评论。
 
 Stash 的结论来自官方文档与静态检查，不能用 mihomo 代替 Stash 实机验证。
 

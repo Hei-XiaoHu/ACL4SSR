@@ -10,7 +10,8 @@
   mihomo/<集合>.yaml    classical（含正则的 local-direct）
   stash/<集合>.yaml     domain / ipcidr / classical
   manifest.json         每个集合的条目数、来源与内容指纹，供下次比较
-失败（退出码 1，不应发布）：任一上游下载/解析失败；某集合条目数比上一版少 30% 以上；转换失败。
+失败（退出码 1，不应发布）：spec 自检失败；任一上游下载/解析失败；某集合或某上游条目数比上一版少 30% 以上；
+本地条目被前面去向不同的集合整体截走或 Claude 域名进入 geosite:cn（tools/check_upstream.py）；转换失败。
 """
 from __future__ import annotations
 
@@ -19,6 +20,7 @@ import concurrent.futures
 import hashlib
 import ipaddress
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -33,6 +35,7 @@ import build
 
 GEO_RAW = "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo"
 SHRINK_LIMIT = 0.7  # 新条目数低于上一版的 70% 视为上游异常
+SHRINK_MIN_BASE = 50  # 上一版不足 50 条的小集合/小上游正常增删比例大，不做骤减判断
 
 
 # ---------------------------------------------------------------- 下载与解析
@@ -76,6 +79,18 @@ def fetch(src: str) -> list[str]:
     if not out:
         raise RuntimeError(f"上游为空 {src}: {url}")
     return out
+
+
+def needed_sources() -> list[str]:
+    """两个客户端实际需要下载的全部上游（Stash 原生 GEOSITE/GEOIP 除外）。"""
+    return sorted({src for t in build.TARGETS for n in build.SETS if build.has_provider(n, t)
+                   for src in build.fetched_sources(n, t)})
+
+
+def fetch_all(sources: list[str] | None = None) -> dict[str, list[str]]:
+    sources = needed_sources() if sources is None else sources
+    with concurrent.futures.ThreadPoolExecutor(8) as pool:
+        return dict(zip(sources, pool.map(fetch, sources)))
 
 
 # ---------------------------------------------------------------- 合并
@@ -130,6 +145,62 @@ def collect(target: str, cache: dict) -> dict[str, list[str]]:
     return result
 
 
+# ---------------------------------------------------------------- 按客户端语义匹配域名（供检查与报告使用）
+class DomainMatcher:
+    """按 mihomo/Stash 的 domain 语义匹配：x 精确；+.x 含自身与子域；.x 仅子域；
+    classical 的 DOMAIN / DOMAIN-SUFFIX / DOMAIN-REGEX。通配符条目不参与（无法离线等价判断）。"""
+
+    def __init__(self, entries: list[str]):
+        self.exact, self.suffix, self.sub, self.regex = set(), set(), set(), []
+        for e in entries:
+            if e.startswith("DOMAIN-REGEX,"):
+                self.regex.append(re.compile(e.split(",", 1)[1]))
+            elif e.startswith("DOMAIN-SUFFIX,"):
+                self.suffix.add(e.split(",", 1)[1])
+            elif e.startswith("DOMAIN,"):
+                self.exact.add(e.split(",", 1)[1])
+            elif e.startswith("+."):
+                self.suffix.add(e[2:])
+            elif e.startswith("."):
+                self.sub.add(e[1:])
+            elif "*" not in e:
+                self.exact.add(e)
+
+    def _parent(self, host: str) -> bool:
+        labels = host.split(".")
+        return any(".".join(labels[i:]) in self.suffix or ".".join(labels[i:]) in self.sub
+                   for i in range(1, len(labels)))
+
+    def match(self, host: str) -> bool:
+        if host in self.exact or host in self.suffix or self._parent(host):
+            return True
+        return any(r.search(host) for r in self.regex)
+
+    def covers(self, row: str) -> bool:
+        """本地条目整体被覆盖：精确条目命中即算；+.x 需 x 自身按后缀命中（只截走某些子域不算）。"""
+        if row.startswith("regex:"):
+            return False
+        if row.startswith("+."):
+            host = row[2:]
+            return host in self.suffix or self._parent(host)
+        return self.match(row)
+
+
+def route_table(sets: dict[str, list[str]]) -> list[tuple[str, str, DomainMatcher]]:
+    """按 spec 顺序排列的 (集合, 去向, 匹配器)，只含有去向的域名/classical 集合。"""
+    return [(item["name"], item["to"], DomainMatcher(sets[item["name"]])) for item in build.S["sets"]
+            if isinstance(item, dict) and item.get("to") and item["name"] in sets
+            and build.set_type(item["name"]) != "ip"]
+
+
+def route(table: list[tuple[str, str, DomainMatcher]], host: str) -> tuple[str | None, str | None]:
+    """域名规则中第一个命中的 (集合, 去向)；都未命中返回 (None, None)，即按 IP / 兜底。"""
+    for name, to, matcher in table:
+        if matcher.match(host):
+            return name, to
+    return None, None
+
+
 # ---------------------------------------------------------------- 输出
 def write_outputs(out: Path, sets: dict[str, dict[str, list[str]]], mihomo: str):
     for target, by_name in sets.items():
@@ -152,13 +223,23 @@ def write_outputs(out: Path, sets: dict[str, dict[str, list[str]]], mihomo: str)
                 raise RuntimeError(f"mrs 转换失败 {rel}: {r.stdout}{r.stderr}")
 
 
+def _shrunk(old, new) -> bool:
+    return bool(old) and old >= SHRINK_MIN_BASE and new < old * SHRINK_LIMIT
+
+
 def check_shrink(manifest: dict, previous: dict) -> list[str]:
+    """集合与单个上游都检查：两个广告源合并成一个集合，其中一个腰斩时集合整体可能仍在阈值内。"""
     problems = []
+    pct = int((1 - SHRINK_LIMIT) * 100)
     for target, by_name in manifest["counts"].items():
         for name, count in by_name.items():
             old = previous.get("counts", {}).get(target, {}).get(name)
-            if old and count < old * SHRINK_LIMIT:
-                problems.append(f"[{target}] {name}: {old} → {count}（减少超过 {int((1 - SHRINK_LIMIT) * 100)}%）")
+            if _shrunk(old, count):
+                problems.append(f"[{target}] {name}: {old} → {count}（减少超过 {pct}%）")
+    for src, count in manifest["upstream_counts"].items():
+        old = previous.get("upstream_counts", {}).get(src)
+        if _shrunk(old, count):
+            problems.append(f"[上游] {src}: {old} → {count}（减少超过 {pct}%）")
     return problems
 
 
@@ -202,10 +283,11 @@ def main() -> int:
     ap.add_argument("--conflicts", action="store_true")
     args = ap.parse_args()
 
-    needed = sorted({src for t in build.TARGETS for n in build.SETS if build.has_provider(n, t)
-                     for src in build.fetched_sources(n, t)})
-    with concurrent.futures.ThreadPoolExecutor(8) as pool:
-        cache = dict(zip(needed, pool.map(fetch, needed)))
+    problems = build.validate_spec()
+    if problems:
+        print("src/spec.yaml / rules/ 自检失败，本次不发布：\n" + "\n".join(f"  {p}" for p in problems))
+        return 1
+    cache = fetch_all()
     if args.conflicts:
         conflicts(cache)
         return 0
@@ -224,6 +306,14 @@ def main() -> int:
         if problems:
             print("条目数异常减少，本次不发布：\n" + "\n".join(problems))
             return 1
+    # 与发布内容同一份数据：本地条目被上游截走 / Claude 进入 cn 时不发布，客户端继续用上一版
+    import check_upstream
+    problems, notes = check_upstream.check(cache, sets)
+    if notes:
+        print("\n".join(notes))
+    if problems:
+        print("本地规则与当日上游冲突，本次不发布：\n" + "\n".join(problems))
+        return 1
     args.out.mkdir(parents=True, exist_ok=True)
     write_outputs(args.out, sets, args.mihomo)
     # 内容指纹：只覆盖规则内容（不含生成时间），内容未变时 Action 不重复发布

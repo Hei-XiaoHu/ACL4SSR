@@ -2,6 +2,21 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-10-25 每周报告跟进、Statsig 修正与发布把关加强
+
+- 每周报告（issue #5）：上游 `category-ai-!cn` 两周共新增 16 条，均已自动走 🤖 AI（`o33249.ingest.us.sentry.io` 为 OpenAI 的 Sentry，由 telemetry 先行拦截，属预期）。
+  其中 v2fly `data/anthropic` 新增的 Claude 家族父域同步到 `rules/ai.txt` 本地固定（ant.dev、anthropic.team、antspace.dev、chatbotclaude.com、claude.new、claude.site、claudeacademy.com、claudepages.dev、claudestudio.com）。
+- 官方网络清单：`sso.claude.com`（SSO 登录）与 `anthropic.com` 裸域加入 `ai-essential`。
+- Statsig：原则是只拦上报、不拦功能开关，但 featureassets.org / assetsconfigcdn.org / statsigapi.net（mihomo）与 api.statsig.com（Stash）被广告源拦截。
+  按 featureassets.org 的 DNS TXT 把初始化主机放进 `ai-essential`，上报主机 prodregistryv2.org / beyondwickedmapping.org 加入 `telemetry`；
+  旧版 Claude Code 遥测端点 `statsig.anthropic.com` 显式拦截（mihomo 本已被广告源拦截，Stash 之前走 AI）。
+- `tools/build.py` 增加 spec 自检（`--check` 与每日构建都会执行）：`rules/` 下没有同名集合的文件（文件名拼错会被静默忽略）、去向/成员引用不存在的组、QUIC/DNS/watch 引用不存在的集合或来源、同一条目出现在去向不同的两个本地文件。
+- `tools/check_upstream.py` 从“广告之后的几个本地文件是否被广告源拦截”扩展为“任一本地条目是否被前面去向不同的集合整体截走”，mihomo 与 Stash 分别按各自来源检查；`build_rules.py` 用同一份下载数据调用它，不通过则不发布。
+- 骤减保护同时检查单个上游（AdRules 与 anti-AD 合并为一个集合，其中一个腰斩时集合整体可能仍在阈值内）；上一版不足 50 条的小集合/小上游不做比例判断。
+- 每周报告只下载一次；`watch` 集合的每条增删按当日规则算出实际去向，与预期不同的标 ⚠️（替代原先“删除了仍在使用的下载主机需人工核对”）。
+- 公共代码收拢：域名匹配器、按顺序路由与批量下载统一在 `build_rules.py`（`DomainMatcher` / `route_table` / `fetch_all`），`legacy_diff.py`、`check_upstream.py`、`weekly_report.py` 共用，不再各自维护上游 URL 与匹配语义。
+- CI：mihomo 下载抽成 `.github/actions/setup-mihomo`（找不到发布文件时明确报错）；`actions/checkout`、`actions/setup-python` 升到 v7（Node 24，消除 Node 20 弃用告警）；`rules.yml` 的触发路径补上 `check_rules.py` 依赖的 `check_routing.py` 与 `check_upstream.py`。
+
 ## 2026-10-07 旧规则对比与每周报告（重构第 4 步）
 
 一次性对比旧 ACL4SSR 31 个列表（约 9800 条域名规则）与当前规则的默认去向，2834 条有变化：

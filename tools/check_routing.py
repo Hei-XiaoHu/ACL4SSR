@@ -114,6 +114,8 @@ FIXTURE = {
         "api.anthropic.com", "challenges.cloudflare.com",
         # 真实广告源确实收录了 Sift 与 Intercom 分析上报（2026-10 核对 AdRules / anti-AD）
         "+.siftscience.com", "+.sift.com", "+.api-visitor-analytics.intercom.com",
+        # AdRules 同样收录了 Statsig 功能开关主机（2026-10 核对）：放行 i= 主机，只拦 e= 上报主机
+        "featureassets.org", "+.statsigapi.net", "statsig.anthropic.com",
         # 人工夹具，不声称这些主机存在；验证非必要子域名仍接受广告检查。
         "audit-telemetry.anthropic.com", "audit-telemetry.claude.ai", "audit-telemetry.together.ai",
     ],
@@ -483,6 +485,7 @@ def native_regressions(exe: str):
                 "bridge.claudeusercontent.com", "test.frame.claudeusercontent.com",
                 "files.claudemcpcontent.com", "api.claudemcpclient.com",
                 "claude.dev", "clau.de", "servd-anthropic-website.b-cdn.net",
+                "sso.claude.com", "anthropic.com", "claude.site", "www.claude.new", "ant.dev",
                 "anthropic.com.cdn.cloudflare.net",
                 "anthropic.auth0.com", "anthropic-com.ghost.io",
                 "widget.intercom.io", "js.intercomcdn.com",
@@ -507,6 +510,11 @@ def native_regressions(exe: str):
                 ("tcp", "o1.ingest.us.sentry.io", 443, "telemetry", "🛑 广告"),
                 ("tcp", "o1.ingest.de.sentry.io", 443, "telemetry", "🛑 广告"),
                 ("tcp", "events.statsigapi.net", 443, "telemetry", "🛑 广告"),
+                ("tcp", "prodregistryv2.org", 443, "telemetry", "🛑 广告"),
+                ("tcp", "beyondwickedmapping.org", 443, "telemetry", "🛑 广告"),
+                ("tcp", "statsig.anthropic.com", 443, "telemetry", "🛑 广告"),
+                ("tcp", "featureassets.org", 443, "ai-essential", "🤖 AI"),
+                ("tcp", "statsigapi.net", 443, "ai-essential", "🤖 AI"),
                 ("tcp", "cdn.usefathom.com", 443, "telemetry", "🛑 广告"),
                 ("tcp", "api-visitor-analytics.intercom.com", 443, "ads", "🛑 广告"),
                 ("tcp", "audit-telemetry.anthropic.com", 443, "ads", "🛑 广告"),

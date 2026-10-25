@@ -26,5 +26,11 @@ http-intake.logs.ddog-gov.com
 +.ingest.sentry.io
 +.ingest.us.sentry.io
 +.ingest.de.sentry.io
+# Statsig 事件上报：featureassets.org DNS TXT 中的 e= 主机（功能开关 i= 主机在 ai-essential.txt 放行）
 events.statsigapi.net
+prodregistryv2.org
+beyondwickedmapping.org
+# Claude Code 旧版“遥测与指标”端点（官方清单 2026-02 起改由 api.anthropic.com 承载）。
+# mihomo 的广告源本已拦截；显式列出使 Stash（AWAvenue 未收录）行为一致
+statsig.anthropic.com
 cdn.usefathom.com

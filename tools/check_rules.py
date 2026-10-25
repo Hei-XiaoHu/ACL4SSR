@@ -80,6 +80,11 @@ CASES = [
     ("log.cmpassport.com", 443, "ads", "🛑 广告"),
     # Statsig 功能开关不拦
     ("featuregates.org", 443, "ai-essential", "🤖 AI"),
+    ("featureassets.org", 443, "ai-essential", "🤖 AI"),
+    ("prodregistryv2.org", 443, "telemetry", "🛑 广告"),
+    ("statsig.anthropic.com", 443, "telemetry", "🛑 广告"),
+    ("sso.claude.com", 443, "ai-essential", "🤖 AI"),
+    ("claude.site", 443, "ai", "🤖 AI"),
     # 群晖 DDNS / TeamViewer 直连；B站港澳台 CDN 跟随 B站组
     ("mynas.myds.me", 5001, "direct", "🎯 直连"),
     ("global.quickconnect.to", 443, "direct", "🎯 直连"),
