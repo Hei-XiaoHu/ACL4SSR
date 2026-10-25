@@ -1,0 +1,45 @@
+# 格式：process:<进程名>，每行一条；# 开头为注释。仅 mihomo（Clash Party / CMFA）生效，固定 DIRECT。
+# mihomo PROCESS-NAME 按完整名称、不区分大小写匹配：Windows 要带 .exe；macOS / Linux 为可执行文件名；安卓为包名。
+# 依据：mihomo 规则文档 https://wiki.metacubex.one/config/rules/ （PROCESS-NAME 示例含 chrome.exe、curl、com.termux）
+# 只在 TUN 模式下有意义：系统代理模式不接管 BT 客户端的流量。客户端的 find-process-mode 不能设为 off。
+#
+# 有意不收录（同时承担普通 HTTP 下载，强制直连会让走代理才能访问的下载变慢或失败）：
+#   aria2c / Motrix、迅雷、IDM、Free Download Manager；需要时自行加到本地覆写。
+# Linux 上的 Deluge 进程名是 python3，无法按名称区分，也不收录。
+
+# qBittorrent（含增强版）
+process:qbittorrent.exe
+process:qbittorrent
+process:qbittorrent-nox
+
+# Transmission
+process:transmission
+process:transmission-qt.exe
+process:transmission-daemon.exe
+process:transmission-gtk
+process:transmission-qt
+process:transmission-daemon
+
+# μTorrent / BitTorrent / BitComet / Deluge / Tixati / PicoTorrent / BiglyBT
+process:utorrent.exe
+process:bittorrent.exe
+process:bitcomet.exe
+process:deluge.exe
+process:deluged.exe
+process:tixati.exe
+process:picotorrent.exe
+process:biglybt.exe
+
+# Linux 终端客户端
+process:rtorrent
+process:ktorrent
+
+# 安卓（包名）
+process:org.proninyaroslav.libretorrent
+process:com.delphicoder.flud
+process:com.delphicoder.flud.paid
+process:com.utorrent.client
+process:com.utorrent.client.pro
+process:com.bittorrent.client
+process:com.bittorrent.client.pro
+process:com.biglybt.android.client

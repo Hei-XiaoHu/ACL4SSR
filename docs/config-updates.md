@@ -2,6 +2,19 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-10-26 BT 客户端按进程直连
+
+- 新增集合 `bt`（`rules/bt.txt`，classical，仅 mihomo），排在内网直连之后、遥测/QUIC/广告之前，固定 `DIRECT`（不随 🎯 直连组切换）。
+  原因：TUN 模式下 BT 客户端连接的 peer 多为境外裸 IP，不在 cn-ip 内，会落到 🐟 漏网之鱼走代理，消耗节点流量且违反多数机场条款。
+  系统代理模式不接管 BT 流量，不受影响；Stash iOS 不支持进程规则，不生成。
+- 收录 qBittorrent、Transmission、μTorrent、BitTorrent、BitComet、Deluge（Windows）、Tixati、PicoTorrent、BiglyBT、rtorrent、KTorrent 与几款安卓客户端包名。
+  有意不收录 aria2c/Motrix、迅雷、IDM、FDM：它们同时做普通 HTTP 下载，强制直连会影响需要代理的下载。
+- 不采用 `geosite:category-public-tracker`：其中含大量 PT/BT 站点网页域名，直连会改变浏览这些网站的去向；进程规则已覆盖客户端自身的 tracker 与 peer 连接。
+- 依据：mihomo 规则文档（PROCESS-NAME 按完整进程名匹配，Windows 带 .exe，安卓为包名）。进程名清单属常见安装默认值，未逐一实机核对；不匹配时只是不生效，不会误伤其他流量。
+- `find-process-mode: always` 保持不变，注释改为“BT 进程直连需要”；客户端把它设为 off 时 BT 直连失效。
+- 工具：`rules/*.txt` 支持 `process:` 条目（仅 classical）；spec 集合支持 `clients: [meta]`；进程规则存在后 mihomo 日志在端口后附加“(进程名, uid)”，
+  `check_routing.py` / `check_rules.py` 的日志匹配随之调整。离线回归在 Linux 上把 Python 解释器复制改名为 `qbittorrent` 实测命中 `bt → DIRECT`。
+
 ## 2026-10-25 维护流程固定
 
 - 新增 `docs/maintenance.md`：从 Action 的 issue 到推送、确认发布、回复关闭 issue 的固定流程与判断表；根目录 `AGENTS.md` 供 AI 代理自动加载；

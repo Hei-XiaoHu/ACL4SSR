@@ -32,7 +32,7 @@ clients:
       allow-lan: false
       mode: rule
       log-level: warning
-      # 无进程分流规则，开启仅为在连接列表里显示应用名；开销很小。客户端自身设置可覆盖
+      # BT 集合按进程名直连需要进程查找；同时在连接列表里显示应用名。客户端自身设置可覆盖（设为 off 时 BT 直连失效）
       find-process-mode: always
       tcp-concurrent: true
       unified-delay: true
@@ -122,6 +122,9 @@ sets:
   - {name: local-direct, to: 🎯 直连, type: classical}
   - {name: private, to: DIRECT, from: [geosite:private]}
   - {name: private-ip, to: DIRECT, type: ip, from: [geoip:private], no_resolve: true}
+  # BT/PT 客户端按进程名固定 DIRECT（仅 mihomo；Stash iOS 不支持进程规则）。peer 多为境外裸 IP，
+  # 否则会落到 🐟 漏网之鱼走代理，消耗节点流量且违反多数机场条款。只在 TUN 模式下生效（系统代理不接管 BT）。
+  - {name: bt, to: DIRECT, type: classical, clients: [meta]}
   - {name: telemetry, to: 🛑 广告}
   # 默认走代理的境外 QUIC；默认直连的服务、国内、游戏、下载、通信、自定义豁免和未知 IP 不拦
   - quic

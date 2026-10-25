@@ -17,6 +17,7 @@
 
 | 文件 | 去向 | 放什么 |
 |---|---|---|
+| `rules/bt.txt` | DIRECT（最前，仅 mihomo） | BT/PT 客户端进程名（`process:qbittorrent.exe`），只在 TUN 模式下生效 |
 | `rules/local-direct.txt` | 🎯 直连（最前） | 必须先于广告与一切分流的直连（功能白名单、运营商一键登录、易盾）；唯一允许 `regex:` |
 | `rules/telemetry.txt` | 🛑 广告 | Claude 相关遥测上报、Statsig 事件上报 |
 | `rules/ai-essential.txt` | 🤖 AI | 必须先于广告放行的 AI 端点（Claude 核心、Sift、Statsig 功能开关） |

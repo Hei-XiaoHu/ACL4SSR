@@ -22,7 +22,7 @@ from pathlib import Path
 import yaml
 
 import build
-from check_routing import address, recv_exact, start_dns, warmup
+from check_routing import address, from_port, recv_exact, start_dns, warmup
 
 # (域名, 端口, 期望集合, 期望策略组)；只放长期稳定、用户明确要求的分流
 CASES = [
@@ -178,7 +178,7 @@ def main() -> int:
                         c.recv(64)
                     except OSError:
                         pass
-                return wait(lambda l: f":{src} -->" in l and f"{host}:{port}" in l and "match " in l, timeout)
+                return wait(lambda l: from_port(l, src) and f"{host}:{port}" in l and "match " in l, timeout)
 
             for host, port, want_set, want_group in CASES:
                 line = probe(host, port, 10)

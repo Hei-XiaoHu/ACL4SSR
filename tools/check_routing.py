@@ -263,6 +263,11 @@ def assert_outputs():
             assert "cn" not in build.providers("stash")
             assert "GEOSITE,cn" in quic
             assert rules.index("GEOSITE,geolocation-!cn,🚀 节点选择") < rules.index("GEOSITE,cn,🎯 直连")
+    # BT 进程直连：只出现在 mihomo，排在遥测/QUIC/广告之前，固定 DIRECT；Stash 没有进程规则
+    meta_rules, stash_rules = build.rules("meta"), build.rules("stash")
+    assert meta_rules.index("RULE-SET,bt,DIRECT") < meta_rules.index("RULE-SET,telemetry,🛑 广告")
+    assert not any(",bt," in r for r in stash_rules) and "bt" not in build.providers("stash")
+    assert build.providers("meta")["bt"]["behavior"] == "classical"
     essential = build.local_rows("ai-essential")
     assert "+.sift.com" in essential and "+.siftscience.com" in essential
     assert "+.claude.app" in build.local_rows("ai")
@@ -271,6 +276,11 @@ def assert_outputs():
         # 🐟 只接真正未命中的流量：已知国外直接走节点选择，兜底 MATCH 才到漏网之鱼
         assert [r for r in rules if r.endswith(",🐟 漏网之鱼")] == ["MATCH,🐟 漏网之鱼"], target
     print("✓ mihomo / Stash / 国外覆写 DNS、STUN、白名单、Claude 与游戏优先级、漏网之鱼仅兜底", flush=True)
+
+
+def from_port(line: str, port: int) -> bool:
+    """日志来源端口匹配：有进程规则时 mihomo 会在端口后附加（进程名, uid）。"""
+    return re.search(rf":{port}(\([^)]*\))? -->", line) is not None
 
 
 def warmup(socks_port: int, await_line, timeout: float = 60) -> None:
@@ -285,7 +295,7 @@ def warmup(socks_port: int, await_line, timeout: float = 60) -> None:
             c.sendall(b"\x05\x01\x00" + address("warmup.audit.invalid", 443) + b"GET / HTTP/1.0\r\n\r\n")
             src = c.getsockname()[1]
             try:
-                await_line(lambda l: f":{src} -->" in l and "warmup.audit.invalid:443" in l, timeout=3)
+                await_line(lambda l: from_port(l, src) and "warmup.audit.invalid:443" in l, timeout=3)
                 return
             except RuntimeError:
                 continue
@@ -586,7 +596,7 @@ def native_regressions(exe: str):
                     destination = f"[{host}]:{port}" if ":" in host else f"{host}:{port}"
                     retry = (lambda: udp.sendto(b"\x00\x00\x00" + address(host, port) + b"audit", relay)) if udp is not None else None
                     line = await_line(lambda line: f"[{network.upper()}]" in line
-                                      and f":{source_port} -->" in line
+                                      and from_port(line, source_port)
                                       and destination in line
                                       and ("match " in line or "(match " in line), retry=retry)
                     if expected_rule in ("AND", "Match"):
@@ -600,6 +610,34 @@ def native_regressions(exe: str):
                     tcp.close()
                     if udp is not None:
                         udp.close()
+
+            # ---------------- BT 客户端按进程名直连（仅 Linux：复制一份 Python 解释器并改名为 BT 进程名）
+            if sys.platform.startswith("linux"):
+                bt_name = next(r[8:] for r in build.local_rows("bt") if r.startswith("process:") and "." not in r)
+                fake = Path(tmp) / bt_name
+                shutil.copy2(os.path.realpath(sys.executable), fake)
+                client = (
+                    "import socket,struct,sys\n"
+                    f"c=socket.create_connection(('127.0.0.1',{socks_port}),timeout=3)\n"
+                    "c.sendall(b'\\x05\\x01\\x00');c.recv(2)\n"
+                    "c.sendall(b'\\x05\\x01\\x00\\x01'+socket.inet_aton('203.0.113.20')+struct.pack('!H',6881))\n"
+                    "print(c.getsockname()[1],flush=True);c.recv(10);sys.stdin.read()\n"
+                )
+                env = {**os.environ, "PYTHONHOME": sys.base_prefix}
+                peer = subprocess.Popen([str(fake), "-c", client], stdin=subprocess.PIPE,
+                                        stdout=subprocess.PIPE, text=True, env=env)
+                try:
+                    src = int(peer.stdout.readline())
+                    line = await_line(lambda l: from_port(l, src) and "203.0.113.20:6881" in l)
+                    want = f"({bt_name},"
+                    if want not in line or "match RuleSet(bt)" not in line or "_audit_direct" not in line:
+                        raise AssertionError(f"BT 进程 {bt_name} 期望 bt → DIRECT\n{line}")
+                    print(f"✓ TCP 进程 {bt_name} → 203.0.113.20:6881 → bt / DIRECT", flush=True)
+                finally:
+                    peer.kill()
+                    peer.wait(timeout=5)
+            else:
+                print("! 非 Linux：跳过 BT 进程名实测（CI 为 Linux）", flush=True)
 
             # ---------------- DNS 泄露断言（先于主动 DNS 查询，避免日志被污染）
             def is_ip(host):

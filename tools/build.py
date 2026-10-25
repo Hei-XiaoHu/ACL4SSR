@@ -43,8 +43,13 @@ def set_type(name: str) -> str:
     return SETS[name].get("type", "domain")
 
 
+def enabled(name: str, target: str) -> bool:
+    """集合是否在该客户端生成（clients 省略 = 全部客户端）。"""
+    return target in SETS[name].get("clients", TARGETS)
+
+
 def local_rows(name: str) -> list[str]:
-    """rules/<name>.txt：每行一条，# 注释；domain 用 x / +.x，classical 另可 regex:，ip 为 CIDR。"""
+    """rules/<name>.txt：每行一条，# 注释；domain 用 x / +.x，classical 另可 regex: / process:，ip 为 CIDR。"""
     path = RULES_DIR / f"{name}.txt"
     if not path.exists():
         return []
@@ -53,9 +58,13 @@ def local_rows(name: str) -> list[str]:
         line = line.strip()
         if not line or line.startswith("#"):
             continue
-        if line.startswith("regex:") and set_type(name) != "classical":
-            sys.exit(f"rules/{name}.txt: 只有 classical 集合允许 regex: 条目：{line}")
-        if set_type(name) == "ip":
+        if line.startswith(("regex:", "process:")) and set_type(name) != "classical":
+            sys.exit(f"rules/{name}.txt: 只有 classical 集合允许 regex: / process: 条目：{line}")
+        if line.startswith("process:"):
+            # 进程名（Windows 含 .exe）或安卓包名；mihomo 按不区分大小写的完整名称匹配
+            if not re.fullmatch(r"process:[a-z0-9][a-z0-9._+-]*", line):
+                sys.exit(f"rules/{name}.txt: 进程名只能用小写字母、数字与 ._+-：{line}")
+        elif set_type(name) == "ip":
             ipaddress.ip_network(line, strict=False)
         elif not line.startswith("regex:") and not re.fullmatch(r"(\+\.)?[a-z0-9*_-]+(\.[a-z0-9*_-]+)*", line):
             sys.exit(f"rules/{name}.txt: 无法识别的条目：{line}")
@@ -66,12 +75,16 @@ def local_rows(name: str) -> list[str]:
 def classical_line(row: str) -> str:
     if row.startswith("regex:"):
         return f"DOMAIN-REGEX,{row[6:]}"
+    if row.startswith("process:"):
+        return f"PROCESS-NAME,{row[8:]}"
     if row.startswith("+."):
         return f"DOMAIN-SUFFIX,{row[2:]}"
     return f"DOMAIN,{row}"
 
 
 def sources(name: str, target: str) -> list[str]:
+    if not enabled(name, target):
+        return []
     src = SETS[name].get("from", [])
     return list(src.get(target, [])) if isinstance(src, dict) else list(src)
 
@@ -89,7 +102,7 @@ def fetched_sources(name: str, target: str) -> list[str]:
 
 
 def has_provider(name: str, target: str) -> bool:
-    return bool(local_rows(name) or fetched_sources(name, target))
+    return enabled(name, target) and bool(local_rows(name) or fetched_sources(name, target))
 
 
 def provider_file(name: str, target: str) -> str:
@@ -328,7 +341,7 @@ HDR_META = [
     f"规则：本仓库 rules 分支（每日合并本地 rules/*.txt 与 MetaCubeX 等上游）mrs 二进制规则集，匹配快、内存小",
     "去广告：AdRules + anti-AD 合并去重；默认走代理的境外 UDP443 回落 TCP，默认直连/国内/游戏/下载/未知 IP 保留",
     "DNS：已知国内走国内 DoH，其余经 🛰️ DNS 查境外 DoH，内网用系统 DNS；DIRECT 出站用国内 direct-nameserver",
-    "安全：allow-lan 关闭，DNS 仅监听 127.0.0.1；find-process-mode always（仅用于连接列表显示应用名）",
+    "安全：allow-lan 关闭，DNS 仅监听 127.0.0.1；find-process-mode always（BT 客户端按进程直连，并在连接列表显示应用名）",
     f"规则 CDN 为 {CDN}，失效时全局替换为 https://cdn.jsdelivr.net/gh",
 ]
 HDR_STASH = [
@@ -452,6 +465,10 @@ def validate_spec() -> list[str]:
         if "name" in item:
             if item.get("type", "domain") not in ("domain", "ip", "classical"):
                 problems.append(f"{item['name']}: 未知 type {item['type']}")
+            if not set(item.get("clients", TARGETS)) <= set(TARGETS):
+                problems.append(f"{item['name']}: clients 只能取 {TARGETS}")
+            if any(r.startswith("process:") for r in local_rows(item["name"])) and "stash" in item.get("clients", TARGETS):
+                problems.append(f"{item['name']}: 进程规则只用于 mihomo，需写 clients: [meta]（Stash iOS 不支持）")
             for target in TARGETS:
                 for src in sources(item["name"], target):
                     kind = src.partition(":")[0]

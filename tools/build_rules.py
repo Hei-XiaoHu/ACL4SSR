@@ -153,6 +153,8 @@ class DomainMatcher:
     def __init__(self, entries: list[str]):
         self.exact, self.suffix, self.sub, self.regex = set(), set(), set(), []
         for e in entries:
+            if e.startswith(("PROCESS-NAME,", "process:")):
+                continue  # 进程规则与域名无关
             if e.startswith("DOMAIN-REGEX,"):
                 self.regex.append(re.compile(e.split(",", 1)[1]))
             elif e.startswith("DOMAIN-SUFFIX,"):

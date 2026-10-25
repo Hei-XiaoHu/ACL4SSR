@@ -4,7 +4,7 @@
 # 规则：本仓库 rules 分支（每日合并本地 rules/*.txt 与 MetaCubeX 等上游）mrs 二进制规则集，匹配快、内存小
 # 去广告：AdRules + anti-AD 合并去重；默认走代理的境外 UDP443 回落 TCP，默认直连/国内/游戏/下载/未知 IP 保留
 # DNS：已知国内走国内 DoH，其余经 🛰️ DNS 查境外 DoH，内网用系统 DNS；DIRECT 出站用国内 direct-nameserver
-# 安全：allow-lan 关闭，DNS 仅监听 127.0.0.1；find-process-mode always（仅用于连接列表显示应用名）
+# 安全：allow-lan 关闭，DNS 仅监听 127.0.0.1；find-process-mode always（BT 客户端按进程直连，并在连接列表显示应用名）
 # 规则 CDN 为 https://fastly.jsdelivr.net/gh，失效时全局替换为 https://cdn.jsdelivr.net/gh
 
 port: 7890
@@ -147,6 +147,7 @@ rule-providers:
   local-direct: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/local-direct.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/local-direct.yaml'}
   private: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/private.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/private.mrs'}
   private-ip: {type: http, behavior: ipcidr, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/private-ip.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/private-ip.mrs'}
+  bt: {type: http, behavior: classical, format: yaml, interval: 86400, path: ./ruleset/acl4ssr/bt.yaml, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/bt.yaml'}
   telemetry: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/telemetry.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/telemetry.mrs'}
   ai-essential: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/ai-essential.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/ai-essential.mrs'}
   auth: {type: http, behavior: domain, format: mrs, interval: 86400, path: ./ruleset/acl4ssr/auth.mrs, url: 'https://fastly.jsdelivr.net/gh/Hei-XiaoHu/ACL4SSR@rules/mihomo/auth.mrs'}
@@ -173,6 +174,7 @@ rules:
 - RULE-SET,local-direct,🎯 直连
 - RULE-SET,private,DIRECT
 - RULE-SET,private-ip,DIRECT,no-resolve
+- RULE-SET,bt,DIRECT
 - RULE-SET,telemetry,🛑 广告
 - AND,((NETWORK,udp),(DST-PORT,443),(OR,((RULE-SET,ai),(RULE-SET,auth),(RULE-SET,proxy),(RULE-SET,media),(RULE-SET,foreign),(RULE-SET,ai-ip,no-resolve))),(NOT,((AND,((RULE-SET,cn),(NOT,((RULE-SET,foreign))))))),(NOT,((RULE-SET,cn-ip,no-resolve))),(NOT,((OR,((RULE-SET,quic-exempt),(RULE-SET,direct),(RULE-SET,bilibili),(RULE-SET,microsoft),(RULE-SET,apple),(RULE-SET,games),(RULE-SET,game-proxy)))))),REJECT
 - RULE-SET,ai-essential,🤖 AI
