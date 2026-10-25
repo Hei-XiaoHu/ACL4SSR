@@ -470,6 +470,11 @@ def validate_spec() -> list[str]:
     for src in S["watch"]:
         if src not in all_sources:
             problems.append(f"watch 中的 {src} 不是任何集合的来源")
+    for src, name in (S.get("pin") or {}).items():
+        if not src.startswith("geosite:") and src not in S["upstream"]:
+            problems.append(f"pin 中的 {src} 不是 geosite 或已定义的上游")
+        if name not in SETS or set_type(name) != "domain":
+            problems.append(f"pin 的目标 {name} 不是域名集合")
     for item in S["stash_dns_china"]:
         if not item.startswith("geosite:") and item not in SETS:
             problems.append(f"stash_dns_china 引用了不存在的集合: {item}")

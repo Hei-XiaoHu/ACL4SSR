@@ -11,6 +11,8 @@
 
 ## 修改规则
 
+> 完整流程（处理 Action 的 issue → 修改 → 校验 → 推送 → 确认发布 → 关闭 issue）见 [docs/maintenance.md](docs/maintenance.md)；pi 中可直接用 `/weekly-review`、`/add-rule <域名>`。
+
 **加一条规则**：先想它该走哪个组，然后在 `rules/` 下同名文件里加一行（`example.com` 精确，`+.example.com` 含子域名），推送即可。Action 几分钟内重新合并并发布到 `rules` 分支，但客户端经 jsDelivr 下载，**最多约 12 小时后才拿到新版**（见下方说明）。
 
 | 文件 | 去向 | 放什么 |
@@ -35,6 +37,9 @@
 ```bash
 pip install pyyaml
 python3 tools/build.py                 # 生成全部配置
+python3 tools/verify.py                # 推送前一键校验（与 CI 相同，下面各项全跑；--offline 只跑离线项）
+python3 tools/after_push.py            # 推送后等 Actions 结束并确认规则集已发布
+python3 tools/weekly_report.py --preview  # 用最新数据预览每周报告（只打印）
 python3 tools/build.py --check         # spec 自检（孤儿 rules 文件、组名/集合引用、跨文件冲突）+ 七份输出一致
 python3 tools/check.py /path/to/mihomo  # 渲染与真实内核校验，含节点全过滤/零节点场景
 python3 tools/check_routing.py /path/to/mihomo # 离线连接、DNS 泄露、QUIC 与广告回归
@@ -46,7 +51,7 @@ python3 tools/build_rules.py --conflicts   # 报告集合间的覆盖关系（�
 
 **每周报告**：`.github/workflows/weekly.yml` 每周一北京时间 05:00 运行 `tools/weekly_report.py`，更新 issue“每周规则报告”：
 旧 ACL4SSR 列表中新出现、未审阅的去向差异（`tools/legacy_diff.py`，审阅结论记在 `src/legacy-review.yaml`），
-以及 spec `watch` 中上游集合（游戏下载、AI）相比上周的增删；每条增删都按当日规则算出实际去向，与该集合预期去向不同的标 ⚠️（新增被前面的集合截走、删除后不再直连等）。基准与历次报告存于 `report` 分支；只有出现新条目时才追加评论。
+以及 spec `watch` 中上游集合（游戏下载、AI）相比上周的增删；每条增删都按当日规则算出实际去向，与该集合预期去向不同的标 ⚠️（新增被前面的集合截走、删除后不再直连等）。另列出 spec `pin` 中上游条目尚未固定到本地文件的（目前是 v2fly anthropic → `rules/ai.txt`）。基准与历次报告存于 `report` 分支；只有出现待处理条目时才追加评论并重新打开 issue，处理完回复结论并关闭。
 
 Stash 的结论来自官方文档与静态检查，不能用 mihomo 代替 Stash 实机验证。
 

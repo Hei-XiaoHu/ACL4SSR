@@ -2,6 +2,17 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-10-25 维护流程固定
+
+- 新增 `docs/maintenance.md`：从 Action 的 issue 到推送、确认发布、回复关闭 issue 的固定流程与判断表；根目录 `AGENTS.md` 供 AI 代理自动加载；
+  pi 项目命令 `.pi/prompts/weekly-review.md`（`/weekly-review [编号]`）与 `add-rule.md`（`/add-rule <域名>`）。
+- `tools/verify.py`：推送前一键校验，自动下载/缓存 mihomo 到 `.cache/`；CI（check.yml）改为直接运行它，本地与 CI 检查项完全一致（CI 因此也会试构建规则集并跑关键域名把关）。
+- `tools/after_push.py`：等待本次提交的 Actions 结束，确认 rules 分支是否已发布本提交。
+- `tools/weekly_report.py --preview`：以 report 分支基准、用最新数据本地预览报告，不写任何分支。
+- spec 新增 `pin`：`geosite:anthropic` 的条目应全部固定在 `rules/ai.txt`；每周报告列出待固定条目（原先需要人工对比 v2fly）。
+- issue 状态约定：「每周规则报告」只在有待处理条目时重新打开（原先每周无条件重新打开），处理完回复并关闭。
+- `rules.yml` 手动运行新增 `skip_shrink_check`：确认上游属正常大幅删减时跳过骤减保护，避免一直卡住不发布。
+
 ## 2026-10-25 每周报告跟进、Statsig 修正与发布把关加强
 
 - 每周报告（issue #5）：上游 `category-ai-!cn` 两周共新增 16 条，均已自动走 🤖 AI（`o33249.ingest.us.sentry.io` 为 OpenAI 的 Sentry，由 telemetry 先行拦截，属预期）。

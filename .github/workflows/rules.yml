@@ -16,6 +16,11 @@ on:
       - .github/actions/setup-mihomo/**
       - .github/workflows/rules.yml
   workflow_dispatch:
+    inputs:
+      skip_shrink_check:
+        description: 跳过条目数骤减保护（确认上游是正常的大幅删减后使用，见 docs/maintenance.md）
+        type: boolean
+        default: false
 
 concurrency:
   group: rules-publish
@@ -44,8 +49,12 @@ jobs:
       - uses: ./.github/actions/setup-mihomo
 
       - name: 读取上一版清单
+        env:
+          SKIP_SHRINK: ${{ inputs.skip_shrink_check }}
         run: |
-          if git fetch --depth=1 origin rules 2>/dev/null; then
+          if [ "$SKIP_SHRINK" = "true" ]; then
+            echo "手动跳过骤减保护"; : > prev.json
+          elif git fetch --depth=1 origin rules 2>/dev/null; then
             git show origin/rules:manifest.json > prev.json || : > prev.json
           else
             : > prev.json

@@ -18,16 +18,9 @@ jobs:
       - name: 安装依赖
         run: pip install pyyaml
 
-      - name: spec 自检 + 生成文件必须与 src/spec.yaml 一致
-        run: python3 tools/build.py --check
-
       - uses: ./.github/actions/setup-mihomo
 
-      - name: mihomo -t 校验（Xboard / subconverter / 国外覆写）
-        run: python3 tools/check.py ./mihomo
-
-      - name: QQ / Claude / DNS / 广告分流行为回归（本地夹具）
-        run: python3 tools/check_routing.py ./mihomo
-
-      - name: 当日上游核对（Claude 不在 cn、本地条目未被前面的集合截走）
-        run: cd tools && python3 check_upstream.py
+      # 与本地推送前的 python3 tools/verify.py 完全相同：spec 自检、内核校验、分流/DNS 回归、
+      # 当日上游核对、试构建规则集（含骤减保护）、真实规则集关键域名
+      - name: 全部校验（tools/verify.py）
+        run: python3 tools/verify.py --mihomo ./mihomo

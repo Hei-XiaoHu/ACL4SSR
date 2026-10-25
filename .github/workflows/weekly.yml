@@ -73,8 +73,10 @@ jobs:
             gh issue create -t "$ISSUE_TITLE" -F issue-body.md
           else
             gh issue edit "$n" -F issue-body.md
-            gh issue reopen "$n" 2>/dev/null || true
+            # 状态约定：打开 = 有待处理条目；处理完回复结论并关闭（docs/maintenance.md）。
+            # 没有新条目时保持原状态，不再每周无条件重新打开。
             if [ "$HAS_NEW" = "true" ]; then
-              gh issue comment "$n" -b "本周有新变化：$SUMMARY。详见正文或 $link"
+              gh issue reopen "$n" 2>/dev/null || true
+              gh issue comment "$n" -b "本周有新变化：$SUMMARY。详见正文或 $link（处理流程：docs/maintenance.md）"
             fi
           fi

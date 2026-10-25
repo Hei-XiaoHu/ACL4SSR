@@ -175,6 +175,10 @@ overseas:
 # 每周报告关注的上游集合：列出相比上周的增删（下载集合删掉仍在用的主机时需要补进 rules/direct.txt）
 watch: ['geosite:category-game-platforms-download', 'geosite:category-ai-!cn']
 
+# 本地固定：上游列表的条目应全部写进对应的 rules/<集合>.txt，上游以后删减时分流不变。
+# 每周报告列出尚未固定的条目（例如 v2fly 新增的 Claude 家族域名），按报告补进本地文件即可。
+pin: {'geosite:anthropic': ai}
+
 # 定向 QUIC 拒绝：已识别境外域名与明确自有 IP 让 UDP443 回落 TCP，不把未知 IP 当境外。
 # 已有国内真实 IP 豁免；cn/!cn 域名交集采用明确境外归属优先。
 quic_reject: [ai, auth, proxy, media, foreign]
