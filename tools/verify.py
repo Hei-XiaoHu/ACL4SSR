@@ -47,7 +47,11 @@ def _api(url: str) -> dict:
 def mihomo_path(given: str | None) -> str:
     found = given or os.environ.get("MIHOMO") or shutil.which("mihomo")
     if found:
-        return found
+        # 各步骤在 tools/ 下运行，相对路径（如 CI 的 ./mihomo）按调用时的目录解析为绝对路径
+        path = Path(found).resolve() if os.sep in found else Path(shutil.which(found) or found).resolve()
+        if not path.is_file():
+            sys.exit(f"找不到 mihomo：{found}")
+        return str(path)
     system = {"Linux": "linux", "Darwin": "darwin"}.get(platform.system())
     arch = {"x86_64": "amd64", "amd64": "amd64", "arm64": "arm64", "aarch64": "arm64"}.get(platform.machine().lower())
     if not system or not arch:
