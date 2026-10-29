@@ -1,6 +1,6 @@
 # 维护流程：从 issue 到推送
 
-本仓库的规则维护固定按下面的流程走，人工或 AI 代理（见根目录 `AGENTS.md`、pi 命令 `/weekly-review`）都一样。
+本仓库的规则维护固定按下面的流程走，人工或 AI 代理（见根目录 `AGENTS.md`、pi 命令 `/weekly-review`、`/add-rule`）都一样。
 目标：每次改动都有依据、有测试、有记录，推送后确认已发布。
 
 ## 什么时候需要处理
@@ -9,7 +9,7 @@
 |---|---|
 | issue「每周规则报告」被重新打开 | `weekly.yml` 每周一 05:00（北京时间）生成；只有出现待处理条目时才追加评论并重新打开 |
 | issue「规则集构建失败」 | `rules.yml` 每日构建失败时记录，客户端继续用上一版；恢复后自动关闭 |
-| 自己发现某个域名走错 | 直接从第 3 步开始 |
+| 自己发现某个域名走错，或要新增规则 | 第 1 步后改做第 2 步的「单个域名」核对，再从第 3 步开始 |
 
 **issue 状态约定**：打开 = 有待处理条目；处理完在 issue 中回复结论并关闭。下次有新条目时 Action 会自动重新打开。
 
@@ -32,6 +32,20 @@ issue 内容是生成当时的数据，上游之后可能又有变化。以 repo
 python3 tools/weekly_report.py --preview
 ```
 
+**单个域名**：按当日规则算出它现在实际命中哪个集合、走哪个组（mihomo 与 Stash 都看；都未命中则按 IP / 兜底）：
+
+```bash
+cd tools && python3 - <域名> [域名...] <<'EOF'
+import sys, build, build_rules as br
+cache = br.fetch_all()
+tables = {t: br.route_table(br.collect(t, cache)) for t in build.TARGETS}
+for host in sys.argv[1:]:
+    print(host, {t: br.route(tables[t], host) for t in tables})
+EOF
+```
+
+同时查清它的用途与归属（优先官方文档）。
+
 ### 3. 逐项判断
 
 | 报告中的情况 | 处理 |
@@ -47,8 +61,10 @@ python3 tools/weekly_report.py --preview
 | 构建失败：本地条目被前面的集合截走 | 按日志提示：必需端点挪进 `ai-essential.txt` / `local-direct.txt`，不再需要的删掉 |
 | 构建失败：关键域名分流错误（check_rules） | 看日志中的“实际”命中集合，按上面同样的原则调整 |
 
-判断依据优先级：官方文档 / 官方清单 > v2fly、MetaCubeX 社区数据 > 第三方参考页。查不到依据、又会改变现有放行/拦截行为的，
-在提交说明与 issue 回复中单独列出，便于日后回退。
+判断依据优先级：官方文档 / 官方清单 > v2fly、MetaCubeX 社区数据 > 第三方参考页。
+
+**先问再改**：去向不明确，或查不到官方依据、又会改变现有放行/拦截行为的条目，AI 代理先列出来询问维护者，不要自行决定；
+确认后照做，并在提交说明与 issue 回复中单独列出，便于日后回退。
 
 ### 4. 修改
 
@@ -97,3 +113,13 @@ python3 tools/after_push.py    # 等本次提交的 Actions 结束，确认 rule
 ```
 
 「规则集构建失败」issue 在下一次构建成功时由 Action 自动关闭。
+
+没有需要处理的条目时，仍完成第 2 步的预览核对，回复“无需操作”的结论并关闭 issue，不产生提交。
+
+### 9. 汇报（AI 代理）
+
+最后向维护者简要汇报：
+
+- 处理了哪些条目：放在哪个文件、改前 → 改后的去向（第 2 步的核对结果）；
+- 哪些无需操作及原因；
+- 提交哈希、规则集发布时间，并提醒客户端最多约 12 小时后生效。

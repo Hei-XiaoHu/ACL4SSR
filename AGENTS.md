@@ -4,9 +4,9 @@ mihomo（Clash Party / CMFA）与 Stash 的分流配置和规则集。概览见 
 
 ## 处理 issue、新增或调整规则
 
-一律按 `docs/maintenance.md` 的流程执行：看 issue → `tools/weekly_report.py --preview` 用最新数据核对 →
+一律按 `docs/maintenance.md` 的流程执行：看 issue → `tools/weekly_report.py --preview` 用最新数据核对（单个域名则按第 2 步算出当前去向）→
 按判断表逐项处理 → 改 `rules/` + 补测试 + 写 `docs/config-updates.md` → `python3 tools/verify.py` 全部通过 →
-提交推送 → `python3 tools/after_push.py` 确认发布 → 用 gh 在 issue 中回复结论并关闭。
+提交推送 → `python3 tools/after_push.py` 确认发布 → 用 gh 在 issue 中回复结论并关闭 → 按第 9 步汇报。
 
 ## 必须遵守
 
@@ -16,7 +16,7 @@ mihomo（Clash Party / CMFA）与 Stash 的分流配置和规则集。概览见 
 - 推送前 `python3 tools/verify.py` 必须全部通过（与 CI 相同）。推送 master 会立即触发规则集重新发布到 rules 分支。
 - 不要手动改 `rules` / `report` 分支，它们由 Actions 生成。
 - 依据优先：官方文档 > v2fly / MetaCubeX 社区数据 > 第三方页面。不泛化整个 CDN 或供应商后缀，不用 DOMAIN-KEYWORD。
-- 会改变现有放行/拦截行为、又缺少官方依据的判断，要在提交说明和 issue 回复里单独写明。
+- 去向不明确，或会改变现有放行/拦截行为又缺少官方依据的判断，先问维护者再改；照做后在提交说明和 issue 回复里单独写明。
 - 提交说明用一句中文概括处理内容；文档与注释用中文。
 
 ## 已定的设计（不要“顺手改掉”）
