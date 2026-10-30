@@ -2,6 +2,15 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-10-30 Stash 改用 mrs 规则集与 3.6 新 DNS 字段；目录改名 xboard/
+
+- Stash 的 domain/ipcidr 规则集从 yaml 改为 mrs（Stash iOS 3.1.1+ 支持，与 mihomo 同一二进制格式）：`rules` 分支 `stash/` 下 21 个集合改发 `.mrs`，只有 classical 的 `local-direct` 仍是 yaml。旧 `stash/*.yaml` 不再发布，仍用旧配置的 Stash 刷新规则集会 404 并沿用本地缓存，刷新订阅后即换到 mrs。
+- Stash DNS 对齐 mihomo：新增 `proxy-server-nameserver`（国内 DoH）给节点域名单独解析，不跟随 follow-rule；`nameserver-policy` 里原先逐条展开的 `rules/direct.txt` 28 条与 `geosite:category-game-platforms-download` 合并为一条 `rule-set:direct`（Stash 3.6+ 支持 `rule-set:` 引用，与分流共用同一份规则集，`direct` 集合本就包含游戏下载上游）。`spec.stash_dns_china` 现在只写集合名。
+- 因此 Stash 最低要求提高到 iOS 3.6 / macOS 4.3（2026-10-09 发布）；README、底包与模板头注释同步说明。依据：stash.wiki 规则集与 DNS 文档、3.1.1 / 3.4.0 / 3.6.0 发布说明。未做 Stash 实机验证。
+- mihomo 配置复核：未发现冗余或已废弃字段（`global-client-fingerprint` 已在 1.19.27 移除，本仓库从未使用；`use-hosts`/`use-system-hosts`/`fake-ip-filter-mode` 为默认值但显式保留便于阅读）。sniffer `override-destination: false` 与官方示例一致，未改。
+- `Xboard/` 目录改名 `xboard/`（顶层目录统一小写；`Clash/` 为远程配置路径不动）。OVH 上 Xboard 模板同步脚本的拉取路径同步改为 `xboard/`。`xboard/README.md` 改为描述实际部署方式（后台数据库模板 + 每小时同步脚本），并说明 clash 槽位放 mihomo 模板的原因与 Xboard Clash 渲染器只下发 ss/vmess/trojan 的限制；sing-box/Surge/Surfboard 不做模板。
+- 工具：`build.provider_file` 不再按客户端区分后缀；`check_routing.assert_outputs` 改为断言 `rule-set:direct` 与 `proxy-server-nameserver`。`python3 tools/verify.py` 全部通过（mihomo v1.19.33）。
+
 ## 2026-10-26 被墙的 Azure 网站改走代理
 
 - 按当日上游核对“被墙域名落入默认直连组”的情况：`geosite:gfw` 中只有 6 条走了直连组。

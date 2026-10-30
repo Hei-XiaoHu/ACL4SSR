@@ -7,8 +7,8 @@
 #   Clash/config/ACL4SSR_Online_Full_AdblockPlus_Stash.ini    subconverter · Stash
 #   Clash/customBaseConfigs/dns_enhanced.yml                  上面 ini 的底包 · mihomo
 #   Clash/customBaseConfigs/dns_enhanced_stash.yml            上面 ini 的底包 · Stash
-#   Xboard/custom.clashmeta.yaml                              Xboard 模板 · mihomo（电脑 Clash Party / 安卓 CMFA）
-#   Xboard/custom.stash.yaml                                  Xboard 模板 · Stash（iOS）
+#   xboard/custom.clashmeta.yaml                              Xboard 模板 · mihomo（电脑 Clash Party / 安卓 CMFA）
+#   xboard/custom.stash.yaml                                  Xboard 模板 · Stash（iOS）
 #   Clash/override/overseas.yaml                              Clash Party 远程覆写 · 国外模式
 # ============================================================================
 
@@ -195,9 +195,10 @@ quic_exempt: [quic-exempt, direct, bilibili, microsoft, apple, games, game-proxy
 # 本地解析只发生在：IP 规则（cn-ip）、DIRECT 出站、fake-ip-filter、节点域名。
 # mihomo：DIRECT 出站使用 direct-nameserver（国内）；follow-policy 只为让内网名仍走 system，
 #         policy 中不放任何“境外”条目，DIRECT 未命中 policy 时一律回到国内 direct-nameserver。
-# Stash：没有 direct-nameserver，DIRECT 也用主 DNS，所以额外给“默认直连但不在 cn 里”的
-#        游戏下载集合指定国内 DNS（下载 CDN 需要就近节点）。geosite policy 需 iOS 3.4.0+。
-stash_dns_china: ['geosite:category-game-platforms-download', direct]   # direct = rules/direct.txt 的条目
+# Stash（需 iOS 3.6+ / macOS 4.3+）：没有 direct-nameserver，DIRECT 也用主 DNS，所以额外把“默认直连但不在 cn 里”的
+#        集合整体指定国内 DNS（下载 CDN 需要就近节点）；3.6 起 policy 可直接引用 rule-set:<集合>，与分流共用同一份规则集。
+#        proxy-server-nameserver（3.6+）给节点域名单独指定国内 DNS，不跟随 follow-rule。
+stash_dns_china: [direct]   # 集合名 → nameserver-policy 的 rule-set:<集合>（direct 已含 category-game-platforms-download）
 dns_system_domains:
   - +.lan
   - +.local

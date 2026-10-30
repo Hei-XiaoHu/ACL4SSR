@@ -2,25 +2,21 @@
 
 与本仓库 `Clash/config/ACL4SSR_Online_Full_AdblockPlus*.ini` 同一套规则，均由 `tools/build.py` 从 `src/spec.yaml` 生成，**请勿手改**。
 
-| 文件 | 客户端 (flag) | 说明 |
+| 文件 | 后台模板槽位（按 UA 分发） | 说明 |
 |---|---|---|
-| `custom.clashmeta.yaml` | Clash Meta / mihomo（Clash Party、CMFA、FlClash 等） | mrs 规则集 + AdRules/anti-AD + 嗅探 + DNS 走节点 |
-| `custom.stash.yaml` | Stash（iOS/macOS） | yaml 规则集 + AWAvenue；DNS 走节点用 `follow-rule` 等价实现 |
+| `custom.clashmeta.yaml` | `clashmeta`（UA 含 meta / verge / flclash / nekobox / clashmetaforandroid）与 `clash`（其余含 clash 的 UA） | mrs 规则集 + AdRules/anti-AD + 嗅探 + DNS 走节点 |
+| `custom.stash.yaml` | `stash` | mrs 规则集 + AWAvenue；DNS 走节点用 `follow-rule` 等价实现；需 Stash iOS 3.6+ |
 
-Clash 原版/Premium 旧内核不再提供模板（不支持 mrs），这类客户端会拿到 Xboard 内置默认模板。
+- `clash` 槽位也放 mihomo 模板：Clash Premium 已停更且不支持 mrs，现在 UA 落到 `clash` 的基本是 mihomo 内核但 UA 不含上述关键字的客户端（Clash Nyanpasu、Clash Mi 等）。
+  注意 Xboard 的 Clash 渲染器只下发 ss/vmess/trojan/socks/http 节点，VLESS/Hysteria2/TUIC/AnyTLS 会被过滤——这是 Xboard 的限制，不是模板的问题；能改 UA 的客户端建议把 UA 改成含 `meta` 的值。
+- `singbox` / `surge` / `surfboard` 槽位留空，Xboard 会下发自带默认模板（只有国内直连 + 节点选择）。本仓库暂不维护这三种格式：需要 rules 分支另发 .srs 与 Surge 文本列表，且 DNS/QUIC 语义与 mihomo 不同。
 
-## 安装
+## 部署方式
 
-把两个文件放到 Xboard 项目的 `resources/rules/` 目录（文件名不能改）：
-
-```bash
-# Docker Compose 部署（在 Xboard 目录）
-cp custom.clashmeta.yaml custom.stash.yaml ./resources/rules/
-rm -f ./resources/rules/custom.clash.yaml   # 如之前放过旧版
-docker compose restart
-```
-
-Xboard 会按客户端 UA 自动分发对应模板，订阅地址不变。
+新版 Xboard 的订阅模板存在数据库（后台 → 系统配置 → 订阅模板），`resources/rules/custom.*.yaml` 文件已不再读取。
+OVH 上 `/docker/service/xboard/scripts/sync-subscribe-template.sh` 每小时（cron `15 * * * *`）从本仓库 master 拉取 `xboard/custom.clashmeta.yaml` → `clash` + `clashmeta`、`xboard/custom.stash.yaml` → `stash`，
+校验 YAML 后经 `php artisan tinker` 写入数据库并清 Redis 缓存；内容无变化不写入。日志在 `/docker/log/xboard-template-sync.log`。
+推送 master 后最多 1 小时生效，想立即生效可手动执行该脚本。
 
 ## 模板机制备忘
 

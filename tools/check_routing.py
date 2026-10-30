@@ -219,10 +219,12 @@ def assert_outputs():
     # Stash：没有 direct-nameserver，默认直连的游戏下载集合单独走国内
     sp = stash["nameserver"], stash["nameserver-policy"]
     assert not _has_china(sp[0])
+    assert stash["proxy-server-nameserver"] == china  # 节点域名国内直连解析（Stash 3.6+）
     assert all(v in (system, china) for v in sp[1].values()), sp[1]
     assert sp[1]["geosite:private"] == system and sp[1]["+.lan"] == system
-    assert sp[1]["geosite:category-game-platforms-download"] == china
-    assert sp[1]["+.steamcontent.com"] == china and sp[1]["+.cdn.ea.com"] == china
+    # 默认直连的 direct 集合（含游戏下载 CDN）整体走国内 DNS，与分流共用同一规则集
+    assert sp[1]["rule-set:direct"] == china and "direct" in build.providers("stash")
+    assert not any(k.startswith("+.steam") for k in sp[1])  # 不再逐条展开
     assert list(sp[1])[-1] == "geosite:cn" and sp[1]["geosite:cn"] == china
     assert not any(key.startswith("geosite:") and "@" in key for key in sp[1])
     for host in ("+.claude.ai", "+.anthropic.com", "+.steamserver.net", "challenges.cloudflare.com"):

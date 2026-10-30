@@ -106,7 +106,8 @@ def has_provider(name: str, target: str) -> bool:
 
 
 def provider_file(name: str, target: str) -> str:
-    ext = "yaml" if target == "stash" or set_type(name) == "classical" else "mrs"
+    # domain / ipcidr 用 mrs 二进制（mihomo；Stash iOS 3.1.1+ 同样支持），classical 只能 yaml
+    ext = "yaml" if set_type(name) == "classical" else "mrs"
     return f"{OUT_DIR[target]}/{name}.{ext}"
 
 
@@ -239,17 +240,17 @@ def dns_policy(target: str, *, overseas: bool = False) -> dict:
         return policy
     china = S["dns_china"]
     if target == "stash":
-        # Stash 没有 direct-nameserver：默认直连但不在 cn 里的下载集合单独指定国内 DNS
+        # Stash 没有 direct-nameserver：默认直连但不在 cn 里的集合整体指定国内 DNS。
+        # rule-set: 引用需 Stash iOS 3.6+ / macOS 4.3+，与分流共用同一份规则集。
         for item in S["stash_dns_china"]:
             if item.startswith("geosite:"):
                 if "@" in item:
                     sys.exit(f"Stash DNS 未确认支持 geosite 属性标签: {item}")
                 policy[item] = china
                 continue
-            for domain in local_rows(item):
-                if domain in policy and policy[domain] != china:
-                    sys.exit(f"DNS policy 冲突: {domain}")
-                policy[domain] = china
+            if not has_provider(item, "stash") or set_type(item) != "domain":
+                sys.exit(f"stash_dns_china 只能引用 Stash 上有规则集的 domain 集合: {item}")
+            policy[f"rule-set:{item}"] = china
     policy["rule-set:cn" if target == "meta" else "geosite:cn"] = china
     return policy
 
@@ -286,7 +287,9 @@ def stash_dns() -> dict:
         "fake-ip-filter": fake_ip_filter(),
         "default-nameserver": S["dns_bootstrap"],
         "nameserver": S["dns_remote"],
-        "nameserver-policy": dns_policy("stash"),  # 需 Stash iOS 3.4.0+
+        # 节点域名用国内 DNS 直连解析，不跟随 follow-rule（需 Stash iOS 3.6+）
+        "proxy-server-nameserver": S["dns_china"],
+        "nameserver-policy": dns_policy("stash"),  # geosite: 需 3.4+，rule-set: 需 3.6+
     })
     return {"dns": dns}
 
@@ -345,11 +348,13 @@ HDR_META = [
     f"规则 CDN 为 {CDN}，失效时全局替换为 https://cdn.jsdelivr.net/gh",
 ]
 HDR_STASH = [
-    "规则：本仓库 rules 分支的 domain/ipcidr yaml；国内外兜底复用 Stash 原生 GEOSITE + GEOIP,CN",
+    "规则：本仓库 rules 分支的 mrs 二进制规则集（domain/ipcidr）；国内外兜底复用 Stash 原生 GEOSITE + GEOIP,CN",
     "  （不额外下载全量 cn/geolocation-!cn 文本）",
     "去广告：AWAvenue 秋风规则（约 900 条，含广告+隐私跟踪+流氓推广）",
-    "DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS；内网系统 DNS，已知国内与游戏下载走国内 DoH，其余境外 DoH",
-    "geosite DNS policy 需 Stash iOS 3.4.0+；GEOSITE 数据首次从 GitHub 按需加载，请确保 GitHub 可达",
+    "DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS；内网系统 DNS，已知国内与直连集合走国内 DoH，其余境外 DoH；",
+    "  节点域名用 proxy-server-nameserver（国内）直连解析",
+    "需 Stash iOS 3.6+ / macOS 4.3+（mrs 规则集、DNS policy 的 geosite:/rule-set:、proxy-server-nameserver）；",
+    "  GEOSITE 数据首次从 GitHub 按需加载，请确保 GitHub 可达",
     f"规则 CDN 为 {CDN}，失效时全局替换为 https://cdn.jsdelivr.net/gh",
 ]
 
@@ -423,8 +428,8 @@ OUTPUTS = {
     "Clash/config/ACL4SSR_Online_Full_AdblockPlus_Stash.ini": lambda: ini("stash"),
     "Clash/customBaseConfigs/dns_enhanced.yml": lambda: base("meta"),
     "Clash/customBaseConfigs/dns_enhanced_stash.yml": lambda: base("stash"),
-    "Xboard/custom.clashmeta.yaml": lambda: xboard("meta"),
-    "Xboard/custom.stash.yaml": lambda: xboard("stash"),
+    "xboard/custom.clashmeta.yaml": lambda: xboard("meta"),
+    "xboard/custom.stash.yaml": lambda: xboard("stash"),
     "Clash/override/overseas.yaml": overseas,
 }
 
