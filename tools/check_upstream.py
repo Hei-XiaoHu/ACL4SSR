@@ -6,8 +6,8 @@
 
 失败条件：
   1. Claude / AI 相关本地域名被 geosite:cn 收录：本地解析（UDP、fake-ip-filter、IP 规则）会改用国内 DNS，
-     QUIC 规则会把它当国内放行，且 Stash 的 GEOSITE,cn 兜底可能把它判为直连。
-  2. 任一本地条目（rules/*.txt）被排在前面、去向不同的集合整体截走（mihomo 与 Stash 分别按各自来源检查）：
+     QUIC 规则会把它当国内放行。
+  2. 任一本地条目（rules/*.txt）被排在前面、去向不同的集合整体截走（Stash 的规则是 mihomo 的子集，只需查一遍）：
      这条本地规则永远不会生效。最常见的是广告源收录了 AI / 直连补充条目——
      确属必需的端点应挪进排在广告前的 ai-essential.txt（AI）或 local-direct.txt（直连）。
 前面的集合只截走某个子域（如 Intercom 的分析上报被广告源拦截）属预期，不算失败。
@@ -23,30 +23,27 @@ import build_rules
 AI_LIKE = ("ai-essential", "ai", "auth", "telemetry")
 
 
-def check(cache: dict[str, list[str]], sets: dict[str, dict[str, list[str]]] | None = None
-          ) -> tuple[list[str], list[str]]:
+def check(cache: dict[str, list[str]], sets: dict[str, list[str]] | None = None) -> tuple[list[str], list[str]]:
     """返回 (失败, 提示)。sets 为 build_rules.collect 的结果，省略时现算。"""
-    sets = sets or {t: build_rules.collect(t, cache) for t in build.TARGETS}
+    sets = sets or build_rules.collect(cache)
     problems, notes = [], []
     cn = build_rules.DomainMatcher(cache["geosite:cn"])
     for name in AI_LIKE:
         for row in build.local_rows(name):
             if cn.covers(row):
                 problems.append(f"[cn] rules/{name}.txt: {row} 被 geosite:cn 收录")
-    for target in build.TARGETS:
-        table = build_rules.route_table(sets[target])
-        for i, (name, to, _) in enumerate(table):
-            for row in build.local_rows(name):
-                for earlier, earlier_to, matcher in table[:i]:
-                    if earlier_to != to and matcher.covers(row):
-                        problems.append(f"[{target}] rules/{name}.txt: {row} 被前面的 {earlier}（{earlier_to}）"
-                                        f"整体截走，不会走 {to}")
-                        break
-        # 仅提示：essential 被广告源收录是预期（它排在广告前），列出来便于了解覆盖关系
-        ads = build_rules.DomainMatcher(sets[target]["ads"])
-        hits = [row for row in build.local_rows("ai-essential") if ads.covers(row)]
-        if hits:
-            notes.append(f"i [{target}] 广告源也收录、由排在前面的 ai-essential 放行：{', '.join(hits)}")
+    table = build_rules.route_table(sets)
+    for i, (name, to, _) in enumerate(table):
+        for row in build.local_rows(name):
+            for earlier, earlier_to, matcher in table[:i]:
+                if earlier_to != to and matcher.covers(row):
+                    problems.append(f"rules/{name}.txt: {row} 被前面的 {earlier}（{earlier_to}）整体截走，不会走 {to}")
+                    break
+    # 仅提示：essential 被广告源收录是预期（它排在广告前），列出来便于了解覆盖关系
+    ads = build_rules.DomainMatcher(sets["ads"])
+    hits = [row for row in build.local_rows("ai-essential") if ads.covers(row)]
+    if hits:
+        notes.append(f"i 广告源也收录、由排在前面的 ai-essential 放行：{', '.join(hits)}")
     return problems, notes
 
 
@@ -57,7 +54,7 @@ def main() -> int:
     if problems:
         print("\n".join(problems))
         return 1
-    print("✓ Claude/AI 本地域名均不在 geosite:cn；mihomo / Stash 的本地条目都没有被前面的集合整体截走")
+    print("✓ Claude/AI 本地域名均不在 geosite:cn；本地条目都没有被前面的集合整体截走")
     return 0
 
 

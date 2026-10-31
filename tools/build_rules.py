@@ -5,10 +5,9 @@
   python3 tools/build_rules.py --out dist --mihomo /path/to/mihomo [--previous old/manifest.json]
   python3 tools/build_rules.py --conflicts      只下载并报告集合间的覆盖关系，不生成文件
 
-输出（dist/）：
+输出（dist/，mihomo 与 Stash 共用同一目录）：
   mihomo/<集合>.mrs     domain / ipcidr（mihomo convert-ruleset 转换）
-  mihomo/<集合>.yaml    classical（含正则的 local-direct）
-  stash/<集合>.yaml     domain / ipcidr / classical
+  mihomo/<集合>.yaml    classical（含正则的 local-direct，按进程名的 bt）
   manifest.json         每个集合的条目数、来源与内容指纹，供下次比较
 失败（退出码 1，不应发布）：spec 自检失败；任一上游下载/解析失败；某集合或某上游条目数比上一版少 30% 以上；
 本地条目被前面去向不同的集合整体截走或 Claude 域名进入 geosite:cn（tools/check_upstream.py）；转换失败。
@@ -82,9 +81,8 @@ def fetch(src: str) -> list[str]:
 
 
 def needed_sources() -> list[str]:
-    """两个客户端实际需要下载的全部上游（Stash 原生 GEOSITE/GEOIP 除外）。"""
-    return sorted({src for t in build.TARGETS for n in build.SETS if build.has_provider(n, t)
-                   for src in build.fetched_sources(n, t)})
+    """需要下载的全部上游（Stash 的集合是 mihomo 的子集，按 meta 收集即可）。"""
+    return sorted({src for n in build.SETS for src in build.sources(n, "meta")})
 
 
 def fetch_all(sources: list[str] | None = None) -> dict[str, list[str]]:
@@ -125,13 +123,13 @@ def merge_ips(rows: list[str]) -> list[str]:
     return [str(n) for n in (*v4, *v6)]
 
 
-def collect(target: str, cache: dict) -> dict[str, list[str]]:
+def collect(cache: dict, target: str = "meta") -> dict[str, list[str]]:
     result = {}
     for name in build.SETS:
         if not build.has_provider(name, target):
             continue
         rows = list(build.local_rows(name))
-        for src in build.fetched_sources(name, target):
+        for src in build.sources(name, target):
             rows += cache[src]
         kind = build.set_type(name)
         if kind == "classical":
@@ -204,25 +202,23 @@ def route(table: list[tuple[str, str, DomainMatcher]], host: str) -> tuple[str |
 
 
 # ---------------------------------------------------------------- 输出
-def write_outputs(out: Path, sets: dict[str, dict[str, list[str]]], mihomo: str):
-    for target, by_name in sets.items():
-        folder = out / build.OUT_DIR[target]
-        folder.mkdir(parents=True, exist_ok=True)
-        for name, rows in by_name.items():
-            rel = build.provider_file(name, target)
-            path = out / rel
-            if rel.endswith(".yaml"):
-                path.write_text(yaml.safe_dump({"payload": rows}, allow_unicode=True, sort_keys=False, width=100000),
-                                encoding="utf-8")
-                continue
-            behavior = "ipcidr" if build.set_type(name) == "ip" else "domain"
-            with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8") as tmp:
-                tmp.write("\n".join(rows) + "\n")
-            r = subprocess.run([mihomo, "convert-ruleset", behavior, "text", tmp.name, str(path)],
-                               capture_output=True, text=True)
-            Path(tmp.name).unlink()
-            if r.returncode != 0 or not path.exists() or path.stat().st_size == 0:
-                raise RuntimeError(f"mrs 转换失败 {rel}: {r.stdout}{r.stderr}")
+def write_outputs(out: Path, sets: dict[str, list[str]], mihomo: str):
+    (out / build.RULES_SUBDIR).mkdir(parents=True, exist_ok=True)
+    for name, rows in sets.items():
+        rel = build.provider_file(name)
+        path = out / rel
+        if rel.endswith(".yaml"):
+            path.write_text(yaml.safe_dump({"payload": rows}, allow_unicode=True, sort_keys=False, width=100000),
+                            encoding="utf-8")
+            continue
+        behavior = "ipcidr" if build.set_type(name) == "ip" else "domain"
+        with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8") as tmp:
+            tmp.write("\n".join(rows) + "\n")
+        r = subprocess.run([mihomo, "convert-ruleset", behavior, "text", tmp.name, str(path)],
+                           capture_output=True, text=True)
+        Path(tmp.name).unlink()
+        if r.returncode != 0 or not path.exists() or path.stat().st_size == 0:
+            raise RuntimeError(f"mrs 转换失败 {rel}: {r.stdout}{r.stderr}")
 
 
 def _shrunk(old, new) -> bool:
@@ -233,11 +229,11 @@ def check_shrink(manifest: dict, previous: dict) -> list[str]:
     """集合与单个上游都检查：两个广告源合并成一个集合，其中一个腰斩时集合整体可能仍在阈值内。"""
     problems = []
     pct = int((1 - SHRINK_LIMIT) * 100)
-    for target, by_name in manifest["counts"].items():
-        for name, count in by_name.items():
-            old = previous.get("counts", {}).get(target, {}).get(name)
-            if _shrunk(old, count):
-                problems.append(f"[{target}] {name}: {old} → {count}（减少超过 {pct}%）")
+    for name, count in manifest["counts"].items():
+        # 旧版 manifest 按客户端分组（counts.meta.<集合>），兼容一次
+        old = previous.get("counts", {}).get(name) or previous.get("counts", {}).get("meta", {}).get(name)
+        if _shrunk(old, count):
+            problems.append(f"{name}: {old} → {count}（减少超过 {pct}%）")
     for src, count in manifest["upstream_counts"].items():
         old = previous.get("upstream_counts", {}).get(src)
         if _shrunk(old, count):
@@ -258,7 +254,7 @@ def conflicts(cache: dict, target: str = "meta"):
              and build.has_provider(item["name"], target)]
     per_source = {}
     for name in order:
-        for src in ["local", *build.fetched_sources(name, target)]:
+        for src in ["local", *build.sources(name, target)]:
             rows = build.local_rows(name) if src == "local" else cache[src]
             per_source[(name, src)] = rows
     for i, later in enumerate(order):
@@ -296,11 +292,11 @@ def main() -> int:
     if not args.out or not args.mihomo:
         ap.error("需要 --out 与 --mihomo")
 
-    sets = {t: collect(t, cache) for t in build.TARGETS}
+    sets = collect(cache)
     manifest = {
         "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "counts": {t: {n: len(rows) for n, rows in by.items()} for t, by in sets.items()},
-        "sources": {n: {t: build.fetched_sources(n, t) for t in build.TARGETS} for n in build.SETS},
+        "counts": {n: len(rows) for n, rows in sets.items()},
+        "sources": {n: build.sources(n, "meta") for n in build.SETS},
         "upstream_counts": {src: len(rows) for src, rows in cache.items()},
     }
     if args.previous and args.previous.exists() and args.previous.stat().st_size:
@@ -328,10 +324,9 @@ def main() -> int:
     (args.out / "README.md").write_text(
         "# rules 分支（自动生成，请勿手改）\n\n"
         "由 master 上的 `tools/build_rules.py` 合并 `rules/*.txt` 与上游列表生成，每日更新。\n"
-        "`mihomo/` 供 Clash Party / CMFA，`stash/` 供 Stash；条目数见 `manifest.json`。\n",
+        "`mihomo/` 目录同时供 mihomo（Clash Party / CMFA）与 Stash 下载（mrs 两边同格式，Stash 不用其中的 bt）；条目数见 `manifest.json`。\n",
         encoding="utf-8")
-    for target, by in manifest["counts"].items():
-        print(f"[{target}] " + "  ".join(f"{n}:{c}" for n, c in by.items()))
+    print("  ".join(f"{n}:{c}" for n, c in manifest["counts"].items()))
     return 0
 
 

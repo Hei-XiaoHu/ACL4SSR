@@ -118,7 +118,7 @@ def main() -> int:
 
     providers = {}
     for name, spec in build.providers("meta").items():
-        rel = build.provider_file(name, "meta")
+        rel = build.provider_file(name)
         if not (args.dist / rel).exists():
             sys.exit(f"缺少规则集文件: {args.dist / rel}")
         # mihomo 只允许读取工作目录内的文件，启动前整体复制进去
@@ -139,7 +139,7 @@ def main() -> int:
     lines: queue.Queue[str] = queue.Queue()
     failures = []
     with tempfile.TemporaryDirectory(prefix="acl4ssr-rules-") as tmp:
-        shutil.copytree(args.dist / build.OUT_DIR["meta"], Path(tmp) / build.OUT_DIR["meta"])
+        shutil.copytree(args.dist / build.RULES_SUBDIR, Path(tmp) / build.RULES_SUBDIR)
         cfg_path = Path(tmp) / "config.yaml"
         cfg_path.write_text(yaml.safe_dump(cfg, allow_unicode=True, sort_keys=False), encoding="utf-8")
         proc = subprocess.Popen([args.mihomo, "-d", tmp, "-f", str(cfg_path)],

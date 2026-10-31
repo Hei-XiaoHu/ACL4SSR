@@ -32,7 +32,7 @@ events.statsigapi.net / prodregistryv2.org / beyondwickedmapping.org / statsig.a
 
 Datadog 浏览器端点是连字符域名（不是 datadoghq.com 的子域），按 Datadog 官方站点列表逐个列出，覆盖 Anthropic 将来切换区域的情况。这些都是共享接收端，其他应用向相同端点发送的遥测也会被拦（隐私上可接受）。不添加 `DOMAIN-KEYWORD,datadog/sentry/sift`：关键词无归属边界，也无法放进 domain/mrs 集合。
 
-非必要的 Claude 子域名仍会接受 AdRules/anti-AD 或 Stash AWAvenue 检查。必要例外只覆盖明确功能端点与专用内容域，不放行整个 `*.anthropic.com`、`*.claude.ai`。
+非必要的 Claude 子域名仍会接受 AdRules/anti-AD 检查。必要例外只覆盖明确功能端点与专用内容域，不放行整个 `*.anthropic.com`、`*.claude.ai`。
 
 `api.anthropic.com` 同时承载正常 API 和部分 event_logging。域名/IP 规则看不到同一 HTTPS 主机上的不同路径，无法仅凭此配置做到“允许核心 API、拒绝它的所有遥测路径”。不能为拦截遥测而封禁整个 API。Claude Code 用户可按官方文档使用 `DISABLE_TELEMETRY=1`、`DISABLE_ERROR_REPORTING=1`；更广的 `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` 会影响其他非必要功能，应先阅读官方说明。本次未修改任何用户系统环境变量。
 
@@ -48,7 +48,7 @@ Datadog 浏览器端点是连字符域名（不是 datadoghq.com 的子域），
 | sentry.io / statsigapi.net / datadog | 只精确拦截上报端点；Statsig 初始化决定功能开关，不拦；不使用关键词。Statsig 会在多个域名间切换以躲避广告拦截，按 featureassets.org 的 DNS TXT 区分：i=（featuregates.org、featureassets.org、assetsconfigcdn.org、api.statsig.com、statsigapi.net）放行到 AI，e=（events.statsigapi.net、prodregistryv2.org、beyondwickedmapping.org）拦截。2026-10-25 前 featureassets.org 等被广告源拦截 |
 | sift | 反欺诈，把设备指纹与 IP 交给 Anthropic 风控。广告源（AdRules / anti-AD）收录了 sift.com / siftscience.com，之前实际被拦。现放入 `ai-essential`（rules/ai-essential.txt）（排在广告前）走 AI，保证与 Claude 同出口；不使用 `sift` 关键词 |
 | intercom.io / intercomcdn.com | 客服会话绑定账户与 IP，走 AI。全局生效：其他网站的 Intercom 也会走 AI；Intercom 分析上报仍被广告源拦截 |
-| cdn.usefathom.com | 访问统计，显式拦截（Stash 的 AWAvenue 未收录） |
+| cdn.usefathom.com | 访问统计，显式拦截 |
 | 两个 IP 段 / AS399358 | ARIN RDAP 注册主体均为 Anthropic, PBC；添加两个自有前缀。ASN 规则未额外引入，避免依赖客户端 ASN 数据库与重复覆盖 |
 | “所有 NTP 必须进入 AI，否则返回的时区不一致” | 不采纳。NTP 用于同步时间，不返回中国/美国等本地时区；本地时区由操作系统设置。不能靠 NTP 分流保证“没有时区泄漏” |
 | “每个监控请求必须代理，才能避免风控” | 未发现官方依据支持这种无条件结论；明确的可选遥测可拦截，不能为了这个说法放行所有统计供应商 |

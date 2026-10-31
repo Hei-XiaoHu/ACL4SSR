@@ -146,11 +146,9 @@ def main():
     xb = xboard_render(meta_tpl)
     assert_groups(xb, "xboard-meta")
     assert_groups(xboard_render(stash_tpl), "xboard-stash")
-    assert_groups(xboard_render(yaml.safe_load(build.xboard(build.FULL))), "xboard-stash-full")
     sub = subconverter_render(base, ini)
     assert_groups(sub, "subconverter-meta")
-    for target in ("stash", build.FULL):
-        assert_groups(subconverter_render(yaml.safe_load(build.base(target)), build.ini(target)), f"subconverter-{target}")
+    assert_groups(subconverter_render(yaml.safe_load(build.base("stash")), build.ini("stash")), "subconverter-stash")
     print("✓ 策略组顺序 / 节点筛选")
 
     with tempfile.TemporaryDirectory() as tmp:

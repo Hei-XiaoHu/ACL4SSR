@@ -2,6 +2,16 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-10-31 Stash 配置改为与 mihomo 同一套规则集；删除完整版并列文件
+
+- 维护者在 iOS 最新版 Stash 上导入完整版（约 36 万条域名）实测：规则集全部加载，番茄/红果广告消失，未出现崩溃。据此把标准版 Stash 配置（`_Stash.ini` / `dns_enhanced_stash.yml` / `custom.stash.yaml`）直接改成完整版内容，删除昨日新增的三份 `_Full` 文件与 `stash-full` 生成目标。用户与 Xboard 同步脚本无需改动，刷新订阅即得新版。
+- `src/spec.yaml` 删除 `awavenue` 上游与 `stash_native`；`ads` 不再按客户端分来源（`from: {meta, stash}` 写法随之取消）。两客户端现在共用同一份规则集定义，唯一差别仍是 `clients: [meta]` 的 bt 进程规则。
+- `rules` 分支不再发布 `stash/` 目录：Stash 直接下载 `mihomo/` 目录的文件（mrs 两边同格式，字节级一致），`manifest.json` 的 `counts` / `sources` 改为单层（不再按客户端分组；骤减保护兼容读取旧版 `counts.meta`）。仍用旧 Stash 配置的客户端刷新规则集会 404 并沿用本地缓存，刷新订阅后即切换。
+- 规则集缓存路径改为与 URL 同构的 `./ruleset/acl4ssr/mihomo/<集合>`（mihomo 与 Stash 相同）：保证旧 Stash 配置缓存的 950 条 `ads.mrs` 不会被新配置先读到；mihomo 侧因此重新下载一次（约 2.8 MB）。
+- Stash DNS policy 的 `geosite:private` / `geosite:cn` 改为 `rule-set:private` / `rule-set:cn`，整份配置不再依赖原生 GEOSITE 数据（不需要 GitHub 可达）。
+- 校验：`check_routing.assert_outputs` 断言 Stash 规则去掉 DoH 端点 IP 绑定后与 mihomo 逐条相同（仅 `DST-PORT,443` → `PROTOCOL,QUIC`、无 bt），provider 定义（URL、缓存路径）与 mihomo 完全相同，规则与 DNS 均无 GEOSITE/GEOIP；`check_upstream` 只需按一份规则集检查。`python3 tools/verify.py` 全部通过。
+- 内存结论的边界：只在维护者一台设备、最新 Stash 上确认过可加载和日常使用；长期常驻占用与规则集每日更新时的峰值未测量。隧道无故断开时查 iOS 分析数据里的 `JetsamEvent`（`reason: per-process-limit`）。
+
 ## 2026-10-31 新增 Stash 完整版配置（规则与 mihomo 一致）
 
 - 起因：番茄小说 / 红果短剧的广告在 mihomo 上能拦、Stash 上拦不住。对比当日三份广告源：字节系穿山甲（`pglstatp-toutiao.com`、`pangolin-sdk-toutiao.com`、`*.fqnovel.com` 等）在 AdRules 是整个后缀、anti-AD 也大量收录，AWAvenue（约 970 条，仅 12 条后缀规则）只列了个别主机名。不是 MITM 的问题——mihomo 按域名就能拦掉，Stash 缺的只是规则。

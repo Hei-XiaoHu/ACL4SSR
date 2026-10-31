@@ -107,7 +107,7 @@ def report(baseline: Path, now: datetime) -> tuple[list[str], bool, list[str]]:
     # 只下载一次：旧规则对比、去向计算、关注集合与固定清单共用
     extra = [*build.S["watch"], *(build.S.get("pin") or {})]
     cache = build_rules.fetch_all(sorted({*build_rules.needed_sources(), *extra}))
-    table = build_rules.route_table(build_rules.collect("meta", cache))
+    table = build_rules.route_table(build_rules.collect(cache))
     diffs, stats = legacy_diff.compute(cache, table)
     kept, skipped = legacy_diff.filter_reviewed(diffs)
     watch_lines, watch_changed, summary = watch_section(baseline, cache, table)

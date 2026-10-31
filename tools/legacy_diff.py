@@ -99,7 +99,7 @@ def compute(cache: dict[str, list[str]] | None = None, table=None):
         bodies = dict(zip([n for n, _, _ in LEGACY],
                           pool.map(lambda item: build_rules._download(f"{ACL}/{item[1]}"), LEGACY)))
     cache = cache if cache is not None else build_rules.fetch_all()
-    table = table or build_rules.route_table(build_rules.collect("meta", cache))
+    table = table or build_rules.route_table(build_rules.collect(cache))
     legacy = []
     stats = {}
     for name, _, group in LEGACY:

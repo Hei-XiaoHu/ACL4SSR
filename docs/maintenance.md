@@ -71,7 +71,7 @@ EOF
 - 条目放哪：见 README「修改规则」表。原则：精确主机优先，不泛化整个 CDN / 供应商后缀；
   `example.com` 精确，`+.example.com` 含子域名；每组条目写注释说明用途与依据链接/日期。
 - 重要端点同时补测试：离线回归 `tools/check_routing.py`（夹具与 cases）、发布把关 `tools/check_rules.py` 的 `CASES`。
-- 改了 `src/spec.yaml` 要运行 `python3 tools/build.py` 重新生成配置；十份生成文件不要手改。
+- 改了 `src/spec.yaml` 要运行 `python3 tools/build.py` 重新生成配置；七份生成文件不要手改。
 - 记录：`docs/config-updates.md` 顶部加一节「日期 + 标题」，写清处理了哪些条目、为什么；Claude 相关同步 `docs/claude-routing.md`。
 
 ### 5. 推送前校验

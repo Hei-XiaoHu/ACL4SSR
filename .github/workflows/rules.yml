@@ -89,7 +89,7 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         run: |
           cd dist
-          find mihomo stash -type f | sort | while read -r f; do
+          find mihomo -type f | sort | while read -r f; do
             curl -s -o /dev/null --max-time 20 "https://purge.jsdelivr.net/gh/${{ github.repository }}@rules/$f" || echo "purge 失败: $f"
           done
 

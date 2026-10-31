@@ -101,8 +101,8 @@ groups:
 
 # 规则集与分流顺序（自上而下匹配，顺序即规则顺序）。
 #   每个集合 = rules/<name>.txt（若存在）+ from 中的上游，构建时合并去重，发布为 <name>.mrs / <name>.yaml。
+#   mihomo 与 Stash 用同一份规则集（rules 分支 mihomo/ 目录，mrs 两边同格式）；clients: [meta] 表示 Stash 不生成（仅进程规则）。
 #   from 简写：geosite:X / geoip:X = MetaCubeX/meta-rules-dat；其他名字见下面 upstream。
-#   from 可写成 {meta: [...], stash: [...]} 为两个客户端分别指定来源。
 #   type: domain（默认）/ ip / classical（仅 local-direct，含正则）
 #   no_resolve: IP 集合不为匹配而额外解析域名
 #   to 省略：只供 QUIC 豁免引用，不生成分流规则
@@ -110,13 +110,6 @@ groups:
 upstream:
   adrules: {url: 'https://raw.githubusercontent.com/Cats-Team/AdRules/main/adrules_domainset.txt'}
   anti-ad: {url: 'https://anti-ad.net/domains.txt', plain: suffix}   # 纯域名按后缀生效
-  awavenue: {url: 'https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/Filters/AWAvenue-Ads-Rule-Clash.yaml'}
-
-# Stash 直接使用原生 GEOSITE/GEOIP 的来源（不下载对应的大列表）
-stash_native:
-  geosite:geolocation-!cn: GEOSITE,geolocation-!cn
-  geosite:cn: GEOSITE,cn
-  geoip:cn: GEOIP,CN
 
 sets:
   - {name: local-direct, to: 🎯 直连, type: classical}
@@ -132,8 +125,8 @@ sets:
   - {name: ai-essential, to: 🤖 AI}
   # 验证码服务被很多网站共用，走通用节点（低延迟）而非 AI 出口
   - {name: auth, to: 🚀 节点选择}
-  # mihomo 用 AdRules + anti-AD（两者有独有规则）；iOS 用轻量 AWAvenue
-  - {name: ads, to: 🛑 广告, from: {meta: [adrules, anti-ad], stash: [awavenue]}}
+  # AdRules + anti-AD（两者有独有规则）；Stash 同用，约 21 万条，iOS 实机确认过可加载
+  - {name: ads, to: 🛑 广告, from: [adrules, anti-ad]}
   # AI 放在微软/谷歌之前，否则 copilot.microsoft.com 等会被微软组截走
   - {name: ai, to: 🤖 AI, from: ['geosite:category-ai-!cn']}
   # 已核实的 Anthropic 自有网段兜底；不把共享 Cloudflare/CDN IP 全部送进 AI

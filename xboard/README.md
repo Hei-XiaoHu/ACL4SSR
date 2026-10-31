@@ -5,8 +5,7 @@
 | 文件 | 后台模板槽位（按 UA 分发） | 说明 |
 |---|---|---|
 | `custom.clashmeta.yaml` | `clashmeta`（UA 含 meta / verge / flclash / nekobox / clashmetaforandroid）与 `clash`（其余含 clash 的 UA） | mrs 规则集 + AdRules/anti-AD + 嗅探 + DNS 走节点 |
-| `custom.stash.yaml` | `stash` | mrs 规则集 + AWAvenue；DNS 走节点用 `follow-rule` 等价实现；需 Stash iOS 3.6+ |
-| `custom.stash-full.yaml` | （暂不部署） | Stash 完整版：规则与 `custom.clashmeta.yaml` 完全一致（下载同一批 `mihomo/` mrs），不用原生 GEOSITE；iOS 内存实测通过后再替换 `stash` 槽位 |
+| `custom.stash.yaml` | `stash` | 与 mihomo 同一批 mrs 规则集（含 AdRules/anti-AD）；DNS 走节点用 `follow-rule` 等价实现；需 Stash iOS 3.6+ |
 
 - `clash` 槽位也放 mihomo 模板：Clash Premium 已停更且不支持 mrs，现在 UA 落到 `clash` 的基本是 mihomo 内核但 UA 不含上述关键字的客户端（Clash Nyanpasu、Clash Mi 等）。
   注意 Xboard 的 Clash 渲染器只下发 ss/vmess/trojan/socks/http 节点，VLESS/Hysteria2/TUIC/AnyTLS 会被过滤——这是 Xboard 的限制，不是模板的问题；能改 UA 的客户端建议把 UA 改成含 `meta` 的值。
