@@ -229,6 +229,14 @@ def assert_outputs():
     assert not any(key.startswith("geosite:") and "@" in key for key in sp[1])
     for host in ("+.claude.ai", "+.anthropic.com", "+.steamserver.net", "challenges.cloudflare.com"):
         assert host not in sp[1], host
+    # Stash 完整版：DNS 与标准版相同，但 private / cn 都用规则集，不依赖原生 GEOSITE
+    full = build.stash_dns(build.FULL)["dns"]
+    fp = full["nameserver-policy"]
+    assert full["nameserver"] == stash["nameserver"] and full["proxy-server-nameserver"] == china
+    assert not any(key.startswith("geosite:") for key in fp), fp
+    assert fp["rule-set:private"] == system and fp["rule-set:direct"] == china
+    assert list(fp)[-1] == "rule-set:cn" and fp["rule-set:cn"] == china
+    assert all(v in (system, china) for v in fp.values()), fp
     # 国外覆写：不含任何国内服务器；只替换 DNS，不改规则
     ov = yaml.safe_load(build.overseas())
     assert list(ov) == ["dns!"], list(ov)
@@ -240,7 +248,7 @@ def assert_outputs():
     assert all(f"#{build.DNS_GROUP}" in s for s in od["nameserver"])
     assert not any("#" in s for s in od["direct-nameserver"] + od["proxy-server-nameserver"])
 
-    for target, dns in (("meta", meta), ("stash", stash)):
+    for target, dns in (("meta", meta), ("stash", stash), (build.FULL, full)):
         assert "+.stun.*.*" in dns["fake-ip-filter"], target
         rules = build.rules(target)
         assert all("RULE-SET,unban," not in rule for rule in rules), target
@@ -258,22 +266,39 @@ def assert_outputs():
         quic = next(rule for rule in rules if rule.startswith("AND,"))
         assert "(RULE-SET,ai)" in quic and "(RULE-SET,foreign)" in quic, target
         assert "(RULE-SET,ai-ip,no-resolve)" in quic, target
-        assert "RULE-SET,cn-ip,no-resolve" in quic if target == "meta" else "GEOIP,CN,no-resolve" in quic
-        assert "(RULE-SET,quic-exempt)" in quic and "(RULE-SET,apple)" in quic, target
         if target == "stash":
-            assert "(PROTOCOL,QUIC)" in quic and "DST-PORT" not in quic
+            assert "GEOIP,CN,no-resolve" in quic and "GEOSITE,cn" in quic
             assert "cn" not in build.providers("stash")
-            assert "GEOSITE,cn" in quic
+        else:
+            assert "RULE-SET,cn-ip,no-resolve" in quic and "(RULE-SET,cn)" in quic, target
+            assert "GEOSITE" not in quic and "GEOIP" not in quic, target
+        assert "(RULE-SET,quic-exempt)" in quic and "(RULE-SET,apple)" in quic, target
+        if target != "meta":
+            assert "(PROTOCOL,QUIC)" in quic and "DST-PORT" not in quic, target
+        if target == "stash":
             assert rules.index("GEOSITE,geolocation-!cn,🚀 节点选择") < rules.index("GEOSITE,cn,🎯 直连")
     # BT 进程直连：只出现在 mihomo，排在遥测/QUIC/广告之前，固定 DIRECT；Stash 没有进程规则
     meta_rules, stash_rules = build.rules("meta"), build.rules("stash")
     assert meta_rules.index("RULE-SET,bt,DIRECT") < meta_rules.index("RULE-SET,telemetry,🛑 广告")
     assert not any(",bt," in r for r in stash_rules) and "bt" not in build.providers("stash")
     assert build.providers("meta")["bt"]["behavior"] == "classical"
+    # Stash 完整版：规则与 mihomo 逐条相同，只差 DoH 端点 IP 绑定、QUIC 协议判断和 bt 进程规则
+    full_rules = build.rules(build.FULL)
+    dns_pins = [r for r in full_rules if r.startswith("IP-CIDR,") and r.endswith(f",{build.DNS_GROUP},no-resolve")]
+    assert len(dns_pins) == len(build.S["dns_remote"]) and full_rules[:len(dns_pins)] == dns_pins
+    expect = [r.replace("(DST-PORT,443)", "(PROTOCOL,QUIC)") for r in meta_rules if ",bt," not in r]
+    assert full_rules[len(dns_pins):] == expect, "Stash 完整版规则与 mihomo 不一致"
+    assert not any("GEOSITE" in r or "GEOIP" in r for r in full_rules)
+    meta_prov, full_prov = build.providers("meta"), build.providers(build.FULL)
+    assert set(full_prov) == set(meta_prov) - {"bt"}
+    for name, spec in full_prov.items():
+        assert spec["url"] == meta_prov[name]["url"], name  # 直接复用 mihomo/ 目录的文件
+        assert spec["path"].startswith("./ruleset/acl4ssr-full/"), name
+    assert all(spec["path"].startswith("./ruleset/acl4ssr/") for spec in build.providers("stash").values())
     essential = build.local_rows("ai-essential")
     assert "+.sift.com" in essential and "+.siftscience.com" in essential
     assert "+.claude.app" in build.local_rows("ai")
-    for target in ("meta", "stash"):
+    for target in ("meta", "stash", build.FULL):
         rules = build.rules(target)
         # 🐟 只接真正未命中的流量：已知国外直接走节点选择，兜底 MATCH 才到漏网之鱼
         assert [r for r in rules if r.endswith(",🐟 漏网之鱼")] == ["MATCH,🐟 漏网之鱼"], target

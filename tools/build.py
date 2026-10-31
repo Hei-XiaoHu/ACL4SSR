@@ -17,7 +17,11 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "src" / "spec.yaml"
-TARGETS = ("meta", "stash")
+TARGETS = ("meta", "stash")  # 规则集发布目标（rules 分支的两个目录），也是 sets 里 clients 的取值
+# Stash 完整版：规则与 mihomo 完全一致（广告、cn、foreign、cn-ip 都用同一份 mrs，不用原生 GEOSITE/GEOIP），
+# 直接下载 rules 分支 mihomo/ 目录的文件，不另发规则集；只有进程规则（bt）无法在 Stash 上实现。
+# 约 36 万条域名，iOS 网络扩展内存（50 MB 上限）需实机确认，所以与标准版并列输出，不替换。
+FULL = "stash-full"
 RULES_DIR = ROOT / "rules"
 
 S = yaml.safe_load(SPEC.read_text(encoding="utf-8"))
@@ -25,7 +29,7 @@ CDN = S["cdn"]
 REPO = S["repo"]
 RAW_SELF = f"https://raw.githubusercontent.com/{REPO}/master"
 RULES_BASE = f"{CDN}/{REPO}@{S['rules_branch']}"
-OUT_DIR = {"meta": "mihomo", "stash": "stash"}  # rules 分支内的子目录
+OUT_DIR = {"meta": "mihomo", "stash": "stash", FULL: "mihomo"}  # rules 分支内的子目录
 GENERATED = "本文件由 tools/build.py 从 src/spec.yaml 生成，请勿手改；改规则请改 src/spec.yaml"
 
 
@@ -43,9 +47,14 @@ def set_type(name: str) -> str:
     return SETS[name].get("type", "domain")
 
 
+def client(target: str) -> str:
+    """生成目标对应的客户端软件（决定语法、DNS 字段和 clients 过滤）。"""
+    return "stash" if target == FULL else target
+
+
 def enabled(name: str, target: str) -> bool:
     """集合是否在该客户端生成（clients 省略 = 全部客户端）。"""
-    return target in SETS[name].get("clients", TARGETS)
+    return client(target) in SETS[name].get("clients", TARGETS)
 
 
 def local_rows(name: str) -> list[str]:
@@ -86,7 +95,8 @@ def sources(name: str, target: str) -> list[str]:
     if not enabled(name, target):
         return []
     src = SETS[name].get("from", [])
-    return list(src.get(target, [])) if isinstance(src, dict) else list(src)
+    # 完整版的规则内容与 mihomo 相同（下载的也是 mihomo/ 目录的文件）
+    return list(src.get("meta" if target == FULL else target, [])) if isinstance(src, dict) else list(src)
 
 
 def native_rules(name: str, target: str) -> list[str]:
@@ -123,8 +133,9 @@ def providers(target: str) -> dict:
             "behavior": behavior,
             "format": rel.rsplit(".", 1)[1],
             "interval": S["provider_interval"],
-            # 独立子目录：与旧配置的 ./ruleset/<同名>.mrs 缓存隔离，换配置时必定重新下载
-            "path": f"./ruleset/acl4ssr/{rel.split('/', 1)[1]}",
+            # 独立子目录：与旧配置的 ./ruleset/<同名>.mrs 缓存隔离，换配置时必定重新下载；
+            # 完整版再独立一层，避免 Stash 启动时先读到标准版缓存的小文件
+            "path": f"./ruleset/{'acl4ssr-full' if target == FULL else 'acl4ssr'}/{rel.split('/', 1)[1]}",
             "url": f"{RULES_BASE}/{rel}",
         }
     return out
@@ -157,7 +168,7 @@ def quic_rule(target: str) -> str:
     exemptions = _any([_leaf(n, target) for n in S["quic_exempt"]])
     # Stash 能识别 QUIC 协议，只拦真正的 QUIC（任意端口），游戏自定义 UDP 不受影响；
     # mihomo 没有协议规则，用 UDP443 近似。
-    transport = "(PROTOCOL,QUIC)" if target == "stash" else "(DST-PORT,443)"
+    transport = "(PROTOCOL,QUIC)" if client(target) == "stash" else "(DST-PORT,443)"
     expression = _logical(
         "AND", "(NETWORK,udp)", transport, _any(services),
         _logical("NOT", domestic), _logical("NOT", _leaf("cn-ip", target)), _logical("NOT", exemptions),
@@ -167,7 +178,7 @@ def quic_rule(target: str) -> str:
 
 def rules(target: str) -> list[str]:
     out = []
-    if target == "stash":
+    if client(target) == "stash":
         # Stash 用 follow-rule + DoH 端点 IP 规则指定出站（该 IP 的其他流量也受影响）
         for u in S["dns_remote"]:
             ip = re.match(r"https://([\d.]+)/", u).group(1)
@@ -232,14 +243,14 @@ def dns_policy(target: str, *, overseas: bool = False) -> dict:
     未命中时回到国内 direct-nameserver，直连下载不会被送去境外 DNS。
     """
     policy = {domain: ["system"] for domain in S["dns_system_domains"]}
-    if target == "meta":
-        policy = {"rule-set:private": ["system"], **policy}
-    else:
+    if target == "stash":
         policy["geosite:private"] = ["system"]
+    else:
+        policy = {"rule-set:private": ["system"], **policy}
     if overseas:
         return policy
     china = S["dns_china"]
-    if target == "stash":
+    if client(target) == "stash":
         # Stash 没有 direct-nameserver：默认直连但不在 cn 里的集合整体指定国内 DNS。
         # rule-set: 引用需 Stash iOS 3.6+ / macOS 4.3+，与分流共用同一份规则集。
         for item in S["stash_dns_china"]:
@@ -248,10 +259,11 @@ def dns_policy(target: str, *, overseas: bool = False) -> dict:
                     sys.exit(f"Stash DNS 未确认支持 geosite 属性标签: {item}")
                 policy[item] = china
                 continue
-            if not has_provider(item, "stash") or set_type(item) != "domain":
+            if not has_provider(item, target) or set_type(item) != "domain":
                 sys.exit(f"stash_dns_china 只能引用 Stash 上有规则集的 domain 集合: {item}")
             policy[f"rule-set:{item}"] = china
-    policy["rule-set:cn" if target == "meta" else "geosite:cn"] = china
+    # 标准版 Stash 的 cn 用原生 GEOSITE；mihomo 与完整版都有 cn 规则集，DNS 与分流共用
+    policy["geosite:cn" if target == "stash" else "rule-set:cn"] = china
     return policy
 
 
@@ -281,7 +293,7 @@ def stash_general() -> dict:
     return copy.deepcopy(S["clients"]["stash"]["general"])
 
 
-def stash_dns() -> dict:
+def stash_dns(target: str = "stash") -> dict:
     dns = copy.deepcopy(S["clients"]["stash"]["dns"])
     dns.update({
         "fake-ip-filter": fake_ip_filter(),
@@ -289,7 +301,7 @@ def stash_dns() -> dict:
         "nameserver": S["dns_remote"],
         # 节点域名用国内 DNS 直连解析，不跟随 follow-rule（需 Stash iOS 3.6+）
         "proxy-server-nameserver": S["dns_china"],
-        "nameserver-policy": dns_policy("stash"),  # geosite: 需 3.4+，rule-set: 需 3.6+
+        "nameserver-policy": dns_policy(target),  # geosite: 需 3.4+，rule-set: 需 3.6+
     })
     return {"dns": dns}
 
@@ -324,7 +336,7 @@ def yaml_doc(header: list[str], *sections: tuple[str, str]) -> str:
 
 
 def full_config(target: str, *, with_groups: bool, final: bool) -> list[tuple[str, str]]:
-    gen, dns = (meta_general(), meta_dns()) if target == "meta" else (stash_general(), stash_dns())
+    gen, dns = (meta_general(), meta_dns()) if target == "meta" else (stash_general(), stash_dns(target))
     sec = [("", _dump(gen))]
     if target == "meta":
         sec.append(("嗅探：浏览器自带 DoH 或直接按 IP 连接时，从 TLS/QUIC/HTTP 握手中取回域名再分流", _dump(meta_sniffer())))
@@ -357,29 +369,44 @@ HDR_STASH = [
     "  GEOSITE 数据首次从 GitHub 按需加载，请确保 GitHub 可达",
     f"规则 CDN 为 {CDN}，失效时全局替换为 https://cdn.jsdelivr.net/gh",
 ]
+HDR_FULL = [
+    "规则：与 mihomo 完全一致，直接下载 rules 分支 mihomo/ 目录的 mrs 规则集（含 AdRules + anti-AD 广告、cn、foreign、cn-ip）；",
+    "  不使用 Stash 原生 GEOSITE/GEOIP，无需 GitHub 可达；仅 BT 进程直连规则无法在 Stash 上实现",
+    "内存：约 36 万条域名规则，iOS 网络扩展上限 50 MB；导入后在 Stash 首页观察内存读数，接近上限或被系统杀掉请换回标准版",
+    "DNS：follow-rule + DoH 端点 IP 绑定 🛰️ DNS；内网系统 DNS，cn 与直连集合走国内 DoH，其余境外 DoH；节点域名用 proxy-server-nameserver（国内）",
+    "需 Stash iOS 3.6+ / macOS 4.3+（mrs 规则集、DNS policy 的 rule-set:、proxy-server-nameserver）",
+    f"规则 CDN 为 {CDN}，失效时全局替换为 https://cdn.jsdelivr.net/gh",
+]
+HDR = {"meta": HDR_META, "stash": HDR_STASH, FULL: HDR_FULL}
+LABEL = {"meta": "mihomo", "stash": "Stash", FULL: "Stash 完整版"}
 
 
 def xboard(target: str) -> str:
-    name = "custom.clashmeta.yaml" if target == "meta" else "custom.stash.yaml"
-    who = "Clash Meta / mihomo（Clash Party、CMFA 等）" if target == "meta" else "Stash（iOS / macOS）"
+    name = {"meta": "custom.clashmeta.yaml", "stash": "custom.stash.yaml", FULL: "custom.stash-full.yaml"}[target]
+    who = {"meta": "Clash Meta / mihomo（Clash Party、CMFA 等）", "stash": "Stash（iOS / macOS）",
+           FULL: "Stash（iOS / macOS）完整版，规则与 mihomo 一致"}[target]
     hdr = [f"Xboard 订阅模板 - {who}（{name}）", GENERATED,
-           "策略组内 /正则/i 为 Xboard 侧节点筛选；/^$/ 表示不追加任何节点", *(HDR_META if target == "meta" else HDR_STASH)]
+           "策略组内 /正则/i 为 Xboard 侧节点筛选；/^$/ 表示不追加任何节点", *HDR[target]]
     return yaml_doc(hdr, *full_config(target, with_groups=True, final=True))
 
 
+INI_NAME = {"meta": "ACL4SSR_Online_Full_AdblockPlus.ini", "stash": "ACL4SSR_Online_Full_AdblockPlus_Stash.ini",
+            FULL: "ACL4SSR_Online_Full_AdblockPlus_Stash_Full.ini"}
+BASE_NAME = {"meta": "dns_enhanced.yml", "stash": "dns_enhanced_stash.yml", FULL: "dns_enhanced_stash_full.yml"}
+
+
 def base(target: str) -> str:
-    ini = "ACL4SSR_Online_Full_AdblockPlus.ini" if target == "meta" else "ACL4SSR_Online_Full_AdblockPlus_Stash.ini"
-    hdr = [f"subconverter 底包（{'mihomo' if target == 'meta' else 'Stash'}），需配合 {ini} 使用（依赖其中的策略组）",
-           GENERATED, "MATCH 兜底由 ini 生成，排在本文件 rules 之后", *(HDR_META if target == "meta" else HDR_STASH)]
+    hdr = [f"subconverter 底包（{LABEL[target]}），需配合 {INI_NAME[target]} 使用（依赖其中的策略组）",
+           GENERATED, "MATCH 兜底由 ini 生成，排在本文件 rules 之后", *HDR[target]]
     return yaml_doc(hdr, *full_config(target, with_groups=False, final=False))
 
 
 def ini(target: str) -> str:
-    base_name = "dns_enhanced.yml" if target == "meta" else "dns_enhanced_stash.yml"
+    base_name = BASE_NAME[target]
     lines = [
         "[custom]",
         f";{GENERATED}",
-        f";acl4SSR规则 - Full_AdblockPlus（{'mihomo' if target == 'meta' else 'Stash / iOS'}）",
+        f";acl4SSR规则 - Full_AdblockPlus（{LABEL[target] if target == 'meta' else LABEL[target] + ' / iOS'}）",
         f";全部分流规则在底包 {base_name} 的 rule-providers 中，本 ini 仅提供策略组与 FINAL 兜底",
         "",
         "ruleset=🐟 漏网之鱼,[]FINAL",
@@ -426,10 +453,13 @@ def overseas() -> str:
 OUTPUTS = {
     "Clash/config/ACL4SSR_Online_Full_AdblockPlus.ini": lambda: ini("meta"),
     "Clash/config/ACL4SSR_Online_Full_AdblockPlus_Stash.ini": lambda: ini("stash"),
+    "Clash/config/ACL4SSR_Online_Full_AdblockPlus_Stash_Full.ini": lambda: ini(FULL),
     "Clash/customBaseConfigs/dns_enhanced.yml": lambda: base("meta"),
     "Clash/customBaseConfigs/dns_enhanced_stash.yml": lambda: base("stash"),
+    "Clash/customBaseConfigs/dns_enhanced_stash_full.yml": lambda: base(FULL),
     "xboard/custom.clashmeta.yaml": lambda: xboard("meta"),
     "xboard/custom.stash.yaml": lambda: xboard("stash"),
+    "xboard/custom.stash-full.yaml": lambda: xboard(FULL),
     "Clash/override/overseas.yaml": overseas,
 }
 

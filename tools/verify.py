@@ -8,7 +8,7 @@
                                            .cache/ 下自动下载的最新正式版（linux/darwin amd64/arm64）
 
 步骤（与 .github/workflows/check.yml、rules.yml 一致）：
-  1 build.py --check       spec 自检 + 七份生成文件与 src/spec.yaml 一致
+  1 build.py --check       spec 自检 + 十份生成文件与 src/spec.yaml 一致
   2 check.py               Xboard / subconverter / 国外覆写渲染后 mihomo -t
   3 check_routing.py       本地夹具：分流顺序、QUIC、广告、DNS 泄露
   4 check_upstream.py      当日上游：Claude 不在 cn、本地条目未被前面的集合截走          （联网）

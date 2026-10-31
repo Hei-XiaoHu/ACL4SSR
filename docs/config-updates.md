@@ -2,6 +2,14 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-10-31 新增 Stash 完整版配置（规则与 mihomo 一致）
+
+- 起因：番茄小说 / 红果短剧的广告在 mihomo 上能拦、Stash 上拦不住。对比当日三份广告源：字节系穿山甲（`pglstatp-toutiao.com`、`pangolin-sdk-toutiao.com`、`*.fqnovel.com` 等）在 AdRules 是整个后缀、anti-AD 也大量收录，AWAvenue（约 970 条，仅 12 条后缀规则）只列了个别主机名。不是 MITM 的问题——mihomo 按域名就能拦掉，Stash 缺的只是规则。
+- 新增生成目标 `stash-full`（`build.FULL`），输出 `Clash/config/ACL4SSR_Online_Full_AdblockPlus_Stash_Full.ini`、`Clash/customBaseConfigs/dns_enhanced_stash_full.yml`、`xboard/custom.stash-full.yaml`。与标准版 Stash 的差别只有：规则集全部指向 `rules` 分支 `mihomo/` 目录（mrs 两边同格式，不另发一套），因此 `ads` 变成 AdRules + anti-AD，`cn` / `foreign` / `cn-ip` 变成规则集而非 `GEOSITE,cn` / `GEOSITE,geolocation-!cn` / `GEOIP,CN`；DNS policy 的 `geosite:private` / `geosite:cn` 相应改为 `rule-set:private` / `rule-set:cn`，整份配置不再依赖原生 GEOSITE 数据。规则集缓存目录用 `./ruleset/acl4ssr-full/`，避免 Stash 启动时先读到标准版缓存的小文件。`bt` 仍只在 mihomo（进程规则）。
+- 标准版 Stash 配置与 Xboard `stash` 槽位不动：约 36 万条域名规则对 iOS 网络扩展 50 MB 上限是否够用无法静态判断（Stash 官方 FAQ 只给了上限；公开崩溃案例是 yaml 格式 30 万条，mrs 常驻占用没有数据），需维护者实机导入完整版观察内存，稳定后再决定是否替换。
+- 校验：`check_routing.assert_outputs` 断言完整版规则列表去掉 DoH 端点 IP 绑定后，与 mihomo 的规则逐条相同（仅 `DST-PORT,443` → `PROTOCOL,QUIC`、无 bt）；provider URL 与 mihomo 相同、缓存路径独立；DNS policy 无 `geosite:`。`check.py` 对完整版的 Xboard 与 subconverter 渲染同样检查策略组。`python3 tools/verify.py` 全部通过。
+- 依据：stash.wiki 规则集文档（mrs 支持 domain/ipcidr；domain/ipcidr 针对大量数据压缩优化）、FAQ“编写高效配置”（iOS 15+ 内存上限 50 MB）、3.6 发布说明（DNS policy `rule-set:`）。
+
 ## 2026-10-30 Stash 改用 mrs 规则集与 3.6 新 DNS 字段；目录改名 xboard/
 
 - Stash 的 domain/ipcidr 规则集从 yaml 改为 mrs（Stash iOS 3.1.1+ 支持，与 mihomo 同一二进制格式）：`rules` 分支 `stash/` 下 21 个集合改发 `.mrs`，只有 classical 的 `local-direct` 仍是 yaml。旧 `stash/*.yaml` 不再发布，仍用旧配置的 Stash 刷新规则集会 404 并沿用本地缓存，刷新订阅后即换到 mrs。

@@ -7,6 +7,7 @@
 | Clash Party（电脑） | subconverter + ini，或 Xboard 订阅 | `Clash/config/ACL4SSR_Online_Full_AdblockPlus.ini`（底包 `dns_enhanced.yml`）/ `xboard/custom.clashmeta.yaml` |
 | Clash Meta for Android / FlClash | 同上 | 同上 |
 | Stash（iOS，需 3.6+） | subconverter + Stash ini，或 Xboard 订阅 | `Clash/config/ACL4SSR_Online_Full_AdblockPlus_Stash.ini`（底包 `dns_enhanced_stash.yml`）/ `xboard/custom.stash.yaml` |
+| Stash 完整版（试用中） | 同上，用 `_Stash_Full.ini` | `Clash/config/ACL4SSR_Online_Full_AdblockPlus_Stash_Full.ini`（底包 `dns_enhanced_stash_full.yml`）/ `xboard/custom.stash-full.yaml`；规则与 mihomo 完全一致，约 36 万条域名，内存需实机确认后再替换标准版 |
 | 国外模式（仅海外电脑） | Clash Party 远程覆写 | `Clash/override/overseas.yaml` |
 
 ## 修改规则
@@ -41,7 +42,7 @@ python3 tools/build.py                 # 生成全部配置
 python3 tools/verify.py                # 推送前一键校验（与 CI 相同，下面各项全跑；--offline 只跑离线项）
 python3 tools/after_push.py            # 推送后等 Actions 结束并确认规则集已发布
 python3 tools/weekly_report.py --preview  # 用最新数据预览每周报告（只打印）
-python3 tools/build.py --check         # spec 自检（孤儿 rules 文件、组名/集合引用、跨文件冲突）+ 七份输出一致
+python3 tools/build.py --check         # spec 自检（孤儿 rules 文件、组名/集合引用、跨文件冲突）+ 十份输出一致
 python3 tools/check.py /path/to/mihomo  # 渲染与真实内核校验，含节点全过滤/零节点场景
 python3 tools/check_routing.py /path/to/mihomo # 离线连接、DNS 泄露、QUIC 与广告回归
 python3 tools/check_upstream.py        # 联网：Claude 域名不在 cn、本地条目未被前面的集合截走（mihomo/Stash 分别查）
@@ -77,7 +78,7 @@ Stash 的结论来自官方文档与静态检查，不能用 mihomo 代替 Stash
 | 🛑 广告 | REJECT | 广告与遥测 |
 
 - **规则来源**：本地 `rules/*.txt` + MetaCubeX/meta-rules-dat（v2fly 社区）等上游，每日合并为 24 个集合发布到 `rules` 分支。domain/ipcidr 集合用 mrs 二进制格式（mihomo 与 Stash 3.1.1+ 均支持），匹配快、内存小；classical 集合（local-direct、bt）只能用 yaml。`mihomo/` 与 `stash/` 两套内容不同（广告源不同、Stash 无 cn/foreign/cn-ip/bt）。
-- **去广告**：mihomo 用 AdRules + anti-AD 合并去重后的单个集合（约 21 万条），两者有独有规则；Stash 用轻量 AWAvenue。规则条数不能直接证明 iOS 峰值内存。
+- **去广告**：mihomo 用 AdRules + anti-AD 合并去重后的单个集合（约 21 万条），两者有独有规则；Stash 标准版用轻量 AWAvenue（约 950 条，拦不住番茄/红果等字节系应用的穿山甲广告），Stash 完整版与 mihomo 相同。规则条数不能直接证明 iOS 峰值内存。
 - **性能**：已有 IP 的直接分类使用 `no-resolve`，需要额外解析的 `cn-ip` / `GEOIP,CN` 放末尾；已知国外域名提前分流。
 - **测速**：600 秒；Xboard 显式 `lazy:true`，INI 的 mihomo 依赖内核默认 true，其他转换器/客户端以实际输出为准。节点全被过滤时自动选择组保留 REJECT。测速不验证 AI/媒体解锁，AI 应手动选支持地区的节点。
 - **DNS**：已知国内（`cn`）→ 国内 DoH；其余 → 经 `🛰️ DNS` 查境外 DoH；内网 → system。走代理的连接把域名交给节点远端解析，本地不查询；本地解析只发生在 IP 规则、DIRECT、fake-ip-filter 与节点域名上。mihomo 的 DIRECT 用国内 `direct-nameserver`（follow-policy 只为让内网名走 system）；Stash 没有该字段，改为在 `nameserver-policy` 里用 `rule-set:direct` 让默认直连集合（含游戏下载 CDN）走国内 DNS。两者的节点域名都用 `proxy-server-nameserver`（国内）直连解析。Stash follow-rule 加 DoH 端点 IP 绑定指定组；绑定也影响这些 IP 的其他流量。
@@ -86,7 +87,7 @@ Stash 的结论来自官方文档与静态检查，不能用 mihomo 代替 Stash
 - **QUIC**：默认走代理的境外域名（AI、媒体、gfw、geolocation-!cn、共享验证码等）及 Anthropic 自有 IP 的 QUIC 被拒绝，回落 TCP（VLESS 等 TCP 传输承载 QUIC 效果差）。默认直连的苹果/微软/Bing/OneDrive/网易云/B站、国内、游戏、游戏下载、通信语音、`quic-exempt.txt` 和未知裸 IP 不拦；保留 `google-cn` 的 QUIC 豁免。mihomo 按 UDP443 判断；Stash 用 `PROTOCOL,QUIC` 只拦真正的 QUIC。规则按默认分组判断，手动切换策略组后不会跟着变。
 - **谷歌服务**：`google-cn` 与完整 `google` 集合走 `🔍 谷歌`，默认选择 `🚀 节点选择`，使用境外 DNS；Chrome 商店、Google 资源与 `dl.google.com` 下载统一分流。AI、谷歌 FCM 和 YouTube 保留各自专用策略。
 - **分类**：游戏下载使用完整的 `category-game-platforms-download`（约 490 条，含 Steam/PSN/Epic 等全球 CDN），默认直连；上游只逐个列 Steam `cacheN-xxx` 主机，新节点与 EA/GOG 漏网 CDN 由 `rules/direct.txt` 兜底直连；Steam CM 由 `rules/game-proxy.txt` 走游戏组。集合顺序经 `build_rules.py --conflicts` 核对：游戏平台先于流媒体（社区娱乐集合收录了大量游戏域名），苹果先于国内娱乐（收录了 Apple Music）。
-- **iOS**：Stash 规则与 mihomo 基本一致，差异仅在广告源（AWAvenue 轻量版）及用 Stash 原生 GEOSITE/GEOIP 替代 cn、geolocation-!cn、cn-ip 规则集。若希望与电脑完全一致，可用内置 mihomo 内核的 Clash Mi（KaringX/clashmi，App Store 上架，iOS 15+），直接使用 mihomo 模板；本仓库未做 Clash Mi 实机测试。
+- **iOS**：Stash 标准版与 mihomo 的差异仅在广告源（AWAvenue 轻量版）及用 Stash 原生 GEOSITE/GEOIP 替代 cn、geolocation-!cn、cn-ip 规则集。**Stash 完整版**（`_Stash_Full.ini` / `custom.stash-full.yaml`）去掉这两处差异：直接下载 `rules` 分支 `mihomo/` 目录的同一批 mrs（mrs 格式两边通用，不另发规则集），DNS policy 也改用 `rule-set:private` / `rule-set:cn`，完全不依赖原生 GEOSITE；只有 bt 进程规则无法在 Stash 实现。规则集缓存放在独立的 `./ruleset/acl4ssr-full/`，与标准版互不干扰。代价是约 36 万条域名（标准版约 1 万 + 原生 GEOSITE），iOS 网络扩展上限 50 MB，官方只有 yaml 格式 30 万条时崩溃的旧案例，mrs 的实际占用没有公开数据——导入后看 Stash 首页的内存读数，稳定后再决定是否替换标准版；被系统杀掉就换回标准版订阅。另一条路是内置 mihomo 内核的 Clash Mi（KaringX/clashmi，App Store 上架，iOS 15+），直接用 mihomo 模板；本仓库未做实机测试。
 - **Stash**：需 iOS 3.6+ / macOS 4.3+（mrs 规则集 3.1.1+，DNS policy 的 `geosite:` 3.4+、`rule-set:` 与 `proxy-server-nameserver` 3.6+）。原生 GEOSITE 数据首次从 GitHub 按需加载，需 GitHub 可达。
 - **其他客户端**：Xboard 后台的 clash 槽位放的也是 mihomo 模板——现在 UA 落到 `clash` 的基本都是 mihomo 内核（Clash Nyanpasu、Clash Mi、通用 UA 的客户端），Clash Premium 已停更且不支持 mrs。注意 Xboard 的 Clash 渲染器只下发 ss/vmess/trojan/socks/http 节点，VLESS/Hysteria2/TUIC/AnyTLS 会被过滤。sing-box / Surge / Surfboard 未做模板：需要 rules 分支另发 .srs 与 Surge 文本列表，且 DNS/QUIC 语义不同，暂不维护。
 
