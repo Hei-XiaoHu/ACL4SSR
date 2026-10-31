@@ -101,3 +101,16 @@ Stash 的结论来自官方文档与静态检查，不能用 mihomo 代替 Stash
 3. 在订阅的「编辑信息」里勾选该覆写。
 
 Xboard 零订阅节点时所对照的上游可能残留筛选 regex，需要服务端处理。文件推送并刷新订阅/规则后才会影响远程客户端；旧连接可重启内核清理。
+
+## 本地覆写模板（Clash Party / FlClash，JavaScript）
+
+`Clash/override/*.js` 是手写模板，不含任何节点、域名、IP 或凭据；**复制到客户端的本地覆写里改常量后使用**，不要把填好的版本放回仓库。格式都是 `function main(config)`，重复导入幂等。
+
+| 文件 | 用途 |
+|---|---|
+| `game-ports.js` | 配合 ProxiFyre：每个本机 SOCKS5 端口对应一个游戏，按节点名正则（或精确的节点/策略组名）选节点，没匹配到走 `FALLBACK`（默认 DIRECT） |
+| `pinned-node.js` | 指定域名/IP 固定走某个节点，并可开本地端口隧道（`tunnels`）到该节点后面的服务。`RULES` 插最前（域名规则零解析，IP 规则自动补 `no-resolve`）；`LATE_IP_RULES` 插在 `cn-ip` 前面，用于"解析到某 IP 的域名也要命中"——只有前面所有域名规则都没命中的域名才会走到这里，而 `cn-ip` 本来就要解析它们，不多花 DNS。节点不在订阅里时引用它的规则改走 `FALLBACK` 或跳过，隧道不加 |
+| `local-node.js` | 追加订阅之外的自有节点（落地机、家宽），插到锚点节点后面并进入所有含订阅节点的手选组 |
+
+- Clash Party 支持同时启用多个覆写。FlClash 每个订阅只能启用一个脚本：把需要的模板粘到一个文件，各自的 `main` 改名（如 `localNode` / `pinnedNode` / `gamePorts`），末尾加 `function main(config) { return [localNode, pinnedNode, gamePorts].reduce((c, f) => f(c), config); }`——先加节点再写规则，否则检测不到新节点。
+- Stash 的覆写只有"插最前"与 `#!replace` 两种数组合并，做不到插在 `cn-ip` 前；Stash 上想让某些服务器直连请按域名写（`DOMAIN,...,DIRECT`），IP 规则加 `no-resolve`。

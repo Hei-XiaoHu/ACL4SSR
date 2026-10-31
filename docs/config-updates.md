@@ -2,6 +2,13 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-10-31 新增 Clash Party / FlClash 本地覆写模板（Clash/override/*.js）
+
+- 把维护者本机的三个 JavaScript 覆写去掉节点名、IP、域名与凭据后整理为模板：`game-ports.js`（ProxiFyre 按端口分配游戏节点）、`pinned-node.js`（指定域名/IP 固定节点 + tunnels）、`local-node.js`（追加自有节点）。手写文件，不经 build.py。
+- `pinned-node.js` 的主要改动：IP 规则分两组——插在最前面的自动补 `no-resolve`；要按"解析后的 IP"匹配的放 `LATE_IP_RULES`，插到 `RULE-SET,cn-ip` 之前。原因：规则自上而下匹配，不带 `no-resolve` 的 IP 规则放第一条会让每个域名连接都先用主 nameserver 解析一次（结果对走代理的连接无用，对直连连接也不被 `direct-nameserver` 复用），而 cn-ip 是本套规则里唯一需要解析的一条，放它前面不增加解析。核对 `geosite:geolocation-!cn` 的顶级域条目只有 `.google`、`.xbox` 等 66 个品牌 TLD，个人域名不会被 foreign 截走，能走到 cn-ip。其他改动：规则不写去向默认走 NODE、`FALLBACK` 可指定节点缺失时的替代去向、隧道改数组并按 address 去重、幂等清理。
+- `game-ports.js`：`match` 支持正则或精确名，可匹配策略组名；兜底改为常量。`local-node.js`：支持多个节点、`ANCHOR` 可为 null。三份模板用 Node 模拟 `main(config)` 跑过正常/幂等/节点缺失三种情况。
+- README 新增"本地覆写模板"一节，含 FlClash 单脚本限制下的合并写法，以及 Stash 覆写只能前插或 `#!replace`、应改用域名规则的说明。
+
 ## 2026-10-31 Stash 配置改为与 mihomo 同一套规则集；删除完整版并列文件
 
 - 维护者在 iOS 最新版 Stash 上导入完整版（约 36 万条域名）实测：规则集全部加载，番茄/红果广告消失，未出现崩溃。据此把标准版 Stash 配置（`_Stash.ini` / `dns_enhanced_stash.yml` / `custom.stash.yaml`）直接改成完整版内容，删除昨日新增的三份 `_Full` 文件与 `stash-full` 生成目标。用户与 Xboard 同步脚本无需改动，刷新订阅即得新版。

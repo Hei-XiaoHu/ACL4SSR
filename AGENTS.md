@@ -12,7 +12,7 @@ mihomo（Clash Party / CMFA）与 Stash 的分流配置和规则集。概览见 
 
 - 源头只有 `src/spec.yaml`（组、DNS、集合顺序）与 `rules/*.txt`（本地条目，文件名 = 集合名）。
   `Clash/config/*.ini`、`Clash/customBaseConfigs/*.yml`、`xboard/custom.*.yaml`、`Clash/override/overseas.yaml` 由
-  `python3 tools/build.py` 生成，禁止手改。
+  `python3 tools/build.py` 生成，禁止手改。`Clash/override/*.js` 是手写的本地覆写模板，不含任何节点/域名/IP/凭据，改动时保持这一点。
 - 推送前 `python3 tools/verify.py` 必须全部通过（与 CI 相同）。推送 master 会立即触发规则集重新发布到 rules 分支。
 - 不要手动改 `rules` / `report` 分支，它们由 Actions 生成。
 - 依据优先：官方文档 > v2fly / MetaCubeX 社区数据 > 第三方页面。不泛化整个 CDN 或供应商后缀，不用 DOMAIN-KEYWORD。
