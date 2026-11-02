@@ -1,12 +1,12 @@
-# 每周规则报告（2026-10-26 06:57 北京时间）
+# 每周规则报告（2026-11-02 08:05 北京时间）
 
-**本周需要关注：** geosite:category-ai-!cn +12 -0（⚠️ 1）
+**本周需要关注：** geosite:category-ai-!cn +9 -0
 
 ## 关注的上游集合（相比上周）
 
 - `geosite:category-game-platforms-download`：无变化（491 条）
-- `geosite:category-ai-!cn`：新增 12、删除 0（现 204 条，预期去向 🤖 AI）
-  - 新增：`+.ant.dev`, `+.anthropic.team`, `+.antspace.dev`, `+.chatbotclaude.com`, `+.claude.app`, `+.claude.new`, `+.claude.site`, `+.claudeacademy.com`, `+.claudepages.dev`, `+.claudestudio.com`, `+.magnific.com`, `o33249.ingest.us.sentry.io`（⚠️ 实际 → telemetry / 🛑 广告）
+- `geosite:category-ai-!cn`：新增 9、删除 0（现 213 条，预期去向 🤖 AI）
+  - 新增：`+.artificialanalysis.ai`, `+.cline.bot`, `+.commandcode.ai`, `+.context7.com`, `+.metaaiusercontent.com`, `+.nousresearch.com`, `appsgenaiserver-pa.clients.google.com`, `appsgenaiserver-pa.clients6.google.com`, `appsgenaiserver-pa.googleapis.com`
 
 新增条目已自动进入对应集合。⚠️ 表示实际去向与该集合不同：新增的被排在前面的集合截走（如遥测被 🛑 拦截属预期），删除的已不再命中原去向。
 删除的主机若仍在使用，加进对应的 `rules/*.txt`（下载主机加进 `rules/direct.txt`）。
