@@ -224,11 +224,6 @@ dns_campus:
       - portal2.zzu.edu.cn
       - portal3.zzu.edu.cn
       - portal4.zzu.edu.cn
-      - portal5.zzu.edu.cn
-      - portal6.zzu.edu.cn
-      - portal7.zzu.edu.cn
-      - portal8.zzu.edu.cn
-      - portal9.zzu.edu.cn
 
 fake_ip_filter:
   - +.lan
