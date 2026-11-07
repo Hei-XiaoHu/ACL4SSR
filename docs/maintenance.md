@@ -38,7 +38,7 @@ python3 tools/weekly_report.py --preview
 cd tools && python3 - <域名> [域名...] <<'EOF'
 import sys, build, build_rules as br
 cache = br.fetch_all()
-tables = {t: br.route_table(br.collect(t, cache)) for t in build.TARGETS}
+tables = {t: br.route_table(br.collect(cache, t)) for t in build.TARGETS}
 for host in sys.argv[1:]:
     print(host, {t: br.route(tables[t], host) for t in tables})
 EOF
