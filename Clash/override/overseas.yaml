@@ -40,7 +40,15 @@ dns!:
   - localhost.ptlogin2.qq.com
   - localhost.sec.qq.com
   - localhost.work.weixin.qq.com
-  - +.zzu.edu.cn
+  - portal1.zzu.edu.cn
+  - portal2.zzu.edu.cn
+  - portal3.zzu.edu.cn
+  - portal4.zzu.edu.cn
+  - portal5.zzu.edu.cn
+  - portal6.zzu.edu.cn
+  - portal7.zzu.edu.cn
+  - portal8.zzu.edu.cn
+  - portal9.zzu.edu.cn
   - +.msftconnecttest.com
   - +.msftncsi.com
   - time.*.com
@@ -110,6 +118,4 @@ dns!:
     localhost.sec.qq.com:
     - system
     localhost.work.weixin.qq.com:
-    - system
-    +.zzu.edu.cn:
     - system

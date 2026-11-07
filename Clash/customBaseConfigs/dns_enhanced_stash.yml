@@ -40,7 +40,15 @@ dns:
   - localhost.ptlogin2.qq.com
   - localhost.sec.qq.com
   - localhost.work.weixin.qq.com
-  - +.zzu.edu.cn
+  - portal1.zzu.edu.cn
+  - portal2.zzu.edu.cn
+  - portal3.zzu.edu.cn
+  - portal4.zzu.edu.cn
+  - portal5.zzu.edu.cn
+  - portal6.zzu.edu.cn
+  - portal7.zzu.edu.cn
+  - portal8.zzu.edu.cn
+  - portal9.zzu.edu.cn
   - +.msftconnecttest.com
   - +.msftncsi.com
   - time.*.com
@@ -102,8 +110,24 @@ dns:
     - system
     localhost.work.weixin.qq.com:
     - system
-    +.zzu.edu.cn:
-    - system
+    portal1.zzu.edu.cn:
+    - 202.196.64.1
+    portal2.zzu.edu.cn:
+    - 202.196.64.1
+    portal3.zzu.edu.cn:
+    - 202.196.64.1
+    portal4.zzu.edu.cn:
+    - 202.196.64.1
+    portal5.zzu.edu.cn:
+    - 202.196.64.1
+    portal6.zzu.edu.cn:
+    - 202.196.64.1
+    portal7.zzu.edu.cn:
+    - 202.196.64.1
+    portal8.zzu.edu.cn:
+    - 202.196.64.1
+    portal9.zzu.edu.cn:
+    - 202.196.64.1
     rule-set:direct:
     - https://223.5.5.5/dns-query
     - https://doh.pub/dns-query

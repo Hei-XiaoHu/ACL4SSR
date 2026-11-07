@@ -2,6 +2,12 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-11-07 郑州大学校园网认证页改用校内 DNS（取代下一节的 system）
+
+- 起因：下一节改用 system 后仍打不开。手机上的系统 DNS 是 `10.10.8.8`、`202.196.64.1`、`114.114.114.114`，mihomo 对 system 并发询问、采用最快应答（NXDOMAIN 也算有效应答），结果拿到并缓存了 NXDOMAIN。校内实测：`202.196.64.1` 解析 `portal1.zzu.edu.cn` → `172.16.4.14`，`10.10.8.8` 返回 NXDOMAIN；学校权威 DNS（dns / dns2.zzu.edu.cn）与公共 DNS 也是 NXDOMAIN；`202.196.64.1` 对校外查询一律 REFUSED。
+- 处理：`src/spec.yaml` 新增 `dns_campus`，`portal1`–`portal9.zzu.edu.cn` → `202.196.64.1`（nameserver-policy，排在 `rule-set:cn` 之前；并进 fake-ip-filter）；从 `dns_system_domains` 删除 `+.zzu.edu.cn`。只列认证页主机，是因为整个学校域名交给这台 DNS 会让校外解析失败；编号不确定先列到 9。国外模式不加。分流不变（域名命中 cn，解析出的 172.16.x 命中 private-ip，均直连）。
+- 测试：`check_routing.assert_outputs` 允许 policy 出现 `dns_campus` 服务器，并断言 portal 主机只用校内 DNS、在 fake-ip-filter 中、不再有 `+.zzu.edu.cn`；内核回归把校内 DNS 替换为内网假 DNS，确认 `portal2.zzu.edu.cn` 由它解析。
+
 ## 2026-11-07 郑州大学校园网域名改用系统 DNS
 
 - 起因：校园网认证由 IP 地址改为跳转到 `portal1.zzu.edu.cn` / `portal2.zzu.edu.cn`（portal + 数字），开着代理打不开。分流本身没问题（命中 `cn` → 🎯 直连），问题在 DNS：`cn` 的域名由国内 DoH（223.5.5.5 / doh.pub）解析，而这些主机只能由校园网 DNS 解析（223.5.5.5 / 8.8.8.8 均无结果），认证前 DoH 也可能被拦截，解析失败导致连接失败。

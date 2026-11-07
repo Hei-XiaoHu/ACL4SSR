@@ -206,11 +206,12 @@ def ini_groups() -> list[str]:
 
 # ---------------------------------------------------------------- 全局与 DNS
 def fake_ip_filter() -> list:
-    return list(dict.fromkeys([*S["dns_system_domains"], *S["fake_ip_filter"]]))
+    campus = [domain for item in S["dns_campus"] for domain in item["domains"]]
+    return list(dict.fromkeys([*S["dns_system_domains"], *campus, *S["fake_ip_filter"]]))
 
 
 def dns_policy(target: str, *, overseas: bool = False) -> dict:
-    """只含“内网 → system”与“已知国内 → 国内 DoH”；未命中的域名走主 nameserver（境外）。
+    """只含“内网 → system”“校园网认证页 → 校内 DNS”与“已知国内 → 国内 DoH”；未命中的域名走主 nameserver（境外）。
 
     不放任何境外条目：mihomo 的 DIRECT 出站共享本 policy（follow-policy），
     未命中时回到国内 direct-nameserver，直连下载不会被送去境外 DNS。
@@ -218,6 +219,8 @@ def dns_policy(target: str, *, overseas: bool = False) -> dict:
     policy = {"rule-set:private": ["system"], **{domain: ["system"] for domain in S["dns_system_domains"]}}
     if overseas:
         return policy
+    for item in S["dns_campus"]:
+        policy.update({domain: item["servers"] for domain in item["domains"]})
     china = S["dns_china"]
     if target == "stash":
         # Stash 没有 direct-nameserver：默认直连但不在 cn 里的集合整体指定国内 DNS。
