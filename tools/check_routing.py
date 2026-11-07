@@ -710,7 +710,7 @@ def native_regressions(exe: str):
                     "gchat.qpic.qq.com", "www.baidu.cn", "www.nintendoswitch.cn",
                     "services.googleapis.cn", "acm.org",
                 ]),
-                (LAN_IP, "内网 system", ["nas.lan", "router.home.arpa"]),
+                (LAN_IP, "内网 system", ["nas.lan", "router.home.arpa", "portal2.zzu.edu.cn"]),
             ]
             for want, label, hosts in expectations:
                 for host in hosts:

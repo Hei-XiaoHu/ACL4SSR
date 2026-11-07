@@ -211,6 +211,8 @@ dns_system_domains:
   - localhost.ptlogin2.qq.com
   - localhost.sec.qq.com
   - localhost.work.weixin.qq.com
+  # 郑州大学校园网认证页 portalN.zzu.edu.cn 只能由校园网 DNS 解析；分流已由 cn 直连
+  - +.zzu.edu.cn
 
 fake_ip_filter:
   - +.lan

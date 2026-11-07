@@ -78,6 +78,8 @@ CASES = [
     ("verify.id6.me", 443, "local-direct", "🎯 直连"),
     ("ye.dun.163yun.com", 443, "local-direct", "🎯 直连"),
     ("log.cmpassport.com", 443, "ads", "🛑 广告"),
+    # 校园网认证页（校园网 DNS 才能解析）
+    ("portal2.zzu.edu.cn", 443, "cn", "🎯 直连"),
     # Statsig 功能开关不拦
     ("featuregates.org", 443, "ai-essential", "🤖 AI"),
     ("featureassets.org", 443, "ai-essential", "🤖 AI"),

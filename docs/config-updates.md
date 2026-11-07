@@ -2,6 +2,12 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-11-07 郑州大学校园网域名改用系统 DNS
+
+- 起因：校园网认证由 IP 地址改为跳转到 `portal1.zzu.edu.cn` / `portal2.zzu.edu.cn`（portal + 数字），开着代理打不开。分流本身没问题（命中 `cn` → 🎯 直连），问题在 DNS：`cn` 的域名由国内 DoH（223.5.5.5 / doh.pub）解析，而这些主机只能由校园网 DNS 解析（223.5.5.5 / 8.8.8.8 均无结果），认证前 DoH 也可能被拦截，解析失败导致连接失败。
+- 处理：`+.zzu.edu.cn` 加入 `src/spec.yaml` 的 `dns_system_domains`（nameserver-policy → system，排在 `rule-set:cn` 之前，并进入 fake-ip-filter）。mihomo 的 DNS 通配符不能表达 `portal[0-9]+`，经维护者确认按整个学校域名处理。分流不改。
+- 测试：`check_routing.py` 增加 `portal2.zzu.edu.cn` → system DNS；`check_rules.py` 增加 `portal2.zzu.edu.cn` → cn / 🎯 直连。
+
 ## 2026-10-31 新增 Clash Party / FlClash 本地覆写模板（Clash/override/*.js）
 
 - 把维护者本机的三个 JavaScript 覆写去掉节点名、IP、域名与凭据后整理为模板：`game-ports.js`（ProxiFyre 按端口分配游戏节点）、`pinned-node.js`（指定域名/IP 固定节点 + tunnels）、`local-node.js`（追加自有节点）。手写文件，不经 build.py。
