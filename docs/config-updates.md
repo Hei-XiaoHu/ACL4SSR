@@ -2,6 +2,11 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-11-07 校园网认证页恢复指定校内 DNS（撤销下一节的 system）
+
+- 按维护者要求：系统 DNS 中的 114.114.114.114 会抢先返回 NXDOMAIN，恢复 `dns_campus`：`portal1`–`portal4.zzu.edu.cn` → `202.196.64.1`（nameserver-policy 与 fake-ip-filter），`src/spec.yaml`、`tools/build.py`、`tools/check_routing.py` 与 71b5545 相同。
+- 已知限制：`202.196.64.1` 拒绝校外来源。WiFi 未认证、手机默认网络切到移动数据时，查询经数据网络发出仍会失败，需要先关数据或用系统「登录 WLAN 网络」通知认证。
+
 ## 2026-11-07 校园网认证页改为 portal1–4.zzu.edu.cn 走 system DNS（取代下一节的 dns_campus）
 
 - 按维护者要求：`portal1`–`portal4.zzu.edu.cn` 放进 `dns_system_domains`（nameserver-policy → system，并进 fake-ip-filter），删除 `dns_campus` 及 build.py / check_routing.py 中相应代码。system 随手机当前网络取 DNS，同时连 WiFi 与数据时不会把查询硬发到只认校内来源的 `202.196.64.1`。

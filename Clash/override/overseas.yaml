@@ -114,11 +114,3 @@ dns!:
     - system
     localhost.work.weixin.qq.com:
     - system
-    portal1.zzu.edu.cn:
-    - system
-    portal2.zzu.edu.cn:
-    - system
-    portal3.zzu.edu.cn:
-    - system
-    portal4.zzu.edu.cn:
-    - system

@@ -203,6 +203,7 @@ def _has_china(servers) -> bool:
 
 def assert_outputs():
     china, system = build.S["dns_china"], ["system"]
+    campus = [item["servers"] for item in build.S["dns_campus"]]
     meta = build.meta_dns()["dns"]
     stash = build.stash_dns()["dns"]
     # mihomo：主 DNS 全部境外且经 DNS 组；DIRECT 走国内；policy 只有内网与 cn 两类
@@ -214,15 +215,17 @@ def assert_outputs():
     assert policy["rule-set:private"] == system and policy["+.lan"] == system
     assert list(policy)[-1] == "rule-set:cn" and policy["rule-set:cn"] == china
     # 关键不变式：policy 不含任何境外条目，DIRECT 未命中时必回到国内 direct-nameserver
-    assert all(v in (system, china) for v in policy.values()), policy
+    assert all(v in (system, china, *campus) for v in policy.values()), policy
     assert sum(v == china for v in policy.values()) == 1
-    # 校园网认证页按维护者要求走 system，只列 portal1–4，不放整个学校域名
-    assert policy["portal1.zzu.edu.cn"] == system and "+.zzu.edu.cn" not in policy
+    # 认证页只用校内 DNS；system 会被公共 DNS 的 NXDOMAIN 抢先
+    assert policy["portal1.zzu.edu.cn"] == ["202.196.64.1"] and "+.zzu.edu.cn" not in policy
+    assert "portal1.zzu.edu.cn" in meta["fake-ip-filter"]
     # Stash：没有 direct-nameserver，默认直连的游戏下载集合单独走国内；private / cn 与 mihomo 一样用规则集
     sp = stash["nameserver"], stash["nameserver-policy"]
     assert not _has_china(sp[0])
     assert stash["proxy-server-nameserver"] == china  # 节点域名国内直连解析（Stash 3.6+）
-    assert all(v in (system, china) for v in sp[1].values()), sp[1]
+    assert all(v in (system, china, *campus) for v in sp[1].values()), sp[1]
+    assert sp[1]["portal1.zzu.edu.cn"] == ["202.196.64.1"]
     assert sp[1]["rule-set:private"] == system and sp[1]["+.lan"] == system
     # 默认直连的 direct 集合（含游戏下载 CDN）整体走国内 DNS，与分流共用同一规则集
     assert sp[1]["rule-set:direct"] == china and "direct" in build.providers("stash")
@@ -406,8 +409,9 @@ def native_regressions(exe: str):
             lan_server = [f"udp://127.0.0.1:{lan_dns.getsockname()[1]}"]
             # 保留生成的 policy 顺序/匹配条件，只把上游替换为返回不同 A 记录的本地 DNS。
             policy = {}
+            campus_servers = [item["servers"] for item in build.S["dns_campus"]]
             for key, servers in build.dns_policy("meta").items():
-                if servers == ["system"]:
+                if servers == ["system"] or servers in campus_servers:
                     policy[key] = lan_server
                 elif servers == build.S["dns_china"]:
                     policy[key] = china_server
@@ -712,7 +716,7 @@ def native_regressions(exe: str):
                     "gchat.qpic.qq.com", "www.baidu.cn", "www.nintendoswitch.cn",
                     "services.googleapis.cn", "acm.org",
                 ]),
-                (LAN_IP, "内网 system", ["nas.lan", "router.home.arpa", "portal2.zzu.edu.cn"]),
+                (LAN_IP, "内网 system / 校内 DNS", ["nas.lan", "router.home.arpa", "portal2.zzu.edu.cn"]),
             ]
             for want, label, hosts in expectations:
                 for host in hosts:
