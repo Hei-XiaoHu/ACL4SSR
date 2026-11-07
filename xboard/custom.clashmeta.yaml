@@ -144,13 +144,13 @@ dns:
     localhost.work.weixin.qq.com:
     - system
     portal1.zzu.edu.cn:
-    - 202.196.64.1
+    - system
     portal2.zzu.edu.cn:
-    - 202.196.64.1
+    - system
     portal3.zzu.edu.cn:
-    - 202.196.64.1
+    - system
     portal4.zzu.edu.cn:
-    - 202.196.64.1
+    - system
     rule-set:cn:
     - https://223.5.5.5/dns-query
     - https://doh.pub/dns-query

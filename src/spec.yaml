@@ -211,19 +211,11 @@ dns_system_domains:
   - localhost.ptlogin2.qq.com
   - localhost.sec.qq.com
   - localhost.work.weixin.qq.com
-
-# 校园网内网 DNS：只有它能解析的认证页主机（公共与学校权威 DNS 均 NXDOMAIN）。
-# 不能用 system：mihomo 并发询问全部系统 DNS 取最快应答，公共 DNS（114）的 NXDOMAIN 会先到。
-# 只列认证页主机：这台 DNS 拒绝校外查询，整个 +.zzu.edu.cn 交给它会让校外解析失败。
-# 进 nameserver-policy（国外模式不加）与 fake-ip-filter；分流已由 cn / private-ip 直连。
-dns_campus:
-  # 郑州大学：202.196.64.1 解析出 172.16.x；同为系统 DNS 的 10.10.8.8 返回 NXDOMAIN（2026-11-07 校内实测）
-  - servers: [202.196.64.1]
-    domains:
-      - portal1.zzu.edu.cn
-      - portal2.zzu.edu.cn
-      - portal3.zzu.edu.cn
-      - portal4.zzu.edu.cn
+  # 郑州大学校园网认证页：只有校内 DNS 能解析（公共与学校权威 DNS 均 NXDOMAIN）；分流已由 cn / private-ip 直连
+  - portal1.zzu.edu.cn
+  - portal2.zzu.edu.cn
+  - portal3.zzu.edu.cn
+  - portal4.zzu.edu.cn
 
 fake_ip_filter:
   - +.lan

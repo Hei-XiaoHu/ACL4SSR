@@ -2,6 +2,12 @@
 
 对应 [初始审计](mihomo-stash-audit.md) 的修改前快照。配置已按 Claude → 其他分类 → DNS/非规则配置 → 整体校验的顺序复核。
 
+## 2026-11-07 校园网认证页改为 portal1–4.zzu.edu.cn 走 system DNS（取代下一节的 dns_campus）
+
+- 按维护者要求：`portal1`–`portal4.zzu.edu.cn` 放进 `dns_system_domains`（nameserver-policy → system，并进 fake-ip-filter），删除 `dns_campus` 及 build.py / check_routing.py 中相应代码。system 随手机当前网络取 DNS，同时连 WiFi 与数据时不会把查询硬发到只认校内来源的 `202.196.64.1`。
+- 已知风险：校园网 WiFi 下系统 DNS 含 `114.114.114.114`，mihomo 并发询问取最快应答，可能再次拿到并缓存 NXDOMAIN（见下一节起因）。
+- 测试：`check_routing.assert_outputs` 断言 portal 主机为 system、policy 中没有 `+.zzu.edu.cn`；内核回归 `portal2.zzu.edu.cn` → 内网 system。
+
 ## 2026-11-07 郑州大学校园网认证页改用校内 DNS（取代下一节的 system）
 
 - 起因：下一节改用 system 后仍打不开。手机上的系统 DNS 是 `10.10.8.8`、`202.196.64.1`、`114.114.114.114`，mihomo 对 system 并发询问、采用最快应答（NXDOMAIN 也算有效应答），结果拿到并缓存了 NXDOMAIN。校内实测：`202.196.64.1` 解析 `portal1.zzu.edu.cn` → `172.16.4.14`，`10.10.8.8` 返回 NXDOMAIN；学校权威 DNS（dns / dns2.zzu.edu.cn）与公共 DNS 也是 NXDOMAIN；`202.196.64.1` 对校外查询一律 REFUSED。
