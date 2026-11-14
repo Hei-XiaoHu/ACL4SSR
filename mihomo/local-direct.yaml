@@ -1,0 +1,19 @@
+payload:
+- DOMAIN-REGEX,^epicgames-download[0-9]\.akamaized\.net$
+- DOMAIN-REGEX,^epicgames-download[0-9]-[0-9]+\.file\.myqcloud\.com$
+- DOMAIN-REGEX,^cdn[0-9]-epicgames-[0-9]+\.file\.myqcloud\.com$
+- DOMAIN,tracking-protection.cdn.mozilla.net
+- DOMAIN,dizhensubao.getui.com
+- DOMAIN,fairplay.l.qq.com
+- DOMAIN,livew.l.qq.com
+- DOMAIN,vd.l.qq.com
+- DOMAIN,config.cmpassport.com
+- DOMAIN,auth.wosms.cn
+- DOMAIN,enrichgw.10010.com
+- DOMAIN,nishub1.10010.com
+- DOMAIN,hmrz.wo.cn
+- DOMAIN,id.mail.wo.cn
+- DOMAIN,mdn.open.wo.cn
+- DOMAIN,opencloud.wostore.cn
+- DOMAIN-SUFFIX,id6.me
+- DOMAIN,ye.dun.163yun.com
