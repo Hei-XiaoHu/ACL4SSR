@@ -1,0 +1,153 @@
+{
+ "generated": "2026-11-28T02:27:34Z",
+ "counts": {
+  "local-direct": 18,
+  "private": 132,
+  "private-ip": 28,
+  "bt": 27,
+  "telemetry": 22,
+  "ai-essential": 30,
+  "auth": 2,
+  "ads": 228848,
+  "ai": 228,
+  "ai-ip": 2,
+  "game-proxy": 2,
+  "bilibili": 56,
+  "apple": 1454,
+  "direct": 906,
+  "proxy": 84,
+  "proxy-ip": 12,
+  "microsoft": 638,
+  "games": 992,
+  "media": 2092,
+  "media-ip": 122,
+  "google": 848,
+  "foreign": 26581,
+  "cn": 110177,
+  "cn-ip": 9735,
+  "quic-exempt": 273
+ },
+ "sources": {
+  "local-direct": [],
+  "private": [
+   "geosite:private"
+  ],
+  "private-ip": [
+   "geoip:private"
+  ],
+  "bt": [],
+  "telemetry": [],
+  "ai-essential": [],
+  "auth": [],
+  "ads": [
+   "adrules",
+   "anti-ad"
+  ],
+  "ai": [
+   "geosite:category-ai-!cn"
+  ],
+  "ai-ip": [],
+  "game-proxy": [],
+  "bilibili": [
+   "geosite:bilibili"
+  ],
+  "apple": [
+   "geosite:apple"
+  ],
+  "direct": [
+   "geosite:category-games@cn",
+   "geosite:category-game-platforms-download",
+   "geosite:netease",
+   "geosite:category-entertainment-cn",
+   "geosite:category-entertainment@cn"
+  ],
+  "proxy": [
+   "geosite:github",
+   "geosite:telegram"
+  ],
+  "proxy-ip": [
+   "geoip:telegram"
+  ],
+  "microsoft": [
+   "geosite:bing",
+   "geosite:onedrive",
+   "geosite:microsoft"
+  ],
+  "games": [
+   "geosite:epicgames",
+   "geosite:ea",
+   "geosite:sony",
+   "geosite:steam",
+   "geosite:nintendo",
+   "geosite:category-games-!cn"
+  ],
+  "media": [
+   "geosite:youtube",
+   "geosite:netflix",
+   "geosite:bahamut",
+   "geosite:category-entertainment"
+  ],
+  "media-ip": [
+   "geoip:netflix"
+  ],
+  "google": [
+   "geosite:googlefcm",
+   "geosite:google-cn",
+   "geosite:google"
+  ],
+  "foreign": [
+   "geosite:gfw",
+   "geosite:geolocation-!cn"
+  ],
+  "cn": [
+   "geosite:cn"
+  ],
+  "cn-ip": [
+   "geoip:cn"
+  ],
+  "quic-exempt": [
+   "geosite:category-communication",
+   "geosite:google-cn"
+  ]
+ },
+ "upstream_counts": {
+  "adrules": 216008,
+  "anti-ad": 110214,
+  "geoip:cn": 9735,
+  "geoip:netflix": 122,
+  "geoip:private": 28,
+  "geoip:telegram": 12,
+  "geosite:apple": 1668,
+  "geosite:bahamut": 5,
+  "geosite:bilibili": 53,
+  "geosite:bing": 41,
+  "geosite:category-ai-!cn": 219,
+  "geosite:category-communication": 160,
+  "geosite:category-entertainment": 2165,
+  "geosite:category-entertainment-cn": 717,
+  "geosite:category-entertainment@cn": 103,
+  "geosite:category-game-platforms-download": 492,
+  "geosite:category-games-!cn": 882,
+  "geosite:category-games@cn": 37,
+  "geosite:cn": 110177,
+  "geosite:ea": 165,
+  "geosite:epicgames": 30,
+  "geosite:geolocation-!cn": 27244,
+  "geosite:gfw": 4462,
+  "geosite:github": 66,
+  "geosite:google": 1079,
+  "geosite:google-cn": 112,
+  "geosite:googlefcm": 12,
+  "geosite:microsoft": 760,
+  "geosite:netease": 55,
+  "geosite:netflix": 24,
+  "geosite:nintendo": 124,
+  "geosite:onedrive": 16,
+  "geosite:private": 132,
+  "geosite:sony": 120,
+  "geosite:steam": 61,
+  "geosite:telegram": 21,
+  "geosite:youtube": 178
+ },
+ "content_sha256": "0fc092ebe8a6b0ba3b03a4a8f5303b492077cf55d4c0d5189466c791a7ebc5f2"
+}
